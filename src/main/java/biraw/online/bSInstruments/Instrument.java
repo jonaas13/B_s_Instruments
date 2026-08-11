@@ -1,5 +1,10 @@
 package biraw.online.bSInstruments;
 
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.Consumable;
+import io.papermc.paper.datacomponent.item.FoodProperties;
+import io.papermc.paper.datacomponent.item.consumable.ItemUseAnimation;
+import net.kyori.adventure.key.Key;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Note;
@@ -120,12 +125,14 @@ public class Instrument implements Listener {
                     break;
             }
         give.setItemMeta(meta);
+        addRightClickUseComponents(give);
         return give;
     }
 
     @EventHandler
     private void playerPlayEvent(PlayerInteractEvent event){
-        if (event.getHand() != EquipmentSlot.HAND) return;
+        if (event.getHand() == EquipmentSlot.OFF_HAND && event.getAction() != Action.RIGHT_CLICK_AIR) return;
+        if (event.getHand() != EquipmentSlot.HAND && event.getHand() != EquipmentSlot.OFF_HAND) return;
         if (!isPlayAction(event.getAction())) return;
         ItemStack offHandItem = event.getPlayer().getInventory().getItemInOffHand();
         if (offHandItem.getType().isAir()) return;
@@ -137,6 +144,8 @@ public class Instrument implements Listener {
                 PersistentDataType.STRING),
                 "instrument_"+sname+"_"+octave
         )) return; // If the player has the item with the specific metadata only then...
+
+        event.setCancelled(true);
 
         Player plr = event.getPlayer();
         float pitch = plr.getPitch();
@@ -166,9 +175,24 @@ public class Instrument implements Listener {
                 }
             }
         }
+    }
 
-        event.setCancelled(true);
-
+    private void addRightClickUseComponents(ItemStack itemStack) {
+        itemStack.setData(
+                DataComponentTypes.CONSUMABLE,
+                Consumable.consumable()
+                        .consumeSeconds(0.1f)
+                        .animation(ItemUseAnimation.NONE)
+                        .sound(Key.key("minecraft:intentionally_empty"))
+                        .hasConsumeParticles(false)
+        );
+        itemStack.setData(
+                DataComponentTypes.FOOD,
+                FoodProperties.food()
+                        .nutrition(0)
+                        .saturation(0.0f)
+                        .canAlwaysEat(true)
+        );
     }
 
     private boolean isPlayAction(Action action) {
