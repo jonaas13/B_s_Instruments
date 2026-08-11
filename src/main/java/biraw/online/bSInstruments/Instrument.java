@@ -10,9 +10,11 @@ import org.bukkit.Material;
 import org.bukkit.Note;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -146,6 +148,7 @@ public class Instrument implements Listener {
         )) return; // If the player has the item with the specific metadata only then...
 
         event.setCancelled(true);
+        event.setUseItemInHand(Event.Result.DENY);
 
         Player plr = event.getPlayer();
         float pitch = plr.getPitch();
@@ -177,11 +180,25 @@ public class Instrument implements Listener {
         }
     }
 
+    @EventHandler
+    private void playerConsumeEvent(PlayerItemConsumeEvent event) {
+        ItemStack item = event.getItem();
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return;
+        if (!Objects.equals(meta.getPersistentDataContainer().get(
+                BSInstruments.NSKEY,
+                PersistentDataType.STRING),
+                "instrument_"+sname+"_"+octave
+        )) return;
+
+        event.setCancelled(true);
+    }
+
     private void addRightClickUseComponents(ItemStack itemStack) {
         itemStack.setData(
                 DataComponentTypes.CONSUMABLE,
                 Consumable.consumable()
-                        .consumeSeconds(0.1f)
+                        .consumeSeconds(72000.0f)
                         .animation(ItemUseAnimation.NONE)
                         .sound(Key.key("minecraft:intentionally_empty"))
                         .hasConsumeParticles(false)
