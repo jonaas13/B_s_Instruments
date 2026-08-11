@@ -2,8 +2,8 @@ package biraw.online.bSInstruments;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.Note;
+import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,17 +11,14 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.components.CustomModelDataComponent;
-import org.bukkit.metadata.Metadatable;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class Instrument implements Listener {
-    private static List<Note.Tone> NOTES = List.of(Note.Tone.A, Note.Tone.B, Note.Tone.C, Note.Tone.D, Note.Tone.E, Note.Tone.F,Note.Tone.G);
+    private static final float NOTE_VOLUME = 3.0f;
+    private static final List<Note.Tone> NOTES = List.of(Note.Tone.A, Note.Tone.B, Note.Tone.C, Note.Tone.D, Note.Tone.E, Note.Tone.F,Note.Tone.G);
     private static final List<String> NOTECOLORS = List.of(
             "§cA", // A - Red
             "§6B", // B - Gold/Orange
@@ -37,12 +34,18 @@ public class Instrument implements Listener {
     final int octave;
     final org.bukkit.Instrument instrument;
     final Material item;
+    final String customSoundBase;
 
     public Instrument(String name, org.bukkit.Instrument instrument, int octave, Material item){
+        this(name, instrument, octave, item, null);
+    }
+
+    public Instrument(String name, org.bukkit.Instrument instrument, int octave, Material item, String customSoundBase){
         this.octave = octave;
         this.instrument = instrument;
         this.name = name;
         this.item = item;
+        this.customSoundBase = customSoundBase;
         this.sname = name.replace(' ', '-').toLowerCase();
 
         Bukkit.getServer().getPluginManager().registerEvents(this,BSInstruments.getInstance());
@@ -53,8 +56,10 @@ public class Instrument implements Listener {
         ItemStack give = new ItemStack(item);
         ItemMeta meta = give.getItemMeta();
         meta.setDisplayName("§d"+name);
-        if (octave > 0) meta.setLore(List.of("§a♪ High note ♪","§8B's Instruments"));
-        else meta.setLore(List.of("§a♫ Low note ♫","§8B's Instruments"));
+        if (octave > 1) meta.setLore(List.of("§a♪ Extra high note "+octave+" ♪","§bMinearchy Instruments"));
+        else if (octave > 0) meta.setLore(List.of("§a♪ High note ♪","§bMinearchy Instruments"));
+        else if (octave < 0) meta.setLore(List.of("§a♫ Extra low note "+Math.abs(octave)+" ♫","§bMinearchy Instruments"));
+        else meta.setLore(List.of("§a♫ Low note ♫","§bMinearchy Instruments"));
         meta.getPersistentDataContainer().set(
                 BSInstruments.NSKEY,
                 PersistentDataType.STRING,
@@ -132,26 +137,45 @@ public class Instrument implements Listener {
         float pitch = plr.getPitch();
 
         pitch+=90; pitch /= 180; pitch *=NOTES.size()-1; // convert player pitch to a note
+        int noteIndex = Math.round(pitch);
+        Note.Tone tone = NOTES.get(noteIndex);
 
         Note note;
         if (plr.isSneaking()) {
-            note = Note.flat(octave, NOTES.get(Math.round(pitch)));
-            plr.sendActionBar(NOTECOLORS.get(Math.round(pitch)) + "♭");
+            note = Note.flat(getPlayableBukkitOctave(), tone);
+            plr.sendActionBar(NOTECOLORS.get(noteIndex) + "♭");
         } else if (event.getAction() == Action.LEFT_CLICK_BLOCK || event.getAction() == Action.LEFT_CLICK_AIR) {
-            note = Note.natural(octave, NOTES.get(Math.round(pitch)));
-            plr.sendActionBar(NOTECOLORS.get(Math.round(pitch)));
+            note = Note.natural(getPlayableBukkitOctave(), tone);
+            plr.sendActionBar(NOTECOLORS.get(noteIndex));
         } else {
-            note = Note.sharp(octave, NOTES.get(Math.round(pitch)));
-            plr.sendActionBar(NOTECOLORS.get(Math.round(pitch)) + "#");
+            note = Note.sharp(getPlayableBukkitOctave(), tone);
+            plr.sendActionBar(NOTECOLORS.get(noteIndex) + "#");
         }
 
         for (Player listener : Bukkit.getOnlinePlayers()) {
             if (!MuteManager.getMuted().contains(listener)) {
-                listener.playNote(plr.getLocation(), instrument, note);
+                if (usesCustomExtraOctaveSound()) {
+                    listener.playSound(plr.getLocation(), getCustomExtraOctaveSound(), SoundCategory.RECORDS, NOTE_VOLUME, note.getPitch());
+                } else {
+                    listener.playNote(plr.getLocation(), instrument, note);
+                }
             }
         }
 
         event.setCancelled(true);
 
+    }
+
+    private int getPlayableBukkitOctave() {
+        if (octave >= 0 && octave <= 1) return octave;
+        return 0;
+    }
+
+    private boolean usesCustomExtraOctaveSound() {
+        return customSoundBase != null && octave != 0 && octave != 1;
+    }
+
+    private String getCustomExtraOctaveSound() {
+        return customSoundBase+"_"+octave;
     }
 }
