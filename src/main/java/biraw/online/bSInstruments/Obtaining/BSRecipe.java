@@ -5,11 +5,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.ShapedRecipe;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class BSRecipe {
     public static List<NamespacedKey> AllRecipeKeys = new ArrayList<>();
@@ -31,7 +29,7 @@ public class BSRecipe {
 
         // Define the recipe key
         NamespacedKey key = new NamespacedKey(BSInstruments.getInstance(),
-                "Recipe_" + BSInstruments.getIntForRecipe());
+                "recipe_" + BSInstruments.getIntForRecipe());
 
 
         // Create the recipe

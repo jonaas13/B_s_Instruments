@@ -1,24 +1,21 @@
-name: BSInstruments
-version: 1.1
+name: MinearchyInstruments
+version: ${project.version}
 main: biraw.online.bSInstruments.BSInstruments
-api-version: 1.21
+api-version: '26.2'
 
 commands:
-  geti:
-    description: Get an instrument by name
-    usage: /geti <name>
-    permission: bsinstruments.geti
-    permission-message: You don't have permission to use this command!
-  mute:
-    description: Mute or unmute the instruments
-    usage: "'/mute <true|false>' or just '/mute' to show current"
-    permission: bsinstruments.mute
-    permission-message: You don't have permission to use this command!
+  instrument:
+    description: Manage instruments
+    usage: /instrument <get <name>|all|mute [true|false]>
+    aliases: [instruments, inst]
 
 permissions:
-  bsinstruments.geti:
-    description: Allows the player to use /geti
+  minearchyinstruments.instrument.get:
+    description: Allows the player to use /instrument get
     default: op
-  bsinstruments.mute:
-    description: Allows the player to use /mute
+  minearchyinstruments.instrument.all:
+    description: Allows the player to use /instrument all
+    default: op
+  minearchyinstruments.instrument.mute:
+    description: Allows the player to use /instrument mute
     default: true

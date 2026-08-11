@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>biraw.online</groupId>
-    <artifactId>B_s_imstruments</artifactId>
+    <artifactId>MinearchyInstruments</artifactId>
     <version>1.2</version>
     <packaging>jar</packaging>
 
-    <name>B_s_imstruments</name>
+    <name>MinearchyInstruments</name>
 
     <properties>
         <java.version>25</java.version>

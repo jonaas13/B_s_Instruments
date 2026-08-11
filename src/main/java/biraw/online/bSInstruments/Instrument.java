@@ -9,6 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -56,10 +57,10 @@ public class Instrument implements Listener {
         ItemStack give = new ItemStack(item);
         ItemMeta meta = give.getItemMeta();
         meta.setDisplayName("§d"+name);
-        if (octave > 1) meta.setLore(List.of("§a♪ Extra high note "+octave+" ♪","§bMinearchy Instruments"));
-        else if (octave > 0) meta.setLore(List.of("§a♪ High note ♪","§bMinearchy Instruments"));
-        else if (octave < 0) meta.setLore(List.of("§a♫ Extra low note "+Math.abs(octave)+" ♫","§bMinearchy Instruments"));
-        else meta.setLore(List.of("§a♫ Low note ♫","§bMinearchy Instruments"));
+        if (octave > 1) meta.setLore(List.of("§a♪ Extra high note "+octave+" ♪","§bMinearchyInstruments"));
+        else if (octave > 0) meta.setLore(List.of("§a♪ High note ♪","§bMinearchyInstruments"));
+        else if (octave < 0) meta.setLore(List.of("§a♫ Extra low note "+Math.abs(octave)+" ♫","§bMinearchyInstruments"));
+        else meta.setLore(List.of("§a♫ Low note ♫","§bMinearchyInstruments"));
         meta.getPersistentDataContainer().set(
                 BSInstruments.NSKEY,
                 PersistentDataType.STRING,
@@ -124,7 +125,11 @@ public class Instrument implements Listener {
 
     @EventHandler
     private void playerPlayEvent(PlayerInteractEvent event){
-        ItemMeta meta = event.getPlayer().getInventory().getItemInOffHand().getItemMeta();
+        if (event.getHand() != EquipmentSlot.HAND) return;
+        if (!isPlayAction(event.getAction())) return;
+        ItemStack offHandItem = event.getPlayer().getInventory().getItemInOffHand();
+        if (offHandItem.getType().isAir()) return;
+        ItemMeta meta = offHandItem.getItemMeta();
         if (meta == null) return;
         if (!meta.getPersistentDataContainer().has(BSInstruments.NSKEY)) return;
         if (!Objects.equals(meta.getPersistentDataContainer().get(
@@ -153,7 +158,7 @@ public class Instrument implements Listener {
         }
 
         for (Player listener : Bukkit.getOnlinePlayers()) {
-            if (!MuteManager.getMuted().contains(listener)) {
+            if (!MuteManager.isMuted(listener)) {
                 if (usesCustomExtraOctaveSound()) {
                     listener.playSound(plr.getLocation(), getCustomExtraOctaveSound(), SoundCategory.RECORDS, NOTE_VOLUME, note.getPitch());
                 } else {
@@ -164,6 +169,13 @@ public class Instrument implements Listener {
 
         event.setCancelled(true);
 
+    }
+
+    private boolean isPlayAction(Action action) {
+        return action == Action.LEFT_CLICK_AIR
+                || action == Action.LEFT_CLICK_BLOCK
+                || action == Action.RIGHT_CLICK_AIR
+                || action == Action.RIGHT_CLICK_BLOCK;
     }
 
     private int getPlayableBukkitOctave() {
