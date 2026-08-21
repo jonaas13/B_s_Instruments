@@ -24,7 +24,11 @@ public class AllInstruments {
             new InstrumentDefinition("Didgeridoo", org.bukkit.Instrument.DIDGERIDOO, "block.note_block.didgeridoo"),
             new InstrumentDefinition("Bit", org.bukkit.Instrument.BIT, "block.note_block.bit"),
             new InstrumentDefinition("Banjo", org.bukkit.Instrument.BANJO, "block.note_block.banjo"),
-            new InstrumentDefinition("Pling", org.bukkit.Instrument.PLING, "block.note_block.pling")
+            new InstrumentDefinition("Pling", org.bukkit.Instrument.PLING, "block.note_block.pling"),
+            new InstrumentDefinition("Trumpet", org.bukkit.Instrument.TRUMPET, "block.note_block.trumpet"),
+            new InstrumentDefinition("Exposed Trumpet", org.bukkit.Instrument.TRUMPET_EXPOSED, "block.note_block.trumpet_exposed"),
+            new InstrumentDefinition("Weathered Trumpet", org.bukkit.Instrument.TRUMPET_WEATHERED, "block.note_block.trumpet_weathered"),
+            new InstrumentDefinition("Oxidized Trumpet", org.bukkit.Instrument.TRUMPET_OXIDIZED, "block.note_block.trumpet_oxidized")
     );
     private static final int[] OCTAVES = {2, 1, 0, -1, -2};
 

@@ -4,6 +4,8 @@ import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.Consumable;
 import io.papermc.paper.datacomponent.item.FoodProperties;
 import io.papermc.paper.datacomponent.item.consumable.ItemUseAnimation;
+import io.papermc.paper.event.player.PlayerArmSwingEvent;
+import io.papermc.paper.event.player.PlayerStopUsingItemEvent;
 import net.kyori.adventure.key.Key;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -14,28 +16,62 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockDamageEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.RayTraceResult;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 public class Instrument implements Listener {
     private static final float NOTE_VOLUME = 3.0f;
-    private static final List<Note.Tone> NOTES = List.of(Note.Tone.A, Note.Tone.B, Note.Tone.C, Note.Tone.D, Note.Tone.E, Note.Tone.F,Note.Tone.G);
-    private static final List<String> NOTECOLORS = List.of(
+    private static final int LEFT_CLICK_REPEAT_TICKS = 4;
+    private static final int LEFT_AIR_HOLD_CONFIRM_TICKS = 8;
+    private static final int LEFT_AIR_REPEAT_WINDOW_TICKS = 10;
+    private static final double LEFT_AIR_REACH = 5.0;
+    private static final int RIGHT_CLICK_REPEAT_TICKS = 4;
+    private static final int MUTED_WARNING_COOLDOWN_TICKS = 60;
+    private static final List<Note.Tone> NATURAL_NOTES = List.of(Note.Tone.G, Note.Tone.A, Note.Tone.B, Note.Tone.C, Note.Tone.D, Note.Tone.E, Note.Tone.F);
+    private static final List<Note.Tone> SHARP_NOTES = List.of(Note.Tone.F, Note.Tone.G, Note.Tone.A, Note.Tone.B, Note.Tone.C, Note.Tone.D, Note.Tone.E);
+    private static final List<String> NATURAL_NOTE_COLORS = List.of(
+            "§dG", // G - Light Purple
             "§cA", // A - Red
             "§6B", // B - Gold/Orange
             "§eC", // C - Yellow
             "§aD", // D - Green
             "§bE", // E - Aqua
-            "§9F", // F - Blue
-            "§dG"  // G - Light Purple
+            "§9F"  // F - Blue
     );
+    private static final List<String> SHARP_NOTE_COLORS = List.of(
+            "§9F", // F - Blue
+            "§dG", // G - Light Purple
+            "§cA", // A - Red
+            "§6B", // B - Gold/Orange
+            "§eC", // C - Yellow
+            "§aD", // D - Green
+            "§bE"  // E - Aqua
+    );
+    private static final Map<UUID, Integer> LAST_PLAY_TICK = new HashMap<>();
+    private static final Map<UUID, Integer> LAST_LEFT_CLICK_TICK = new HashMap<>();
+    private static final Map<UUID, Integer> LEFT_AIR_CLICK_CANDIDATE_TICK = new HashMap<>();
+    private static final Map<UUID, Integer> LEFT_AIR_REPEAT_UNTIL_TICK = new HashMap<>();
+    private static final Map<UUID, Integer> LAST_LEFT_AIR_SIGNAL_TICK = new HashMap<>();
+    private static final Map<UUID, Integer> LAST_MUTED_WARNING_TICK = new HashMap<>();
+    private static final Map<UUID, BukkitTask> LEFT_AIR_TASKS = new HashMap<>();
+    private static final Map<UUID, BukkitTask> RIGHT_CLICK_TASKS = new HashMap<>();
 
     final String name;
     final String sname;
@@ -122,6 +158,18 @@ public class Instrument implements Listener {
                 case "pling":
                     meta.setCustomModelData(15);
                     break;
+                case "trumpet":
+                    meta.setCustomModelData(17);
+                    break;
+                case "exposed-trumpet":
+                    meta.setCustomModelData(18);
+                    break;
+                case "weathered-trumpet":
+                    meta.setCustomModelData(19);
+                    break;
+                case "oxidized-trumpet":
+                    meta.setCustomModelData(20);
+                    break;
                 default:
                     meta.setCustomModelData(999); // fallback or unknown
                     break;
@@ -133,40 +181,74 @@ public class Instrument implements Listener {
 
     @EventHandler
     private void playerPlayEvent(PlayerInteractEvent event){
-        if (event.getHand() == EquipmentSlot.OFF_HAND && event.getAction() != Action.RIGHT_CLICK_AIR) return;
         if (event.getHand() != EquipmentSlot.HAND && event.getHand() != EquipmentSlot.OFF_HAND) return;
-        if (!isPlayAction(event.getAction())) return;
-        ItemStack offHandItem = event.getPlayer().getInventory().getItemInOffHand();
-        if (offHandItem.getType().isAir()) return;
-        ItemMeta meta = offHandItem.getItemMeta();
-        if (meta == null) return;
-        if (!meta.getPersistentDataContainer().has(BSInstruments.NSKEY)) return;
-        if (!Objects.equals(meta.getPersistentDataContainer().get(
-                BSInstruments.NSKEY,
-                PersistentDataType.STRING),
-                "instrument_"+sname+"_"+octave
-        )) return; // If the player has the item with the specific metadata only then...
-
-        event.setCancelled(true);
-        event.setUseItemInHand(Event.Result.DENY);
+        if (!isThisInstrument(event.getPlayer().getInventory().getItemInOffHand())) return;
 
         Player plr = event.getPlayer();
+        if (isRightClick(event.getAction())) {
+            stopLeftAirRepeat(plr);
+            cancelWorldInteractionButAllowUse(event);
+            playNote(plr, false);
+            if (event.getHand() == EquipmentSlot.OFF_HAND) startRightClickRepeat(plr);
+            return;
+        }
+
+        cancelWorldInteraction(event);
+        if (event.getAction() == Action.LEFT_CLICK_AIR) {
+            rememberLeftAirClick(plr);
+            if (!shouldSuppressLeftClick(plr)) playNote(plr, true);
+        }
+    }
+
+    @EventHandler
+    private void playerLeftClickEvent(PlayerAnimationEvent event) {
+        Player plr = event.getPlayer();
+        if (!isThisInstrument(plr.getInventory().getItemInOffHand())) return;
+        if (isLookingAtAir(plr)) {
+            handleLeftAirHoldSignal(plr);
+            return;
+        }
+        if (shouldSuppressLeftClick(plr)) return;
+
+        event.setCancelled(true);
+        playNote(plr, true);
+    }
+
+    @EventHandler
+    private void playerAirLeftClickRefreshEvent(PlayerArmSwingEvent event) {
+        if (event.getHand() != EquipmentSlot.HAND) return;
+
+        Player plr = event.getPlayer();
+        if (!isThisInstrument(plr.getInventory().getItemInOffHand())) return;
+        if (!isLookingAtAir(plr)) return;
+
+        handleLeftAirHoldSignal(plr);
+    }
+
+    private void playNote(Player plr, boolean sharp) {
+        int currentTick = Bukkit.getCurrentTick();
+        if (Objects.equals(LAST_PLAY_TICK.get(plr.getUniqueId()), currentTick)) return;
+        LAST_PLAY_TICK.put(plr.getUniqueId(), currentTick);
+        warnIfMuted(plr, currentTick);
+
         float pitch = plr.getPitch();
 
-        pitch+=90; pitch /= 180; pitch *=NOTES.size()-1; // convert player pitch to a note
+        pitch+=90; pitch /= 180; pitch *=NATURAL_NOTES.size()-1; // convert player pitch to a note
         int noteIndex = Math.round(pitch);
-        Note.Tone tone = NOTES.get(noteIndex);
 
         Note note;
         if (plr.isSneaking()) {
+            Note.Tone tone = NATURAL_NOTES.get(noteIndex);
             note = Note.flat(getPlayableBukkitOctave(), tone);
-            plr.sendActionBar(NOTECOLORS.get(noteIndex) + "♭");
-        } else if (event.getAction() == Action.LEFT_CLICK_BLOCK || event.getAction() == Action.LEFT_CLICK_AIR) {
-            note = Note.natural(getPlayableBukkitOctave(), tone);
-            plr.sendActionBar(NOTECOLORS.get(noteIndex));
-        } else {
+            plr.sendActionBar(NATURAL_NOTE_COLORS.get(noteIndex) + "♭");
+        } else if (sharp) {
+            Note.Tone tone = SHARP_NOTES.get(noteIndex);
             note = Note.sharp(getPlayableBukkitOctave(), tone);
-            plr.sendActionBar(NOTECOLORS.get(noteIndex) + "#");
+            plr.sendActionBar(SHARP_NOTE_COLORS.get(noteIndex) + "#");
+        } else {
+            Note.Tone tone = NATURAL_NOTES.get(noteIndex);
+            note = Note.natural(getPlayableBukkitOctave(), tone);
+            plr.sendActionBar(NATURAL_NOTE_COLORS.get(noteIndex));
         }
 
         for (Player listener : Bukkit.getOnlinePlayers()) {
@@ -177,6 +259,37 @@ public class Instrument implements Listener {
                     listener.playNote(plr.getLocation(), instrument, note);
                 }
             }
+        }
+    }
+
+    @EventHandler
+    private void playerDamageBlockEvent(BlockDamageEvent event) {
+        if (isThisInstrument(event.getPlayer().getInventory().getItemInOffHand())) {
+            event.setCancelled(true);
+            resetBlockDamage(event.getPlayer(), event.getBlock());
+        }
+    }
+
+    @EventHandler
+    private void playerBreakBlockEvent(BlockBreakEvent event) {
+        if (isThisInstrument(event.getPlayer().getInventory().getItemInOffHand())) {
+            event.setCancelled(true);
+            resetBlockDamage(event.getPlayer(), event.getBlock());
+        }
+    }
+
+    @EventHandler
+    private void playerInteractEntityEvent(PlayerInteractEntityEvent event) {
+        if (isThisInstrument(event.getPlayer().getInventory().getItemInOffHand())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    private void playerDamageEntityEvent(EntityDamageByEntityEvent event) {
+        if (event.getDamager() instanceof Player player
+                && isThisInstrument(player.getInventory().getItemInOffHand())) {
+            event.setCancelled(true);
         }
     }
 
@@ -192,6 +305,13 @@ public class Instrument implements Listener {
         )) return;
 
         event.setCancelled(true);
+    }
+
+    @EventHandler
+    private void playerStopUsingItemEvent(PlayerStopUsingItemEvent event) {
+        if (isThisInstrument(event.getItem())) {
+            stopRightClickRepeat(event.getPlayer());
+        }
     }
 
     private void addRightClickUseComponents(ItemStack itemStack) {
@@ -212,11 +332,166 @@ public class Instrument implements Listener {
         );
     }
 
-    private boolean isPlayAction(Action action) {
-        return action == Action.LEFT_CLICK_AIR
-                || action == Action.LEFT_CLICK_BLOCK
-                || action == Action.RIGHT_CLICK_AIR
-                || action == Action.RIGHT_CLICK_BLOCK;
+    private boolean isRightClick(Action action) {
+        return action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK;
+    }
+
+    private boolean isThisInstrument(ItemStack itemStack) {
+        if (itemStack == null || itemStack.getType().isAir()) return false;
+        ItemMeta meta = itemStack.getItemMeta();
+        if (meta == null) return false;
+        return Objects.equals(meta.getPersistentDataContainer().get(
+                BSInstruments.NSKEY,
+                PersistentDataType.STRING),
+                "instrument_"+sname+"_"+octave
+        );
+    }
+
+    private void cancelWorldInteraction(PlayerInteractEvent event) {
+        event.setCancelled(true);
+        event.setUseInteractedBlock(Event.Result.DENY);
+        event.setUseItemInHand(Event.Result.DENY);
+    }
+
+    private void cancelWorldInteractionButAllowUse(PlayerInteractEvent event) {
+        event.setUseInteractedBlock(Event.Result.DENY);
+        event.setUseItemInHand(event.getHand() == EquipmentSlot.OFF_HAND ? Event.Result.ALLOW : Event.Result.DENY);
+    }
+
+    private boolean shouldSuppressLeftClick(Player player) {
+        int currentTick = Bukkit.getCurrentTick();
+        Integer lastTick = LAST_LEFT_CLICK_TICK.get(player.getUniqueId());
+        if (lastTick != null && currentTick - lastTick < LEFT_CLICK_REPEAT_TICKS) return true;
+
+        LAST_LEFT_CLICK_TICK.put(player.getUniqueId(), currentTick);
+        return false;
+    }
+
+    private void resetBlockDamage(Player player, org.bukkit.block.Block block) {
+        stopLeftAirRepeat(player);
+        player.sendBlockDamage(block.getLocation(), 0.0f);
+        Bukkit.getScheduler().runTask(BSInstruments.getInstance(), () -> {
+            player.sendBlockDamage(block.getLocation(), 0.0f);
+            player.sendBlockChange(block.getLocation(), block.getBlockData());
+        });
+    }
+
+    private void startRightClickRepeat(Player player) {
+        UUID playerId = player.getUniqueId();
+        if (RIGHT_CLICK_TASKS.containsKey(playerId)) return;
+
+        BukkitTask task = Bukkit.getScheduler().runTaskTimer(
+                BSInstruments.getInstance(),
+                () -> {
+                    if (!player.isOnline()
+                            || !isThisInstrument(player.getInventory().getItemInOffHand())) {
+                        stopRightClickRepeat(player);
+                        return;
+                    }
+
+                    playNote(player, false);
+                },
+                RIGHT_CLICK_REPEAT_TICKS,
+                RIGHT_CLICK_REPEAT_TICKS
+        );
+        RIGHT_CLICK_TASKS.put(playerId, task);
+    }
+
+    private void stopRightClickRepeat(Player player) {
+        BukkitTask task = RIGHT_CLICK_TASKS.remove(player.getUniqueId());
+        if (task != null) task.cancel();
+    }
+
+    private void rememberLeftAirClick(Player player) {
+        UUID playerId = player.getUniqueId();
+        int currentTick = Bukkit.getCurrentTick();
+        if (LEFT_AIR_TASKS.containsKey(playerId)) {
+            refreshLeftAirRepeat(player);
+            return;
+        }
+
+        LEFT_AIR_CLICK_CANDIDATE_TICK.put(playerId, currentTick);
+    }
+
+    private void handleLeftAirHoldSignal(Player player) {
+        UUID playerId = player.getUniqueId();
+        int currentTick = Bukkit.getCurrentTick();
+        if (Objects.equals(LAST_LEFT_AIR_SIGNAL_TICK.get(playerId), currentTick)) return;
+        LAST_LEFT_AIR_SIGNAL_TICK.put(playerId, currentTick);
+
+        if (LEFT_AIR_TASKS.containsKey(playerId)) {
+            refreshLeftAirRepeat(player);
+            return;
+        }
+
+        Integer candidateTick = LEFT_AIR_CLICK_CANDIDATE_TICK.get(playerId);
+        if (candidateTick == null) return;
+        if (currentTick <= candidateTick + 1) return;
+        if (currentTick - candidateTick > LEFT_AIR_HOLD_CONFIRM_TICKS) {
+            LEFT_AIR_CLICK_CANDIDATE_TICK.remove(playerId);
+            return;
+        }
+
+        refreshLeftAirRepeat(player);
+        startLeftAirRepeat(player);
+    }
+
+    private void refreshLeftAirRepeat(Player player) {
+        LEFT_AIR_REPEAT_UNTIL_TICK.put(player.getUniqueId(), Bukkit.getCurrentTick() + LEFT_AIR_REPEAT_WINDOW_TICKS);
+    }
+
+    private void startLeftAirRepeat(Player player) {
+        UUID playerId = player.getUniqueId();
+        if (LEFT_AIR_TASKS.containsKey(playerId)) return;
+
+        BukkitTask task = Bukkit.getScheduler().runTaskTimer(
+                BSInstruments.getInstance(),
+                () -> {
+                    Integer repeatUntilTick = LEFT_AIR_REPEAT_UNTIL_TICK.get(playerId);
+                    if (!player.isOnline()
+                            || repeatUntilTick == null
+                            || Bukkit.getCurrentTick() > repeatUntilTick
+                            || !isThisInstrument(player.getInventory().getItemInOffHand())) {
+                        stopLeftAirRepeat(player);
+                        return;
+                    }
+
+                    playNote(player, true);
+                },
+                LEFT_CLICK_REPEAT_TICKS,
+                LEFT_CLICK_REPEAT_TICKS
+        );
+        LEFT_AIR_TASKS.put(playerId, task);
+    }
+
+    private void stopLeftAirRepeat(Player player) {
+        LEFT_AIR_CLICK_CANDIDATE_TICK.remove(player.getUniqueId());
+        LEFT_AIR_REPEAT_UNTIL_TICK.remove(player.getUniqueId());
+        BukkitTask task = LEFT_AIR_TASKS.remove(player.getUniqueId());
+        if (task != null) task.cancel();
+    }
+
+    private boolean isLookingAtAir(Player player) {
+        RayTraceResult blockResult = player.rayTraceBlocks(LEFT_AIR_REACH);
+        if (blockResult != null) return false;
+
+        RayTraceResult entityResult = player.getWorld().rayTraceEntities(
+                player.getEyeLocation(),
+                player.getEyeLocation().getDirection(),
+                LEFT_AIR_REACH,
+                entity -> entity != player
+        );
+        return entityResult == null;
+    }
+
+    private void warnIfMuted(Player player, int currentTick) {
+        if (!MuteManager.isMuted(player)) return;
+
+        Integer lastWarningTick = LAST_MUTED_WARNING_TICK.get(player.getUniqueId());
+        if (lastWarningTick != null && currentTick - lastWarningTick < MUTED_WARNING_COOLDOWN_TICKS) return;
+
+        LAST_MUTED_WARNING_TICK.put(player.getUniqueId(), currentTick);
+        player.sendMessage("§cYou have instruments muted. Use §e/instrument mute §cto hear them again.");
     }
 
     private int getPlayableBukkitOctave() {

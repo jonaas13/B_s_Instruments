@@ -64,6 +64,7 @@ public class CommandManager implements CommandExecutor, TabExecutor {
 
     private boolean handleMute(Player player, String[] args) {
         if (args.length < 2) {
+            MuteManager.setMuted(player, !MuteManager.isMuted(player));
             MuteManager.sendMuteStatus(player);
             return true;
         }

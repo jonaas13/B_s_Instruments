@@ -1,11 +1,16 @@
 package biraw.online.bSInstruments.Obtaining;
 
 import biraw.online.bSInstruments.AllInstruments;
+import biraw.online.bSInstruments.BSInstruments;
+import biraw.online.bSInstruments.Instrument;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.inventory.RecipeChoice;
+import org.bukkit.inventory.ShapelessRecipe;
 
 public class RegisterRecipes implements Listener {
 
@@ -163,5 +168,49 @@ public class RegisterRecipes implements Listener {
                 null,Material.AMETHYST_SHARD,null,
                 null,Material.REDSTONE,null,
                 null,null,null);
+
+        addTrumpetRecipes("trumpet", Material.COPPER_INGOT);
+        addTrumpetRecipes("exposed-trumpet", Material.EXPOSED_COPPER);
+        addTrumpetRecipes("weathered-trumpet", Material.WEATHERED_COPPER);
+        addTrumpetRecipes("oxidized-trumpet", Material.OXIDIZED_COPPER);
+
+        addTuningRecipes();
+    }
+
+    private void addTrumpetRecipes(String instrumentName, Material bodyMaterial) {
+        new BSRecipe(AllInstruments.GetInstrumentByName(instrumentName+"-0").getItem(),
+                null,bodyMaterial,null,
+                bodyMaterial,Material.NOTE_BLOCK,bodyMaterial,
+                null,Material.STICK,null);
+        new BSRecipe(AllInstruments.GetInstrumentByName(instrumentName+"-1").getItem(),
+                null,bodyMaterial,null,
+                bodyMaterial,Material.NOTE_BLOCK,null,
+                null,Material.STICK,null);
+    }
+
+    private void addTuningRecipes() {
+        for (String instrumentName : AllInstruments.GetAllInstrumentNames()) {
+            if (!instrumentName.endsWith("-0")) continue;
+
+            String baseName = instrumentName.substring(0, instrumentName.length() - 2);
+            addTuningRecipe(baseName+"-1", baseName+"-0", Material.AMETHYST_SHARD);
+            addTuningRecipe(baseName+"-high-2", baseName+"-1", Material.AMETHYST_BLOCK);
+            addTuningRecipe(baseName+"-low-1", baseName+"-0", Material.DEEPSLATE);
+            addTuningRecipe(baseName+"-low-2", baseName+"-low-1", Material.REINFORCED_DEEPSLATE);
+        }
+    }
+
+    private void addTuningRecipe(String resultName, String sourceName, Material modifier) {
+        Instrument result = AllInstruments.GetInstrumentByName(resultName);
+        Instrument source = AllInstruments.GetInstrumentByName(sourceName);
+        if (result == null || source == null) return;
+
+        NamespacedKey key = new NamespacedKey(BSInstruments.getInstance(),
+                "tuning_recipe_" + BSInstruments.getIntForRecipe());
+        ShapelessRecipe recipe = new ShapelessRecipe(key, result.getItem());
+        recipe.addIngredient(new RecipeChoice.ExactChoice(source.getItem()));
+        recipe.addIngredient(modifier);
+        Bukkit.addRecipe(recipe);
+        BSRecipe.AllRecipeKeys.add(key);
     }
 }
