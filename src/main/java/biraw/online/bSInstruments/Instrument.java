@@ -127,6 +127,11 @@ public class Instrument implements Listener {
         if (!isThisInstrument(event.getPlayer().getInventory().getItemInOffHand())) return;
 
         Player plr = event.getPlayer();
+        if (!isInstrumentControlMode(plr)) {
+            SongPlayer.stop(plr);
+            return;
+        }
+
         if (isRightClick(event.getAction())) {
             stopLeftAirRepeat(plr);
             cancelWorldInteractionButAllowUse(event);
@@ -146,6 +151,10 @@ public class Instrument implements Listener {
     private void playerLeftClickEvent(PlayerAnimationEvent event) {
         Player plr = event.getPlayer();
         if (!isThisInstrument(plr.getInventory().getItemInOffHand())) return;
+        if (!isInstrumentControlMode(plr)) {
+            SongPlayer.stop(plr);
+            return;
+        }
         if (isLookingAtAir(plr)) {
             handleLeftAirHoldSignal(plr);
             return;
@@ -162,6 +171,10 @@ public class Instrument implements Listener {
 
         Player plr = event.getPlayer();
         if (!isThisInstrument(plr.getInventory().getItemInOffHand())) return;
+        if (!isInstrumentControlMode(plr)) {
+            SongPlayer.stop(plr);
+            return;
+        }
         if (!isLookingAtAir(plr)) return;
 
         handleLeftAirHoldSignal(plr);
@@ -206,6 +219,10 @@ public class Instrument implements Listener {
     @EventHandler
     private void playerDamageBlockEvent(BlockDamageEvent event) {
         if (isThisInstrument(event.getPlayer().getInventory().getItemInOffHand())) {
+            if (!isInstrumentControlMode(event.getPlayer())) {
+                SongPlayer.stop(event.getPlayer());
+                return;
+            }
             event.setCancelled(true);
             resetBlockDamage(event.getPlayer(), event.getBlock());
         }
@@ -214,6 +231,10 @@ public class Instrument implements Listener {
     @EventHandler
     private void playerBreakBlockEvent(BlockBreakEvent event) {
         if (isThisInstrument(event.getPlayer().getInventory().getItemInOffHand())) {
+            if (!isInstrumentControlMode(event.getPlayer())) {
+                SongPlayer.stop(event.getPlayer());
+                return;
+            }
             event.setCancelled(true);
             resetBlockDamage(event.getPlayer(), event.getBlock());
         }
@@ -222,6 +243,10 @@ public class Instrument implements Listener {
     @EventHandler
     private void playerInteractEntityEvent(PlayerInteractEntityEvent event) {
         if (isThisInstrument(event.getPlayer().getInventory().getItemInOffHand())) {
+            if (!isInstrumentControlMode(event.getPlayer())) {
+                SongPlayer.stop(event.getPlayer());
+                return;
+            }
             event.setCancelled(true);
         }
     }
@@ -230,6 +255,10 @@ public class Instrument implements Listener {
     private void playerDamageEntityEvent(EntityDamageByEntityEvent event) {
         if (event.getDamager() instanceof Player player
                 && isThisInstrument(player.getInventory().getItemInOffHand())) {
+            if (!isInstrumentControlMode(player)) {
+                SongPlayer.stop(player);
+                return;
+            }
             event.setCancelled(true);
         }
     }
@@ -268,6 +297,11 @@ public class Instrument implements Listener {
 
     private boolean isRightClick(Action action) {
         return action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK;
+    }
+
+    private boolean isInstrumentControlMode(Player player) {
+        ItemStack mainHand = player.getInventory().getItemInMainHand();
+        return mainHand == null || mainHand.getType().isAir() || AllSongs.getSongFromItem(mainHand) != null;
     }
 
     boolean isThisInstrument(ItemStack itemStack) {
