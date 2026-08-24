@@ -49,6 +49,11 @@ public class Instrument implements Listener {
     private static final double LEFT_AIR_REACH = 5.0;
     private static final int RIGHT_CLICK_REPEAT_TICKS = 4;
     private static final int MUTED_WARNING_COOLDOWN_TICKS = 60;
+    private static final int MIN_SONG_NOTE_ID = 0;
+    private static final int MAX_SONG_NOTE_ID = 24;
+    private static final int MIN_CUSTOM_SONG_NOTE_ID = -24;
+    private static final int MAX_CUSTOM_SONG_NOTE_ID = 48;
+    private static final List<Integer> CUSTOM_SONG_SOUND_OFFSETS = List.of(-24, -12, 0, 24);
     private static final List<Note.Tone> NATURAL_NOTES = List.of(Note.Tone.G, Note.Tone.A, Note.Tone.B, Note.Tone.C, Note.Tone.D, Note.Tone.E, Note.Tone.F);
     private static final List<Note.Tone> SHARP_NOTES = List.of(Note.Tone.F, Note.Tone.G, Note.Tone.A, Note.Tone.B, Note.Tone.C, Note.Tone.D, Note.Tone.E);
     private static final List<String> NATURAL_NOTE_COLORS = List.of(
@@ -504,12 +509,60 @@ public class Instrument implements Listener {
 
     private SoundNote getSongSoundNote(int songNoteId) {
         int tunedNoteId = songNoteId + (octave * 12);
-        if (tunedNoteId < -12 && customSoundBase != null) return new SoundNote(customSoundBase + "_-2", tunedNoteId + 24);
-        if (tunedNoteId < 0 && customSoundBase != null) return new SoundNote(customSoundBase + "_-1", tunedNoteId + 12);
-        if (tunedNoteId > 24 && customSoundBase != null) return new SoundNote(customSoundBase + "_2", tunedNoteId - 24);
+        if (customSoundBase != null) {
+            int supportedNoteId = transposeIntoCustomSongRange(tunedNoteId);
+            int soundOffset = closestCustomSongSoundOffset(supportedNoteId);
+            return new SoundNote(customSongSound(soundOffset), supportedNoteId - soundOffset);
+        }
 
-        String sound = customSoundBase != null ? customSoundBase : "block.note_block.harp";
-        return new SoundNote(sound, tunedNoteId);
+        return new SoundNote("block.note_block.harp", transposeIntoVanillaSongRange(tunedNoteId));
+    }
+
+    private int transposeIntoCustomSongRange(int noteId) {
+        while (noteId < MIN_CUSTOM_SONG_NOTE_ID) noteId += 12;
+        while (noteId > MAX_CUSTOM_SONG_NOTE_ID) noteId -= 12;
+        return noteId;
+    }
+
+    private int transposeIntoVanillaSongRange(int noteId) {
+        while (noteId < MIN_SONG_NOTE_ID) noteId += 12;
+        while (noteId > MAX_SONG_NOTE_ID) noteId -= 12;
+        return noteId;
+    }
+
+    private int closestCustomSongSoundOffset(int noteId) {
+        int preferredOffset = preferredCustomSongSoundOffset();
+        int closestOffset = 0;
+        int closestDistance = Integer.MAX_VALUE;
+
+        for (int soundOffset : CUSTOM_SONG_SOUND_OFFSETS) {
+            int pitchedNoteId = noteId - soundOffset;
+            if (pitchedNoteId < MIN_SONG_NOTE_ID || pitchedNoteId > MAX_SONG_NOTE_ID) continue;
+
+            int distance = Math.abs(soundOffset - preferredOffset);
+            if (distance < closestDistance) {
+                closestOffset = soundOffset;
+                closestDistance = distance;
+            }
+        }
+
+        return closestOffset;
+    }
+
+    private int preferredCustomSongSoundOffset() {
+        if (octave <= -2) return -24;
+        if (octave == -1) return -12;
+        if (octave >= 2) return 24;
+        return 0;
+    }
+
+    private String customSongSound(int soundOffset) {
+        return switch (soundOffset) {
+            case -24 -> customSoundBase + "_-2";
+            case -12 -> customSoundBase + "_-1";
+            case 24 -> customSoundBase + "_2";
+            default -> customSoundBase;
+        };
     }
 
     private void playSongForListeners(Player player, int songNoteId) {

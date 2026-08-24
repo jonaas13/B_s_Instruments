@@ -22,8 +22,12 @@ public class SongPlayer {
         UUID playerId = player.getUniqueId();
         Participant activeParticipant = ACTIVE_PLAYERS.get(playerId);
         if (activeParticipant != null) {
-            activeParticipant.setInstrument(instrument);
-            return true;
+            if (activeParticipant.isValid()) {
+                activeParticipant.setInstrument(instrument);
+                return true;
+            }
+
+            activeParticipant.performance().remove(activeParticipant);
         }
 
         Song song = AllSongs.getSongFromItem(player.getInventory().getItemInMainHand());
@@ -37,7 +41,7 @@ public class SongPlayer {
         }
 
         int layer = performance.nextAvailableLayer();
-        Participant participant = new Participant(player, instrument, song, layer, Bukkit.getCurrentTick() - performance.startTick());
+        Participant participant = new Participant(player, instrument, song, layer, performance.currentSongTick());
         performance.add(participant);
         ACTIVE_PLAYERS.put(playerId, participant);
 
@@ -94,12 +98,12 @@ public class SongPlayer {
 
         @Override
         public void run() {
-            int songTick = Bukkit.getCurrentTick() - startTick;
-            if (songTick >= song.durationTicks()) {
+            if (song.durationTicks() <= 0) {
                 finish();
                 return;
             }
 
+            int songTick = currentSongTick();
             for (Participant participant : List.copyOf(participants.values())) {
                 if (!participant.isValid()) {
                     remove(participant);
@@ -112,8 +116,10 @@ public class SongPlayer {
             if (participants.isEmpty()) finish();
         }
 
-        private int startTick() {
-            return startTick;
+        private int currentSongTick() {
+            int elapsedTicks = Bukkit.getCurrentTick() - startTick;
+            if (elapsedTicks <= 0) return 0;
+            return elapsedTicks % song.durationTicks();
         }
 
         private void add(Participant participant) {
@@ -142,7 +148,6 @@ public class SongPlayer {
         private boolean isJoinableBy(Player joiningPlayer, Song joiningSong) {
             return song == joiningSong
                     && !participants.isEmpty()
-                    && Bukkit.getCurrentTick() - startTick < song.durationTicks()
                     && nearestDistanceSquared(joiningPlayer) <= SYNC_RADIUS_SQUARED;
         }
 
@@ -182,6 +187,7 @@ public class SongPlayer {
         private Performance performance;
         private int noteIndex;
         private int nextNoteStartTick;
+        private int lastSongTick = -1;
 
         private Participant(Player player, Instrument instrument, Song song, int layer, int songTick) {
             this.player = player;
@@ -240,6 +246,9 @@ public class SongPlayer {
         }
 
         private void playDueNote(int songTick) {
+            if (songTick < lastSongTick) seek(0);
+            lastSongTick = songTick;
+
             for (Song.SongNote songNote : getDueNotes(songTick)) {
                 if (!songNote.isRest()) {
                     instrument.playSongNote(player, songNote.noteId());
