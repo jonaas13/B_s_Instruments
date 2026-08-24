@@ -89,6 +89,13 @@ public class AllInstruments {
         return AllInstruments.get(ThreadLocalRandom.current().nextInt(AllInstruments.size()));
     }
 
+    public static Instrument GetInstrumentFromItem(org.bukkit.inventory.ItemStack itemStack) {
+        for (Instrument instrument : AllInstruments) {
+            if (instrument.isThisInstrument(itemStack)) return instrument;
+        }
+        return null;
+    }
+
     private static String getLookupName(Instrument instrument) {
         if (instrument.octave < 0) return instrument.sname+"-low-"+Math.abs(instrument.octave);
         if (instrument.octave > 1) return instrument.sname+"-high-"+instrument.octave;

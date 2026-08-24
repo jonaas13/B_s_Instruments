@@ -20,7 +20,11 @@ public class SongPlayer {
 
     public static boolean tryStart(Player player, Instrument instrument) {
         UUID playerId = player.getUniqueId();
-        if (ACTIVE_PLAYERS.containsKey(playerId)) return true;
+        Participant activeParticipant = ACTIVE_PLAYERS.get(playerId);
+        if (activeParticipant != null) {
+            activeParticipant.setInstrument(instrument);
+            return true;
+        }
 
         Song song = AllSongs.getSongFromItem(player.getInventory().getItemInMainHand());
         if (song == null) return false;
@@ -171,7 +175,7 @@ public class SongPlayer {
 
     private static class Participant {
         private final Player player;
-        private final Instrument instrument;
+        private Instrument instrument;
         private final Song song;
         private final int layer;
         private final List<Song.SongNote> notes;
@@ -200,6 +204,10 @@ public class SongPlayer {
             return layer;
         }
 
+        private void setInstrument(Instrument instrument) {
+            this.instrument = instrument;
+        }
+
         private Performance performance() {
             return performance;
         }
@@ -209,8 +217,12 @@ public class SongPlayer {
         }
 
         private boolean isValid() {
-            return player.isOnline()
-                    && instrument.isThisInstrument(player.getInventory().getItemInOffHand())
+            if (!player.isOnline()) return false;
+
+            Instrument currentInstrument = AllInstruments.GetInstrumentFromItem(player.getInventory().getItemInOffHand());
+            if (currentInstrument != null) instrument = currentInstrument;
+
+            return currentInstrument != null
                     && AllSongs.isSameSong(player.getInventory().getItemInMainHand(), song);
         }
 

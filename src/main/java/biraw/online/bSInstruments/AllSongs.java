@@ -1644,7 +1644,7 @@ public final class AllSongs {
     }
 
     private static int defaultBpm(String style) {
-        return switch (normalizeStyle(style)) {
+        return switch (style) {
             case "Chill" -> 82;
             case "Jazz", "Pop" -> 96;
             case "Folk", "Holiday" -> 108;
@@ -1657,8 +1657,7 @@ public final class AllSongs {
     }
 
     private static int defaultBpm(String title, String style) {
-        int offset = Math.floorMod(title.toLowerCase(Locale.ROOT).hashCode(), 17) - 8;
-        return Math.max(60, defaultBpm(style) + offset);
+        return Math.max(100, defaultBpm(style));
     }
 
 
@@ -1666,62 +1665,11 @@ public final class AllSongs {
         List<SongSeed> seeds = new ArrayList<>(BASE_SONG_SEEDS);
         addMidiImportedSeeds(seeds);
         addRecentMidiDemoSeeds(seeds);
-        Map<String, SongSeed> normalizedSeeds = new java.util.LinkedHashMap<>();
+        Map<String, SongSeed> uniqueSeeds = new java.util.LinkedHashMap<>();
         for (SongSeed seed : seeds) {
-            SongSeed normalizedSeed = seed.normalized();
-            normalizedSeeds.putIfAbsent(canonicalSongKey(normalizedSeed), normalizedSeed);
+            uniqueSeeds.putIfAbsent(seed.title().toLowerCase(Locale.ROOT), seed);
         }
-        return List.copyOf(normalizedSeeds.values());
-    }
-
-    private static String canonicalSongKey(SongSeed seed) {
-        return seed.title().toLowerCase(Locale.ROOT);
-    }
-
-    private static String normalizeTitle(String title) {
-        if (title.equalsIgnoreCase("Bridal Chorus")
-                || title.equalsIgnoreCase("Hallelujah Chorus")
-                || title.equalsIgnoreCase("London Bridge")) {
-            return title.trim();
-        }
-
-        String normalized = title
-                .replaceAll("(?i)\\b(solo)\\s+\\d+\\b", "")
-                .replaceAll("(?i)\\b(pre-chorus|lead-out|chorus|verse|bridge|intro|instrumental|solo|outro|demo)\\b", "")
-                .replaceAll("(?i)^\\s*(and|&)\\s+|\\s+(and|&)\\s*$", "")
-                .replaceAll("\\s+", " ")
-                .replaceAll("\\s+([?!.,])", "$1")
-                .trim();
-        return normalized.isEmpty() ? title.trim() : normalized;
-    }
-
-    private static String normalizeStyle(String style) {
-        String compact = style.trim().toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]", "");
-        return switch (compact) {
-            case "albumrock", "arenarock", "artrock", "classicrock", "countryrock", "folkrock",
-                    "glamrock", "hardrock", "modernrock", "pianorock", "poprock", "postgrunge",
-                    "rock", "sixtiesrock", "softrock" -> "Rock";
-            case "alternative", "alternativerock", "alt", "grunge", "metal", "permanentwave" -> "Alt";
-            case "dance", "dancepop", "disco", "dutchtrance", "italodance", "synthpop", "trance" -> "Dance";
-            case "christmaspop", "electropop", "europop", "latinpop", "mellowgold", "mexicanpop",
-                    "neomellow", "newwavepop", "pop", "retropop", "sunshinepop", "vintagepop" -> "Pop";
-            case "anthem", "ceremony", "march", "patriotic", "sports" -> "March";
-            case "adventure", "cartoon", "celebration", "cinematic", "circus", "comedy", "drama",
-                    "fantasy", "gametheme", "horror", "musical", "scifi", "screentheme", "theme" -> "Theme";
-            case "folk", "seashanty", "traditional" -> "Folk";
-            case "holiday" -> "Holiday";
-            case "classical" -> "Classical";
-            case "jazz", "ragtime" -> "Jazz";
-            case "funk", "motown", "rnb", "soul" -> "Soul";
-            case "hiphop" -> "HipHop";
-            case "country", "countrypop" -> "Country";
-            case "chill", "lofi", "lullaby" -> "Chill";
-            case "indie", "indierock", "lilith", "newwave" -> "Indie";
-            case "original" -> "Original";
-            default -> {
-                yield compact.isEmpty() ? "Other" : Character.toUpperCase(compact.charAt(0)) + compact.substring(1);
-            }
-        };
+        return List.copyOf(uniqueSeeds.values());
     }
 
     private static void addMidiImportedSeeds(List<SongSeed> seeds) {
@@ -4019,9 +3967,7 @@ public final class AllSongs {
                     seed.style(),
                     seed.bpm(),
                     seed.pattern(),
-                    seed.layerPatterns(),
-                    Song.shouldPreserveMelody(seed.style()),
-                    true
+                    seed.layerPatterns()
             );
             songs.add(song);
             String lookupName = song.lookupName();
@@ -4094,16 +4040,6 @@ public final class AllSongs {
     private record SongSeed(String title, String style, String pattern, List<String> layerPatterns, int bpm) {
         private SongSeed(String title, String style, String pattern, List<String> layerPatterns) {
             this(title, style, pattern, layerPatterns, defaultBpm(title, style));
-        }
-
-        private SongSeed normalized() {
-            return new SongSeed(
-                    normalizeTitle(title),
-                    normalizeStyle(style),
-                    pattern,
-                    layerPatterns,
-                    bpm
-            );
         }
     }
 }

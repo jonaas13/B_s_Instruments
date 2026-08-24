@@ -7,6 +7,9 @@ import io.papermc.paper.datacomponent.item.consumable.ItemUseAnimation;
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import io.papermc.paper.event.player.PlayerStopUsingItemEvent;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Note;
@@ -105,11 +108,11 @@ public class Instrument implements Listener {
     public ItemStack getItem(){
         ItemStack give = new ItemStack(item);
         ItemMeta meta = give.getItemMeta();
-        meta.setDisplayName("§d"+name);
-        if (octave > 1) meta.setLore(List.of("§a♪ Extra high note "+octave+" ♪","§bMinearchyInstruments"));
-        else if (octave > 0) meta.setLore(List.of("§a♪ High note ♪","§bMinearchyInstruments"));
-        else if (octave < 0) meta.setLore(List.of("§a♫ Extra low note "+Math.abs(octave)+" ♫","§bMinearchyInstruments"));
-        else meta.setLore(List.of("§a♫ Low note ♫","§bMinearchyInstruments"));
+        meta.displayName(Component.text(name, NamedTextColor.LIGHT_PURPLE).decoration(TextDecoration.ITALIC, false));
+        if (octave > 1) meta.lore(instrumentLore("♪ Extra high note "+octave+" ♪"));
+        else if (octave > 0) meta.lore(instrumentLore("♪ High note ♪"));
+        else if (octave < 0) meta.lore(instrumentLore("♫ Extra low note "+Math.abs(octave)+" ♫"));
+        else meta.lore(instrumentLore("♫ Low note ♫"));
         meta.getPersistentDataContainer().set(
                 BSInstruments.NSKEY,
                 PersistentDataType.STRING,
@@ -119,6 +122,13 @@ public class Instrument implements Listener {
         give.setItemMeta(meta);
         addRightClickUseComponents(give);
         return give;
+    }
+
+    private List<Component> instrumentLore(String description) {
+        return List.of(
+                Component.text(description, NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false),
+                Component.text("MinearchyInstruments", NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, false)
+        );
     }
 
     @EventHandler
@@ -213,7 +223,7 @@ public class Instrument implements Listener {
 
     void playSongNote(Player plr, int songNoteId) {
         warnIfMuted(plr, Bukkit.getCurrentTick());
-        playForListeners(plr, toTunedSongNote(songNoteId));
+        playSongForListeners(plr, songNoteId);
     }
 
     @EventHandler
@@ -484,23 +494,33 @@ public class Instrument implements Listener {
         return 0;
     }
 
-    private Note toTunedSongNote(int songNoteId) {
-        int tunedNoteId = usesCustomExtraOctaveSound() ? songNoteId : songNoteId + (octave * 12);
-        return new Note(wrapToPlayableNoteId(tunedNoteId));
-    }
-
-    private int wrapToPlayableNoteId(int noteId) {
-        while (noteId < 0) noteId += 12;
-        while (noteId > 24) noteId -= 12;
-        return noteId;
-    }
-
     private boolean usesCustomExtraOctaveSound() {
         return customSoundBase != null && octave != 0 && octave != 1;
     }
 
     private String getCustomExtraOctaveSound() {
         return customSoundBase+"_"+octave;
+    }
+
+    private float getSongNotePitch(int songNoteId) {
+        int tunedNoteId = usesCustomExtraOctaveSound() ? songNoteId : songNoteId + (octave * 12);
+        return (float) Math.pow(2.0, (tunedNoteId - 12) / 12.0);
+    }
+
+    private String getSongSound() {
+        if (usesCustomExtraOctaveSound()) return getCustomExtraOctaveSound();
+        if (customSoundBase != null) return customSoundBase;
+        return "block.note_block.harp";
+    }
+
+    private void playSongForListeners(Player player, int songNoteId) {
+        float pitch = getSongNotePitch(songNoteId);
+        String sound = getSongSound();
+        for (Player listener : Bukkit.getOnlinePlayers()) {
+            if (MuteManager.isMuted(listener)) continue;
+
+            listener.playSound(player.getLocation(), sound, SoundCategory.RECORDS, NOTE_VOLUME, pitch);
+        }
     }
 
     private void playForListeners(Player player, Note note) {
