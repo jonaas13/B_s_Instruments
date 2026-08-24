@@ -1667,12 +1667,77 @@ public final class AllSongs {
         addRecentMidiDemoSeeds(seeds);
         Map<String, SongSeed> uniqueSeeds = new java.util.LinkedHashMap<>();
         for (SongSeed seed : seeds) {
-            uniqueSeeds.putIfAbsent(seed.title().toLowerCase(Locale.ROOT), seed);
+            String key = seed.title().toLowerCase(Locale.ROOT);
+            SongSeed existing = uniqueSeeds.get(key);
+            if (existing == null) {
+                uniqueSeeds.put(key, seed);
+            } else {
+                uniqueSeeds.put(key, mergeSongSeeds(existing, seed));
+            }
         }
         return List.copyOf(uniqueSeeds.values());
     }
 
+    private static SongSeed mergeSongSeeds(SongSeed base, SongSeed duplicate) {
+        SongSeed primary = averagePitch(duplicate.pattern()) > averagePitch(base.pattern()) ? duplicate : base;
+        SongSeed secondary = primary == base ? duplicate : base;
+
+        List<String> layers = new ArrayList<>(primary.layerPatterns());
+        layers.add(secondary.pattern());
+        layers.addAll(secondary.layerPatterns());
+        return new SongSeed(primary.title(), primary.style(), primary.pattern(), List.copyOf(layers), primary.bpm());
+    }
+
+    private static double averagePitch(String pattern) {
+        int total = 0;
+        int count = 0;
+        for (String token : pattern.split("\\s+")) {
+            if (token.isBlank()) continue;
+            String noteName = token.split(":")[0];
+            if (noteName.equalsIgnoreCase("R")) continue;
+
+            total += approximatePitch(noteName);
+            count++;
+        }
+        return count == 0 ? Double.NEGATIVE_INFINITY : (double) total / count;
+    }
+
+    private static int approximatePitch(String noteName) {
+        int octave = Character.digit(noteName.charAt(noteName.length() - 1), 10);
+        String pitchName = noteName.substring(0, noteName.length() - 1).toUpperCase(Locale.ROOT);
+        int semitone = switch (pitchName) {
+            case "C" -> 0;
+            case "C#", "DB" -> 1;
+            case "D" -> 2;
+            case "D#", "EB" -> 3;
+            case "E" -> 4;
+            case "F" -> 5;
+            case "F#", "GB" -> 6;
+            case "G" -> 7;
+            case "G#", "AB" -> 8;
+            case "A" -> 9;
+            case "A#", "BB" -> 10;
+            case "B" -> 11;
+            default -> 0;
+        };
+        return octave * 12 + semitone;
+    }
+
+    private static void slowImportedSeeds(List<SongSeed> seeds, int firstImportedSeedIndex) {
+        for (int i = firstImportedSeedIndex; i < seeds.size(); i++) {
+            SongSeed seed = seeds.get(i);
+            seeds.set(i, new SongSeed(
+                    seed.title(),
+                    seed.style(),
+                    seed.pattern(),
+                    seed.layerPatterns(),
+                    Math.max(1, Math.round(seed.bpm() / 2.0f))
+            ));
+        }
+    }
+
     private static void addMidiImportedSeeds(List<SongSeed> seeds) {
+        int firstImportedSeedIndex = seeds.size();
 
         // Imported from MulTTiPop aligned MIDI labels, distributed as CC-BY-4.0.
 
@@ -3577,9 +3642,11 @@ public final class AllSongs {
                 )
         ));
 
+        slowImportedSeeds(seeds, firstImportedSeedIndex);
     }
 
     private static void addRecentMidiDemoSeeds(List<SongSeed> seeds) {
+        int firstImportedSeedIndex = seeds.size();
 
         // Imported from MIDIdb free demo MIDI files; MIDIdb states copyright-owner permission for demo downloads.
 
@@ -3950,6 +4017,7 @@ public final class AllSongs {
                 )
         ));
 
+        slowImportedSeeds(seeds, firstImportedSeedIndex);
     }
 
     private static final List<Song> ALL_SONGS;

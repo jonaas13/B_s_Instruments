@@ -502,24 +502,28 @@ public class Instrument implements Listener {
         return customSoundBase+"_"+octave;
     }
 
-    private float getSongNotePitch(int songNoteId) {
-        int tunedNoteId = usesCustomExtraOctaveSound() ? songNoteId : songNoteId + (octave * 12);
-        return (float) Math.pow(2.0, (tunedNoteId - 12) / 12.0);
-    }
+    private SoundNote getSongSoundNote(int songNoteId) {
+        int tunedNoteId = songNoteId + (octave * 12);
+        if (tunedNoteId < -12 && customSoundBase != null) return new SoundNote(customSoundBase + "_-2", tunedNoteId + 24);
+        if (tunedNoteId < 0 && customSoundBase != null) return new SoundNote(customSoundBase + "_-1", tunedNoteId + 12);
+        if (tunedNoteId > 24 && customSoundBase != null) return new SoundNote(customSoundBase + "_2", tunedNoteId - 24);
 
-    private String getSongSound() {
-        if (usesCustomExtraOctaveSound()) return getCustomExtraOctaveSound();
-        if (customSoundBase != null) return customSoundBase;
-        return "block.note_block.harp";
+        String sound = customSoundBase != null ? customSoundBase : "block.note_block.harp";
+        return new SoundNote(sound, tunedNoteId);
     }
 
     private void playSongForListeners(Player player, int songNoteId) {
-        float pitch = getSongNotePitch(songNoteId);
-        String sound = getSongSound();
+        SoundNote soundNote = getSongSoundNote(songNoteId);
         for (Player listener : Bukkit.getOnlinePlayers()) {
             if (MuteManager.isMuted(listener)) continue;
 
-            listener.playSound(player.getLocation(), sound, SoundCategory.RECORDS, NOTE_VOLUME, pitch);
+            listener.playSound(player.getLocation(), soundNote.sound(), SoundCategory.RECORDS, NOTE_VOLUME, soundNote.pitch());
+        }
+    }
+
+    private record SoundNote(String sound, int noteId) {
+        private float pitch() {
+            return (float) Math.pow(2.0, (noteId - 12) / 12.0);
         }
     }
 
