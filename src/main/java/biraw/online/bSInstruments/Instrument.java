@@ -486,9 +486,13 @@ public class Instrument implements Listener {
 
     private Note toTunedSongNote(int songNoteId) {
         int tunedNoteId = usesCustomExtraOctaveSound() ? songNoteId : songNoteId + (octave * 12);
-        while (tunedNoteId < 0) tunedNoteId += 12;
-        while (tunedNoteId > 24) tunedNoteId -= 12;
-        return new Note(tunedNoteId);
+        return new Note(wrapToPlayableNoteId(tunedNoteId));
+    }
+
+    private int wrapToPlayableNoteId(int noteId) {
+        while (noteId < 0) noteId += 12;
+        while (noteId > 24) noteId -= 12;
+        return noteId;
     }
 
     private boolean usesCustomExtraOctaveSound() {
