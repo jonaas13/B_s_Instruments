@@ -1,9 +1,12 @@
 package biraw.online.bSInstruments;
 
 import org.bukkit.Material;
+import org.bukkit.inventory.meta.components.CustomModelDataComponent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,13 +51,16 @@ public class Song {
     public ItemStack getItem() {
         ItemStack item = new ItemStack(Material.PAPER);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§dSheet Music: §f" + title);
-        meta.setLore(List.of(
-                "§7" + style,
-                "§aHold in main hand and play an instrument",
-                "§bMinearchyInstruments"
+        meta.displayName(Component.text("Sheet Music: ", NamedTextColor.LIGHT_PURPLE)
+                .append(Component.text(title, NamedTextColor.WHITE)));
+        meta.lore(List.of(
+                Component.text(style, NamedTextColor.GRAY),
+                Component.text("Hold in main hand and play an instrument", NamedTextColor.GREEN),
+                Component.text("MinearchyInstruments", NamedTextColor.AQUA)
         ));
-        meta.setCustomModelData(CUSTOM_MODEL_DATA);
+        CustomModelDataComponent customModelData = meta.getCustomModelDataComponent();
+        customModelData.setFloats(List.of((float) CUSTOM_MODEL_DATA));
+        meta.setCustomModelDataComponent(customModelData);
         meta.getPersistentDataContainer().set(BSInstruments.NSKEY, PersistentDataType.STRING, "song_" + id);
         item.setItemMeta(meta);
         return item;

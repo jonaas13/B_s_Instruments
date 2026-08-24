@@ -229,7 +229,7 @@ public class RegisterRecipes implements Listener {
     private void addSongRecipes() {
         List<MaterialPair> accentPairs = getSongRecipeAccentPairs();
         int recipeIndex = 0;
-        for (Song song : AllSongs.AllSongs) {
+        for (Song song : AllSongs.getAllSongs()) {
             if (recipeIndex >= accentPairs.size()) break;
 
             MaterialPair accents = accentPairs.get(recipeIndex);

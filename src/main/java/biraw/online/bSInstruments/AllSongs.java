@@ -1,21 +1,25 @@
 package biraw.online.bSInstruments;
 
+import biraw.online.bSInstruments.Obtaining.ItemDelivery;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import biraw.online.bSInstruments.Obtaining.ItemDelivery;
-import org.bukkit.Material;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class AllSongs {
+public final class AllSongs {
+    private static final Material SONG_MATERIAL = Material.PAPER;
+    private static final String SONG_KEY_PREFIX = "song_";
+    private static final float SONG_CUSTOM_MODEL_DATA = (float) Song.CUSTOM_MODEL_DATA;
+    private static final int SONG_TEMPO_TICKS = 4;
+
     private static final List<SongSeed> SONG_SEEDS = List.of(
             new SongSeed("Ode to Joy", "Classical", "E4:2 E4:2 F4:2 G4:2 G4:2 F4:2 E4:2 D4:2 C4:2 C4:2 D4:2 E4:2 E4:3 D4:1 D4:4"),
             new SongSeed("Eine Kleine Nachtmusik", "Classical", "G4:2 D4:2 G4:2 D4:2 G4:2 B4:2 D5:4 C5:2 A4:2 C5:2 A4:2 C5:2 F#4:2 A4:4"),
@@ -188,7 +192,7 @@ public class AllSongs {
             new SongSeed("Afterparty Lights", "Modern Pop", "A3:1 E4:1 A4:2 C5:2 B4:2 A4:2 E4:4 G3:1 D4:1 G4:2 B4:2 A4:2 G4:2 D4:4")
     );
 
-    public static final List<Song> AllSongs;
+    private static final List<Song> ALL_SONGS;
     private static final Map<String, Song> SONGS_BY_NAME;
     private static final List<String> SONG_NAMES;
 
@@ -198,16 +202,21 @@ public class AllSongs {
         List<String> songNames = new ArrayList<>();
 
         for (SongSeed seed : SONG_SEEDS) {
-            Song song = new Song(seed.title(), seed.style(), 4, seed.pattern());
+            Song song = new Song(seed.title(), seed.style(), SONG_TEMPO_TICKS, seed.pattern());
             songs.add(song);
             String lookupName = song.lookupName();
-            songsByName.put(lookupName, song);
+            if (songsByName.put(lookupName, song) != null) {
+                throw new IllegalStateException("Duplicate song id: " + lookupName);
+            }
             songNames.add(lookupName);
         }
 
-        AllSongs = List.copyOf(songs);
+        ALL_SONGS = List.copyOf(songs);
         SONGS_BY_NAME = Map.copyOf(songsByName);
         SONG_NAMES = List.copyOf(songNames);
+    }
+
+    private AllSongs() {
     }
 
     public static Song getSongByName(String name) {
@@ -216,18 +225,18 @@ public class AllSongs {
     }
 
     public static Song getSongFromItem(ItemStack itemStack) {
-        if (itemStack == null || itemStack.getType() != Material.PAPER) return null;
+        if (itemStack == null || itemStack.getType() != SONG_MATERIAL) return null;
         ItemMeta meta = itemStack.getItemMeta();
         if (meta == null) return null;
-        if (!meta.hasCustomModelData() || meta.getCustomModelData() != Song.CUSTOM_MODEL_DATA) return null;
+        if (!hasSongCustomModelData(meta)) return null;
 
         String value = meta.getPersistentDataContainer().get(BSInstruments.NSKEY, PersistentDataType.STRING);
-        if (value == null || !value.startsWith("song_")) return null;
-        return getSongByName(value.substring("song_".length()));
+        if (value == null || !value.startsWith(SONG_KEY_PREFIX)) return null;
+        return getSongByName(value.substring(SONG_KEY_PREFIX.length()));
     }
 
-    public static boolean isSong(ItemStack itemStack) {
-        return getSongFromItem(itemStack) != null;
+    public static List<Song> getAllSongs() {
+        return ALL_SONGS;
     }
 
     public static List<String> getAllSongNames() {
@@ -236,21 +245,26 @@ public class AllSongs {
 
     public static void giveAllSongs(Player player) {
         int given = 0;
-        for (Song song : AllSongs) {
+        for (Song song : ALL_SONGS) {
             if (!ItemDelivery.giveToInventory(player, song.getItem())) break;
             given++;
         }
         player.sendMessage("§aAdded §e" + given + "§a sheet music items to your inventory.");
-        if (given < AllSongs.size()) player.sendMessage("§cInventory full. Some sheet music was not added.");
+        if (given < ALL_SONGS.size()) player.sendMessage("§cInventory full. Some sheet music was not added.");
     }
 
     public static Song getRandomSong() {
-        return AllSongs.get(ThreadLocalRandom.current().nextInt(AllSongs.size()));
+        return ALL_SONGS.get(ThreadLocalRandom.current().nextInt(ALL_SONGS.size()));
     }
 
     public static boolean isSameSong(ItemStack itemStack, Song song) {
         Song itemSong = getSongFromItem(itemStack);
-        return itemSong != null && Objects.equals(itemSong.id(), song.id());
+        return itemSong == song;
+    }
+
+    private static boolean hasSongCustomModelData(ItemMeta meta) {
+        return meta.hasCustomModelDataComponent()
+                && meta.getCustomModelDataComponent().getFloats().contains(SONG_CUSTOM_MODEL_DATA);
     }
 
     private record SongSeed(String title, String style, String pattern) {
