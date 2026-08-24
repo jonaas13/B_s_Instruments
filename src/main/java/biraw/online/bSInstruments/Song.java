@@ -19,6 +19,7 @@ public class Song {
     private static final int MIN_NOTE_ID = 0;
     private static final int MAX_NOTE_ID = 24;
     private static final double TICKS_PER_MINUTE = 30.0 * 20.0;
+    private static final int MAX_HELD_NOTE_RETRIGGER_TICKS = 20;
 
     private final String id;
     private final String title;
@@ -117,9 +118,18 @@ public class Song {
                 continue;
             }
 
-            parsed.add(new SongNote(toNoteId(parts[0]), durationTicks));
+            addTriggeredNote(parsed, toNoteId(parts[0]), durationTicks);
         }
         return List.copyOf(parsed);
+    }
+
+    private void addTriggeredNote(List<SongNote> parsed, int noteId, int durationTicks) {
+        int remainingTicks = durationTicks;
+        while (remainingTicks > MAX_HELD_NOTE_RETRIGGER_TICKS) {
+            parsed.add(new SongNote(noteId, MAX_HELD_NOTE_RETRIGGER_TICKS));
+            remainingTicks -= MAX_HELD_NOTE_RETRIGGER_TICKS;
+        }
+        parsed.add(new SongNote(noteId, remainingTicks));
     }
 
     private double parseDurationUnits(String duration) {
