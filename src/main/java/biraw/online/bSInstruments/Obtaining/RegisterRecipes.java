@@ -1,8 +1,10 @@
 package biraw.online.bSInstruments.Obtaining;
 
 import biraw.online.bSInstruments.AllInstruments;
+import biraw.online.bSInstruments.AllSongs;
 import biraw.online.bSInstruments.BSInstruments;
 import biraw.online.bSInstruments.Instrument;
+import biraw.online.bSInstruments.Song;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -174,6 +176,7 @@ public class RegisterRecipes implements Listener {
         addTrumpetRecipes("weathered-trumpet", Material.WEATHERED_COPPER);
         addTrumpetRecipes("oxidized-trumpet", Material.OXIDIZED_COPPER);
 
+        addSongRecipes();
         addTuningRecipes();
     }
 
@@ -198,6 +201,36 @@ public class RegisterRecipes implements Listener {
             addTuningRecipe(baseName+"-low-1", baseName+"-0", Material.DEEPSLATE);
             addTuningRecipe(baseName+"-low-2", baseName+"-low-1", Material.REINFORCED_DEEPSLATE);
         }
+    }
+
+    private void addSongRecipes() {
+        addSongRecipe("ode-to-joy-classical", Material.FEATHER);
+        addSongRecipe("canon-in-d-classical", Material.DIAMOND);
+        addSongRecipe("greensleeves-traditional", Material.OAK_LEAVES);
+        addSongRecipe("amazing-grace-traditional", Material.GOLD_NUGGET);
+        addSongRecipe("drunken-sailor-sea-shanty", Material.KELP);
+        addSongRecipe("twinkle-twinkle-folk", Material.GLOWSTONE_DUST);
+        addSongRecipe("happy-birthday-celebration", Material.CAKE);
+        addSongRecipe("jingle-bells-holiday", Material.SNOWBALL);
+        addSongRecipe("fur-elise-classical", Material.AMETHYST_SHARD);
+        addSongRecipe("the-entertainer-ragtime", Material.REDSTONE);
+        addSongRecipe("simple-blues-original", Material.LAPIS_LAZULI);
+        addSongRecipe("miners-march-original", Material.COPPER_INGOT);
+    }
+
+    private void addSongRecipe(String songName, Material accent) {
+        Song song = AllSongs.getSongByName(songName);
+        if (song == null) return;
+
+        NamespacedKey key = new NamespacedKey(BSInstruments.getInstance(),
+                "song_recipe_" + BSInstruments.getIntForRecipe());
+        ShapelessRecipe recipe = new ShapelessRecipe(key, song.getItem());
+        recipe.addIngredient(Material.PAPER);
+        recipe.addIngredient(Material.INK_SAC);
+        recipe.addIngredient(Material.NOTE_BLOCK);
+        recipe.addIngredient(accent);
+        Bukkit.addRecipe(recipe);
+        BSRecipe.AllRecipeKeys.add(key);
     }
 
     private void addTuningRecipe(String resultName, String sourceName, Material modifier) {

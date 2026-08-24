@@ -19,6 +19,10 @@ public class MuteManager {
         }
     }
 
+    public static void clear(Player player) {
+        Muted.remove(player.getUniqueId());
+    }
+
     public static void sendMuteStatus(Player player) {
         if (isMuted(player)) player.sendMessage("§cInstruments are MUTED for you.");
         else player.sendMessage("§aInstruments are NOT MUTED for you.");

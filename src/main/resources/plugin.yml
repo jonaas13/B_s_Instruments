@@ -6,7 +6,7 @@ api-version: '26.2'
 commands:
   instrument:
     description: Manage instruments
-    usage: /instrument <get <name>|all|mute [true|false]>
+    usage: /instrument <get <name>|song <name>|songs|all|mute [true|false]>
     aliases: [instruments, inst]
 
 permissions:
@@ -15,6 +15,9 @@ permissions:
     default: op
   minearchyinstruments.instrument.all:
     description: Allows the player to use /instrument all
+    default: op
+  minearchyinstruments.instrument.song:
+    description: Allows the player to use /instrument song and /instrument songs
     default: op
   minearchyinstruments.instrument.mute:
     description: Allows the player to use /instrument mute

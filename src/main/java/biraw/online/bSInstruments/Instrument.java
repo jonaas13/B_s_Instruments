@@ -32,12 +32,14 @@ import org.bukkit.util.RayTraceResult;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
 public class Instrument implements Listener {
     private static final float NOTE_VOLUME = 3.0f;
+    private static final int UNKNOWN_CUSTOM_MODEL_DATA = 999;
     private static final int LEFT_CLICK_REPEAT_TICKS = 4;
     private static final int LEFT_AIR_HOLD_CONFIRM_TICKS = 8;
     private static final int LEFT_AIR_REPEAT_WINDOW_TICKS = 10;
@@ -79,6 +81,8 @@ public class Instrument implements Listener {
     final org.bukkit.Instrument instrument;
     final Material item;
     final String customSoundBase;
+    private final String itemKey;
+    private final int customModelData;
 
     public Instrument(String name, org.bukkit.Instrument instrument, int octave, Material item){
         this(name, instrument, octave, item, null);
@@ -90,7 +94,9 @@ public class Instrument implements Listener {
         this.name = name;
         this.item = item;
         this.customSoundBase = customSoundBase;
-        this.sname = name.replace(' ', '-').toLowerCase();
+        this.sname = name.replace(' ', '-').toLowerCase(Locale.ROOT);
+        this.itemKey = "instrument_"+sname+"_"+octave;
+        this.customModelData = getCustomModelData(sname);
 
         Bukkit.getServer().getPluginManager().registerEvents(this,BSInstruments.getInstance());
     }
@@ -107,73 +113,9 @@ public class Instrument implements Listener {
         meta.getPersistentDataContainer().set(
                 BSInstruments.NSKEY,
                 PersistentDataType.STRING,
-                "instrument_"+sname+"_"+octave
+                itemKey
         );
-            switch (sname.toLowerCase()) {
-                case "guitar":
-                    meta.setCustomModelData(7);
-                    break;
-                case "piano":
-                    meta.setCustomModelData(16);
-                    break;
-                case "bass-drum":
-                    meta.setCustomModelData(1);
-                    break;
-                case "snare-drum":
-                    meta.setCustomModelData(2);
-                    break;
-                case "sticks":
-                    meta.setCustomModelData(3);
-                    break;
-                case "bass-guitar":
-                    meta.setCustomModelData(4);
-                    break;
-                case "flute":
-                    meta.setCustomModelData(5);
-                    break;
-                case "bell":
-                    meta.setCustomModelData(6);
-                    break;
-                case "chime":
-                    meta.setCustomModelData(8);
-                    break;
-                case "xylophone":
-                    meta.setCustomModelData(9);
-                    break;
-                case "iron-xylophone":
-                    meta.setCustomModelData(10);
-                    break;
-                case "cow-bell":
-                    meta.setCustomModelData(11);
-                    break;
-                case "didgeridoo":
-                    meta.setCustomModelData(12);
-                    break;
-                case "bit":
-                    meta.setCustomModelData(13);
-                    break;
-                case "banjo":
-                    meta.setCustomModelData(14);
-                    break;
-                case "pling":
-                    meta.setCustomModelData(15);
-                    break;
-                case "trumpet":
-                    meta.setCustomModelData(17);
-                    break;
-                case "exposed-trumpet":
-                    meta.setCustomModelData(18);
-                    break;
-                case "weathered-trumpet":
-                    meta.setCustomModelData(19);
-                    break;
-                case "oxidized-trumpet":
-                    meta.setCustomModelData(20);
-                    break;
-                default:
-                    meta.setCustomModelData(999); // fallback or unknown
-                    break;
-            }
+        meta.setCustomModelData(customModelData);
         give.setItemMeta(meta);
         addRightClickUseComponents(give);
         return give;
@@ -189,7 +131,7 @@ public class Instrument implements Listener {
             stopLeftAirRepeat(plr);
             cancelWorldInteractionButAllowUse(event);
             playNote(plr, false);
-            if (event.getHand() == EquipmentSlot.OFF_HAND) startRightClickRepeat(plr);
+            if (event.getHand() == EquipmentSlot.OFF_HAND && !SongPlayer.isActive(plr)) startRightClickRepeat(plr);
             return;
         }
 
@@ -226,6 +168,8 @@ public class Instrument implements Listener {
     }
 
     private void playNote(Player plr, boolean sharp) {
+        if (SongPlayer.tryStart(plr, this)) return;
+
         int currentTick = Bukkit.getCurrentTick();
         if (Objects.equals(LAST_PLAY_TICK.get(plr.getUniqueId()), currentTick)) return;
         LAST_PLAY_TICK.put(plr.getUniqueId(), currentTick);
@@ -234,7 +178,7 @@ public class Instrument implements Listener {
         float pitch = plr.getPitch();
 
         pitch+=90; pitch /= 180; pitch *=NATURAL_NOTES.size()-1; // convert player pitch to a note
-        int noteIndex = Math.round(pitch);
+        int noteIndex = Math.max(0, Math.min(NATURAL_NOTES.size() - 1, Math.round(pitch)));
 
         Note note;
         if (plr.isSneaking()) {
@@ -251,15 +195,12 @@ public class Instrument implements Listener {
             plr.sendActionBar(NATURAL_NOTE_COLORS.get(noteIndex));
         }
 
-        for (Player listener : Bukkit.getOnlinePlayers()) {
-            if (!MuteManager.isMuted(listener)) {
-                if (usesCustomExtraOctaveSound()) {
-                    listener.playSound(plr.getLocation(), getCustomExtraOctaveSound(), SoundCategory.RECORDS, NOTE_VOLUME, note.getPitch());
-                } else {
-                    listener.playNote(plr.getLocation(), instrument, note);
-                }
-            }
-        }
+        playForListeners(plr, note);
+    }
+
+    void playSongNote(Player plr, Note note) {
+        warnIfMuted(plr, Bukkit.getCurrentTick());
+        playForListeners(plr, note);
     }
 
     @EventHandler
@@ -295,14 +236,7 @@ public class Instrument implements Listener {
 
     @EventHandler
     private void playerConsumeEvent(PlayerItemConsumeEvent event) {
-        ItemStack item = event.getItem();
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null) return;
-        if (!Objects.equals(meta.getPersistentDataContainer().get(
-                BSInstruments.NSKEY,
-                PersistentDataType.STRING),
-                "instrument_"+sname+"_"+octave
-        )) return;
+        if (!isThisInstrument(event.getItem())) return;
 
         event.setCancelled(true);
     }
@@ -336,15 +270,32 @@ public class Instrument implements Listener {
         return action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK;
     }
 
-    private boolean isThisInstrument(ItemStack itemStack) {
-        if (itemStack == null || itemStack.getType().isAir()) return false;
+    boolean isThisInstrument(ItemStack itemStack) {
+        if (itemStack == null || itemStack.getType() != item) return false;
         ItemMeta meta = itemStack.getItemMeta();
         if (meta == null) return false;
+        if (!meta.hasCustomModelData() || meta.getCustomModelData() != customModelData) return false;
         return Objects.equals(meta.getPersistentDataContainer().get(
                 BSInstruments.NSKEY,
                 PersistentDataType.STRING),
-                "instrument_"+sname+"_"+octave
+                itemKey
         );
+    }
+
+    static void clearPlayerState(Player player) {
+        UUID playerId = player.getUniqueId();
+        LAST_PLAY_TICK.remove(playerId);
+        LAST_LEFT_CLICK_TICK.remove(playerId);
+        LEFT_AIR_CLICK_CANDIDATE_TICK.remove(playerId);
+        LEFT_AIR_REPEAT_UNTIL_TICK.remove(playerId);
+        LAST_LEFT_AIR_SIGNAL_TICK.remove(playerId);
+        LAST_MUTED_WARNING_TICK.remove(playerId);
+
+        BukkitTask leftAirTask = LEFT_AIR_TASKS.remove(playerId);
+        if (leftAirTask != null) leftAirTask.cancel();
+
+        BukkitTask rightClickTask = RIGHT_CLICK_TASKS.remove(playerId);
+        if (rightClickTask != null) rightClickTask.cancel();
     }
 
     private void cancelWorldInteraction(PlayerInteractEvent event) {
@@ -505,5 +456,43 @@ public class Instrument implements Listener {
 
     private String getCustomExtraOctaveSound() {
         return customSoundBase+"_"+octave;
+    }
+
+    private void playForListeners(Player player, Note note) {
+        for (Player listener : Bukkit.getOnlinePlayers()) {
+            if (MuteManager.isMuted(listener)) continue;
+
+            if (usesCustomExtraOctaveSound()) {
+                listener.playSound(player.getLocation(), getCustomExtraOctaveSound(), SoundCategory.RECORDS, NOTE_VOLUME, note.getPitch());
+            } else {
+                listener.playNote(player.getLocation(), instrument, note);
+            }
+        }
+    }
+
+    private static int getCustomModelData(String sname) {
+        return switch (sname) {
+            case "bass-drum" -> 1;
+            case "snare-drum" -> 2;
+            case "sticks" -> 3;
+            case "bass-guitar" -> 4;
+            case "flute" -> 5;
+            case "bell" -> 6;
+            case "guitar" -> 7;
+            case "chime" -> 8;
+            case "xylophone" -> 9;
+            case "iron-xylophone" -> 10;
+            case "cow-bell" -> 11;
+            case "didgeridoo" -> 12;
+            case "bit" -> 13;
+            case "banjo" -> 14;
+            case "pling" -> 15;
+            case "piano" -> 16;
+            case "trumpet" -> 17;
+            case "exposed-trumpet" -> 18;
+            case "weathered-trumpet" -> 19;
+            case "oxidized-trumpet" -> 20;
+            default -> UNKNOWN_CUSTOM_MODEL_DATA;
+        };
     }
 }

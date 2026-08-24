@@ -1,9 +1,11 @@
 package biraw.online.bSInstruments.Obtaining;
 
 import biraw.online.bSInstruments.AllInstruments;
+import biraw.online.bSInstruments.AllSongs;
 import biraw.online.bSInstruments.BSInstruments;
 import biraw.online.bSInstruments.Instrument;
 import biraw.online.bSInstruments.MuteManager;
+import biraw.online.bSInstruments.Song;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -14,9 +16,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class CommandManager implements CommandExecutor, TabExecutor {
-    private static final List<String> SUBCOMMANDS = List.of("get", "all", "mute");
+    private static final String PERMISSION_GET = "minearchyinstruments.instrument.get";
+    private static final String PERMISSION_ALL = "minearchyinstruments.instrument.all";
+    private static final String PERMISSION_SONG = "minearchyinstruments.instrument.song";
+    private static final String PERMISSION_MUTE = "minearchyinstruments.instrument.mute";
+    private static final List<String> MUTE_OPTIONS = List.of("true", "false");
 
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String @NotNull [] strings) {
@@ -28,25 +35,38 @@ public class CommandManager implements CommandExecutor, TabExecutor {
 
         if (strings.length < 1) return false;
 
-        if (strings[0].equalsIgnoreCase("all")) {
-            if (!hasPermission(player, "minearchyinstruments.instrument.all")) return true;
+        String subcommand = strings[0].toLowerCase(Locale.ROOT);
+
+        if (subcommand.equals("all")) {
+            if (!hasPermission(player, PERMISSION_ALL)) return true;
             AllInstruments.GiveAllInstruments(player);
             return true;
         }
 
-        if (strings[0].equalsIgnoreCase("get")) {
-            if (!hasPermission(player, "minearchyinstruments.instrument.get")) return true;
+        if (subcommand.equals("songs")) {
+            if (!hasPermission(player, PERMISSION_SONG)) return true;
+            AllSongs.giveAllSongs(player);
+            return true;
+        }
+
+        if (subcommand.equals("get")) {
+            if (!hasPermission(player, PERMISSION_GET)) return true;
             if (strings.length < 2) return false;
             return giveInstrument(player, strings[1]);
         }
 
-        if (strings[0].equalsIgnoreCase("mute")) {
-            if (!hasPermission(player, "minearchyinstruments.instrument.mute")) return true;
+        if (subcommand.equals("song")) {
+            if (!hasPermission(player, PERMISSION_SONG)) return true;
+            if (strings.length < 2) return false;
+            return giveSong(player, strings[1]);
+        }
+
+        if (subcommand.equals("mute")) {
+            if (!hasPermission(player, PERMISSION_MUTE)) return true;
             return handleMute(player, strings);
         }
 
-        if (!hasPermission(player, "minearchyinstruments.instrument.get")) return true;
-        return giveInstrument(player, strings[0]);
+        return false;
     }
 
     private boolean hasPermission(Player player, String permission) {
@@ -58,7 +78,18 @@ public class CommandManager implements CommandExecutor, TabExecutor {
     private boolean giveInstrument(Player player, String name) {
         Instrument item = AllInstruments.GetInstrumentByName(name);
         if (item == null) return false;
-        player.give(item.getItem());
+        if (!ItemDelivery.giveToInventory(player, item.getItem())) {
+            player.sendMessage("§cInventory full. Instrument was not added.");
+        }
+        return true;
+    }
+
+    private boolean giveSong(Player player, String name) {
+        Song song = AllSongs.getSongByName(name);
+        if (song == null) return false;
+        if (!ItemDelivery.giveToInventory(player, song.getItem())) {
+            player.sendMessage("§cInventory full. Sheet music was not added.");
+        }
         return true;
     }
 
@@ -86,18 +117,36 @@ public class CommandManager implements CommandExecutor, TabExecutor {
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String @NotNull [] strings) {
+        if (!(commandSender instanceof Player player)) return List.of();
+
         if (strings.length == 1) {
-            List<String> completions = new ArrayList<>(SUBCOMMANDS);
-            completions.addAll(AllInstruments.GetAllInstrumentNames());
+            List<String> completions = new ArrayList<>();
+            if (player.hasPermission(PERMISSION_GET)) completions.add("get");
+            if (player.hasPermission(PERMISSION_SONG)) {
+                completions.add("song");
+                completions.add("songs");
+            }
+            if (player.hasPermission(PERMISSION_ALL)) completions.add("all");
+            if (player.hasPermission(PERMISSION_MUTE)) completions.add("mute");
             return filterCompletions(completions, strings[0]);
         }
 
-        if (strings.length == 2 && strings[0].equalsIgnoreCase("get")) {
+        if (strings.length == 2
+                && strings[0].equalsIgnoreCase("get")
+                && player.hasPermission(PERMISSION_GET)) {
             return filterCompletions(AllInstruments.GetAllInstrumentNames(), strings[1]);
         }
 
-        if (strings.length == 2 && strings[0].equalsIgnoreCase("mute")) {
-            return filterCompletions(List.of("true", "false"), strings[1]);
+        if (strings.length == 2
+                && strings[0].equalsIgnoreCase("song")
+                && player.hasPermission(PERMISSION_SONG)) {
+            return filterCompletions(AllSongs.getAllSongNames(), strings[1]);
+        }
+
+        if (strings.length == 2
+                && strings[0].equalsIgnoreCase("mute")
+                && player.hasPermission(PERMISSION_MUTE)) {
+            return filterCompletions(MUTE_OPTIONS, strings[1]);
         }
 
         return List.of();
@@ -105,8 +154,9 @@ public class CommandManager implements CommandExecutor, TabExecutor {
 
     private List<String> filterCompletions(List<String> values, String input) {
         List<String> completions = new ArrayList<>();
+        String normalizedInput = input.toLowerCase(Locale.ROOT);
         for (String value : values) {
-            if (value.toLowerCase().startsWith(input.toLowerCase())) completions.add(value);
+            if (value.startsWith(normalizedInput)) completions.add(value);
         }
         return completions;
     }

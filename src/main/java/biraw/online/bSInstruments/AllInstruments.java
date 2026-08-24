@@ -2,10 +2,14 @@ package biraw.online.bSInstruments;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import biraw.online.bSInstruments.Obtaining.ItemDelivery;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class AllInstruments {
     private static final List<InstrumentDefinition> INSTRUMENT_DEFINITIONS = List.of(
@@ -34,10 +38,12 @@ public class AllInstruments {
 
     public static final List<Instrument> AllInstruments;
     private static final Map<String, Instrument> INSTRUMENTS_BY_NAME;
+    private static final List<String> INSTRUMENT_NAMES;
 
     static {
         List<Instrument> instruments = new ArrayList<>();
         Map<String, Instrument> instrumentsByName = new HashMap<>();
+        List<String> instrumentNames = new ArrayList<>();
 
         for (InstrumentDefinition definition : INSTRUMENT_DEFINITIONS) {
             for (int octave : OCTAVES) {
@@ -49,35 +55,38 @@ public class AllInstruments {
                         definition.customSoundBase()
                 );
                 instruments.add(instrument);
-                instrumentsByName.put(getLookupName(instrument), instrument);
+                String lookupName = getLookupName(instrument);
+                instrumentsByName.put(lookupName, instrument);
+                instrumentNames.add(lookupName);
             }
         }
 
         AllInstruments = List.copyOf(instruments);
         INSTRUMENTS_BY_NAME = Map.copyOf(instrumentsByName);
+        INSTRUMENT_NAMES = List.copyOf(instrumentNames);
     }
 
     public static Instrument GetInstrumentByName(String name){
         if (name == null) return null;
-        return INSTRUMENTS_BY_NAME.get(name.toLowerCase());
+        return INSTRUMENTS_BY_NAME.get(name.toLowerCase(Locale.ROOT));
     }
 
     public static List<String> GetAllInstrumentNames(){
-        List<String> ret = new ArrayList<>();
-        for (Instrument i : AllInstruments){
-            ret.add(getLookupName(i));
-        }
-        return ret;
+        return INSTRUMENT_NAMES;
     }
 
     public static void GiveAllInstruments(Player player){
+        int given = 0;
         for (Instrument i : AllInstruments){
-            player.give(i.getItem());
+            if (!ItemDelivery.giveToInventory(player, i.getItem())) break;
+            given++;
         }
+        player.sendMessage("§aAdded §e" + given + "§a instruments to your inventory.");
+        if (given < AllInstruments.size()) player.sendMessage("§cInventory full. Some instruments were not added.");
     }
 
     public static Instrument GetRandomInstrument(){
-        return AllInstruments.get((int)(Math.random() * AllInstruments.size()));
+        return AllInstruments.get(ThreadLocalRandom.current().nextInt(AllInstruments.size()));
     }
 
     private static String getLookupName(Instrument instrument) {

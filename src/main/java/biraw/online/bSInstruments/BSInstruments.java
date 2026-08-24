@@ -31,6 +31,7 @@ public final class BSInstruments extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(new LootSpawning(),instance);
         Bukkit.getPluginManager().registerEvents(new RegisterRecipes(),instance);
+        Bukkit.getPluginManager().registerEvents(new PlayerStateCleanup(), instance);
 
         Bukkit.getLogger().info(" ");
         Bukkit.getLogger().info("O=========================================================O");
@@ -44,6 +45,6 @@ public final class BSInstruments extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        SongPlayer.stopAll();
     }
 }
