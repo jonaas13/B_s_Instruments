@@ -21,7 +21,29 @@ public final class AllSongs {
     private static final int SONG_TEMPO_TICKS = 4;
 
     private static final List<SongSeed> SONG_SEEDS = List.of(
-            new SongSeed("Ode to Joy", "Classical", "E4:2 E4:2 F4:2 G4:2 G4:2 F4:2 E4:2 D4:2 C4:2 C4:2 D4:2 E4:2 E4:3 D4:1 D4:4"),
+            new SongSeed("Ode to Joy", "Classical",
+                    "E4:2 E4:2 F4:2 G4:2 G4:2 F4:2 E4:2 D4:2 C4:2 C4:2 D4:2 E4:2 E4:3 D4:1 D4:4 " +
+                            "E4:2 E4:2 F4:2 G4:2 G4:2 F4:2 E4:2 D4:2 C4:2 C4:2 D4:2 E4:2 D4:3 C4:1 C4:4 " +
+                            "D4:2 D4:2 E4:2 C4:2 D4:2 E4:1 F4:1 E4:2 C4:2 D4:2 E4:1 F4:1 E4:2 D4:2 C4:2 D4:2 G3:4 " +
+                            "E4:2 E4:2 F4:2 G4:2 G4:2 F4:2 E4:2 D4:2 C4:2 C4:2 D4:2 E4:2 D4:3 C4:1 C4:4",
+                    List.of(
+                            "C4:2 C4:2 D4:2 E4:2 E4:2 D4:2 C4:2 B3:2 A3:2 A3:2 B3:2 C4:2 C4:3 B3:1 B3:4 " +
+                                    "C4:2 C4:2 D4:2 E4:2 E4:2 D4:2 C4:2 B3:2 A3:2 A3:2 B3:2 C4:2 B3:3 A3:1 A3:4 " +
+                                    "B3:2 B3:2 C4:2 A3:2 B3:2 C4:1 D4:1 C4:2 A3:2 B3:2 C4:1 D4:1 C4:2 B3:2 A3:2 B3:2 G3:4 " +
+                                    "C4:2 C4:2 D4:2 E4:2 E4:2 D4:2 C4:2 B3:2 A3:2 A3:2 B3:2 C4:2 B3:3 A3:1 A3:4",
+                            "C3:4 G3:4 C3:4 G3:4 C3:4 G3:4 C3:4 G3:4 " +
+                                    "C3:4 G3:4 C3:4 G3:4 C3:4 G3:4 C3:4 C3:4 " +
+                                    "G3:4 G3:4 C3:4 C3:4 G3:4 G3:4 C3:4 G3:4 " +
+                                    "C3:4 G3:4 C3:4 G3:4 C3:4 G3:4 C3:4 C3:4",
+                            "R:4 G4:2 G4:2 A4:2 B4:2 B4:2 A4:2 G4:2 F4:2 E4:2 E4:2 F4:2 G4:2 G4:3 F4:1 F4:4 " +
+                                    "G4:2 G4:2 A4:2 B4:2 B4:2 A4:2 G4:2 F4:2 E4:2 E4:2 F4:2 G4:2 F4:3 E4:1 E4:4 " +
+                                    "F4:2 F4:2 G4:2 E4:2 F4:2 G4:1 A4:1 G4:2 E4:2 F4:2 G4:1 A4:1 G4:2 F4:2 E4:2 F4:2 D4:4 " +
+                                    "G4:2 G4:2 A4:2 B4:2 B4:2 A4:2 G4:2 F4:2 E4:2 E4:2 F4:2 G4:2 F4:3 E4:1 E4:4",
+                            "R:8 G3:4 R:4 E3:4 R:8 G3:4 R:4 C4:4 " +
+                                    "R:8 G3:4 R:4 E3:4 R:8 G3:4 R:4 C4:4 " +
+                                    "G3:4 R:4 C4:4 R:4 G3:4 R:4 C4:4 G3:4 " +
+                                    "R:8 G3:4 R:4 E3:4 R:8 G3:4 R:4 C4:4"
+                    )),
             new SongSeed("Eine Kleine Nachtmusik", "Classical", "G4:2 D4:2 G4:2 D4:2 G4:2 B4:2 D5:4 C5:2 A4:2 C5:2 A4:2 C5:2 F#4:2 A4:4"),
             new SongSeed("Canon in D", "Classical", "D4:2 A3:2 B3:2 F#3:2 G3:2 D3:2 G3:2 A3:2 D4:2 F#4:2 A4:2 G4:2 F#4:2 E4:2 D4:4"),
             new SongSeed("Spring", "Classical", "E4:2 E4:2 E4:2 D4:1 C4:1 D4:2 E4:2 F4:2 G4:2 G4:2 F4:2 E4:2 D4:2 C4:4"),
@@ -271,7 +293,7 @@ public final class AllSongs {
         List<String> songNames = new ArrayList<>();
 
         for (SongSeed seed : SONG_SEEDS) {
-            Song song = new Song(seed.title(), seed.style(), SONG_TEMPO_TICKS, seed.pattern());
+            Song song = new Song(seed.title(), seed.style(), SONG_TEMPO_TICKS, seed.pattern(), seed.layerPatterns(), seed.preserveMelody());
             songs.add(song);
             String lookupName = song.lookupName();
             if (songsByName.put(lookupName, song) != null) {
@@ -336,6 +358,13 @@ public final class AllSongs {
                 && meta.getCustomModelDataComponent().getFloats().contains(SONG_CUSTOM_MODEL_DATA);
     }
 
-    private record SongSeed(String title, String style, String pattern) {
+    private record SongSeed(String title, String style, String pattern, List<String> layerPatterns, boolean preserveMelody) {
+        private SongSeed(String title, String style, String pattern) {
+            this(title, style, pattern, List.of(), Song.shouldPreserveMelody(style));
+        }
+
+        private SongSeed(String title, String style, String pattern, List<String> layerPatterns) {
+            this(title, style, pattern, layerPatterns, true);
+        }
     }
 }

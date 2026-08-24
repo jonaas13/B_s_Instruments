@@ -2,7 +2,6 @@ package biraw.online.bSInstruments;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Note;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -125,8 +124,7 @@ public class SongPlayer {
             if (songNote == null) return;
 
             if (!songNote.isRest()) {
-                int noteId = Math.max(0, Math.min(24, songNote.noteId()));
-                instrument.playSongNote(player, new Note(noteId));
+                instrument.playSongNote(player, songNote.noteId());
             }
         }
 

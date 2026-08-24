@@ -211,9 +211,9 @@ public class Instrument implements Listener {
         playForListeners(plr, note);
     }
 
-    void playSongNote(Player plr, Note note) {
+    void playSongNote(Player plr, int songNoteId) {
         warnIfMuted(plr, Bukkit.getCurrentTick());
-        playForListeners(plr, note);
+        playForListeners(plr, toTunedSongNote(songNoteId));
     }
 
     @EventHandler
@@ -482,6 +482,13 @@ public class Instrument implements Listener {
     private int getPlayableBukkitOctave() {
         if (octave >= 0 && octave <= 1) return octave;
         return 0;
+    }
+
+    private Note toTunedSongNote(int songNoteId) {
+        int tunedNoteId = usesCustomExtraOctaveSound() ? songNoteId : songNoteId + (octave * 12);
+        while (tunedNoteId < 0) tunedNoteId += 12;
+        while (tunedNoteId > 24) tunedNoteId -= 12;
+        return new Note(tunedNoteId);
     }
 
     private boolean usesCustomExtraOctaveSound() {

@@ -16,7 +16,7 @@ public class Song {
     static final int CUSTOM_MODEL_DATA = 101;
     private static final int MAX_DURATION_TICKS = 180 * 20;
     private static final int TARGET_MIN_DURATION_TICKS = 120 * 20;
-    private static final int PHRASE_REST_TICKS = 8;
+    private static final int PHRASE_REST_TICKS = 4;
 
     private final String id;
     private final String title;
@@ -27,13 +27,21 @@ public class Song {
     private final int durationTicks;
 
     public Song(String title, String style, int tempoTicks, String pattern) {
+        this(title, style, tempoTicks, pattern, List.of(), shouldPreserveMelody(style));
+    }
+
+    public Song(String title, String style, int tempoTicks, String pattern, List<String> layerPatterns) {
+        this(title, style, tempoTicks, pattern, layerPatterns, shouldPreserveMelody(style));
+    }
+
+    public Song(String title, String style, int tempoTicks, String pattern, List<String> layerPatterns, boolean preserveMelody) {
         this.id = toId(title, style);
         this.title = title;
         this.style = style;
         this.tempoTicks = tempoTicks;
-        this.notes = arrange(parsePattern(pattern));
-        this.layerNotes = arrangeLayers(notes);
+        this.notes = arrange(parsePattern(pattern), preserveMelody);
         this.durationTicks = getTotalDuration(notes);
+        this.layerNotes = layerPatterns.isEmpty() ? arrangeLayers(notes) : arrangeCustomLayers(notes, layerPatterns);
     }
 
     public String id() {
@@ -122,14 +130,33 @@ public class Song {
         return Math.max(1, (int) Math.round(Double.parseDouble(duration) * tempoTicks));
     }
 
-    private List<SongNote> arrange(List<SongNote> baseNotes) {
+    static boolean shouldPreserveMelody(String style) {
+        return !style.equalsIgnoreCase("Original")
+                && !style.equalsIgnoreCase("Modern Pop")
+                && !style.equalsIgnoreCase("Retro Pop")
+                && !style.equalsIgnoreCase("Sixties Rock")
+                && !style.equalsIgnoreCase("Disco")
+                && !style.equalsIgnoreCase("Synth Pop")
+                && !style.equalsIgnoreCase("Arena Pop")
+                && !style.equalsIgnoreCase("Pop")
+                && !style.equalsIgnoreCase("Pop Rock")
+                && !style.equalsIgnoreCase("Pop Punk")
+                && !style.equalsIgnoreCase("Dance Pop")
+                && !style.equalsIgnoreCase("Cinematic")
+                && !style.equalsIgnoreCase("Adventure")
+                && !style.equalsIgnoreCase("Sci Fi")
+                && !style.equalsIgnoreCase("Fantasy")
+                && !style.equalsIgnoreCase("Screen Theme");
+    }
+
+    private List<SongNote> arrange(List<SongNote> baseNotes, boolean preserveMelody) {
         int baseDuration = getTotalDuration(baseNotes);
         if (baseDuration >= TARGET_MIN_DURATION_TICKS) return baseNotes;
 
         List<SongNote> arranged = new ArrayList<>();
         int variation = 0;
         while (getTotalDuration(arranged) < TARGET_MIN_DURATION_TICKS) {
-            List<SongNote> phrase = varyPhrase(baseNotes, variation);
+            List<SongNote> phrase = preserveMelody ? baseNotes : varyPhrase(baseNotes, variation);
             int phraseDuration = getTotalDuration(phrase);
             int restDuration = arranged.isEmpty() ? 0 : PHRASE_REST_TICKS;
             if (!arranged.isEmpty() && getTotalDuration(arranged) + restDuration + phraseDuration > MAX_DURATION_TICKS) break;
@@ -142,15 +169,6 @@ public class Song {
     }
 
     private List<SongNote> varyPhrase(List<SongNote> baseNotes, int variation) {
-        int transpose = switch (variation % 6) {
-            case 1 -> 2;
-            case 2 -> -5;
-            case 3 -> 7;
-            case 4 -> -2;
-            case 5 -> 5;
-            default -> 0;
-        };
-
         List<SongNote> varied = new ArrayList<>();
         for (int i = 0; i < baseNotes.size(); i++) {
             SongNote note = baseNotes.get(i);
@@ -159,72 +177,261 @@ public class Song {
                 continue;
             }
 
-            int noteId = note.noteId() + transpose;
-            if (variation % 3 == 2 && i % 4 == 0) noteId -= 12;
-            if (variation % 4 == 3 && i % 5 == 2) noteId += 12;
+            int noteId = note.noteId();
+            if (variation % 4 == 1 && isStrongBeat(varied)) noteId += 12;
+            if (variation % 4 == 2 && i % 6 == 3) noteId -= 12;
+            if (variation % 4 == 3 && i % 8 == 4 && note.durationTicks() >= 2) {
+                int restTicks = Math.max(1, note.durationTicks() / 2);
+                varied.add(new SongNote(-1, restTicks));
+                varied.add(new SongNote(noteId, note.durationTicks() - restTicks));
+                continue;
+            }
             varied.add(new SongNote(noteId, note.durationTicks()));
         }
         return List.copyOf(varied);
     }
 
     private List<List<SongNote>> arrangeLayers(List<SongNote> melody) {
+        List<BarHarmony> harmony = analyzeHarmony(melody);
         List<List<SongNote>> layers = new ArrayList<>();
         layers.add(melody);
-        layers.add(makeParallelLayer(melody, -5, 2));
-        layers.add(makeBassLayer(melody));
-        layers.add(makeParallelLayer(melody, 7, 3));
-        layers.add(makeCounterLayer(melody));
+        layers.add(makeChordToneLayer(melody, harmony, false));
+        layers.add(makeBassLayer(harmony));
+        layers.add(makeChordPadLayer(harmony));
+        layers.add(makeCounterLayer(melody, harmony));
         return List.copyOf(layers);
     }
 
-    private List<SongNote> makeParallelLayer(List<SongNote> melody, int transpose, int entranceEvery) {
+    private List<List<SongNote>> arrangeCustomLayers(List<SongNote> melody, List<String> layerPatterns) {
+        List<List<SongNote>> layers = new ArrayList<>();
+        layers.add(melody);
+        for (String layerPattern : layerPatterns) {
+            layers.add(arrangeToDuration(parsePattern(layerPattern), durationTicks));
+        }
+
+        List<BarHarmony> harmony = analyzeHarmony(melody);
+        if (layers.size() < 5) layers.add(makeChordToneLayer(melody, harmony, false));
+        if (layers.size() < 5) layers.add(makeBassLayer(harmony));
+        if (layers.size() < 5) layers.add(makeChordPadLayer(harmony));
+        if (layers.size() < 5) layers.add(makeCounterLayer(melody, harmony));
+        return List.copyOf(layers);
+    }
+
+    private List<SongNote> arrangeToDuration(List<SongNote> baseNotes, int targetDurationTicks) {
+        List<SongNote> arranged = new ArrayList<>();
+        while (getTotalDuration(arranged) < targetDurationTicks) {
+            if (!arranged.isEmpty()) arranged.add(new SongNote(-1, PHRASE_REST_TICKS));
+            for (SongNote baseNote : baseNotes) {
+                int remainingTicks = targetDurationTicks - getTotalDuration(arranged);
+                if (remainingTicks <= 0) break;
+                arranged.add(new SongNote(baseNote.noteId(), Math.min(baseNote.durationTicks(), remainingTicks)));
+            }
+        }
+        return List.copyOf(arranged);
+    }
+
+    private List<SongNote> makeChordToneLayer(List<SongNote> melody, List<BarHarmony> harmony, boolean aboveMelody) {
         List<SongNote> layer = new ArrayList<>();
-        int noteNumber = 0;
+        int elapsedTicks = 0;
         for (SongNote note : melody) {
-            if (note.isRest() || noteNumber % entranceEvery != 0) {
+            if (note.isRest() || !isLayerEntrance(elapsedTicks, note.durationTicks())) {
                 layer.add(new SongNote(-1, note.durationTicks()));
             } else {
-                layer.add(new SongNote(note.noteId() + transpose, note.durationTicks()));
+                BarHarmony barHarmony = harmony.get(Math.min(harmony.size() - 1, elapsedTicks / barTicks()));
+                layer.add(new SongNote(nearestChordTone(note.noteId(), barHarmony, aboveMelody), note.durationTicks()));
             }
-            if (!note.isRest()) noteNumber++;
+            elapsedTicks += note.durationTicks();
         }
         return List.copyOf(layer);
     }
 
-    private List<SongNote> makeBassLayer(List<SongNote> melody) {
+    private List<SongNote> makeBassLayer(List<BarHarmony> harmony) {
         List<SongNote> layer = new ArrayList<>();
-        int ticksSinceBass = tempoTicks * 4;
+        int halfBarTicks = barTicks() / 2;
+        for (BarHarmony barHarmony : harmony) {
+            layer.add(new SongNote(barHarmony.rootNoteId() - 12, tempoTicks * 2));
+            layer.add(new SongNote(-1, Math.max(1, halfBarTicks - tempoTicks * 2)));
+            layer.add(new SongNote(barHarmony.fifthNoteId() - 12, tempoTicks * 2));
+            layer.add(new SongNote(-1, Math.max(1, halfBarTicks - tempoTicks * 2)));
+        }
+        return trimToDuration(layer, durationTicks);
+    }
+
+    private List<SongNote> makeChordPadLayer(List<BarHarmony> harmony) {
+        List<SongNote> layer = new ArrayList<>();
+        int halfBarTicks = barTicks() / 2;
+        for (BarHarmony barHarmony : harmony) {
+            layer.add(new SongNote(barHarmony.thirdNoteId(), halfBarTicks));
+            layer.add(new SongNote(barHarmony.fifthNoteId(), halfBarTicks));
+        }
+        return trimToDuration(layer, durationTicks);
+    }
+
+    private List<SongNote> makeCounterLayer(List<SongNote> melody, List<BarHarmony> harmony) {
+        List<SongNote> layer = new ArrayList<>();
+        int elapsedTicks = 0;
+        int notesSinceAnswer = 0;
         for (SongNote note : melody) {
-            if (!note.isRest() && ticksSinceBass >= tempoTicks * 4) {
-                layer.add(new SongNote(note.noteId() - 12, note.durationTicks()));
-                ticksSinceBass = 0;
-            } else {
+            if (note.isRest() || note.durationTicks() < tempoTicks || notesSinceAnswer < 3) {
                 layer.add(new SongNote(-1, note.durationTicks()));
-                ticksSinceBass += note.durationTicks();
+            } else {
+                BarHarmony barHarmony = harmony.get(Math.min(harmony.size() - 1, elapsedTicks / barTicks()));
+                int restTicks = Math.max(1, note.durationTicks() / 2);
+                int answerTicks = note.durationTicks() - restTicks;
+                layer.add(new SongNote(-1, restTicks));
+                if (answerTicks > 0) layer.add(new SongNote(barHarmony.fifthNoteId(), answerTicks));
+                notesSinceAnswer = 0;
             }
+
+            if (!note.isRest()) notesSinceAnswer++;
+            elapsedTicks += note.durationTicks();
         }
         return List.copyOf(layer);
     }
 
-    private List<SongNote> makeCounterLayer(List<SongNote> melody) {
-        List<SongNote> layer = new ArrayList<>();
-        int previousNoteId = -1;
-        int noteNumber = 0;
-        for (SongNote note : melody) {
-            if (note.isRest()) {
-                layer.add(note);
-            } else if (previousNoteId >= 0 && noteNumber % 2 == 1) {
-                layer.add(new SongNote(previousNoteId + 7, note.durationTicks()));
-            } else {
-                layer.add(new SongNote(-1, note.durationTicks()));
+    private List<BarHarmony> analyzeHarmony(List<SongNote> melody) {
+        int barTicks = barTicks();
+        int barCount = Math.max(1, (int) Math.ceil((double) durationTicks / barTicks));
+        List<BarHarmony> harmony = new ArrayList<>();
+        int elapsedTicks = 0;
+        int noteIndex = 0;
+        BarHarmony previous = new BarHarmony(6, false);
+
+        for (int bar = 0; bar < barCount; bar++) {
+            int barStartTick = bar * barTicks;
+            int barEndTick = Math.min(durationTicks, barStartTick + barTicks);
+            int[] pitchWeights = new int[12];
+
+            while (noteIndex < melody.size() && elapsedTicks + melody.get(noteIndex).durationTicks() <= barStartTick) {
+                elapsedTicks += melody.get(noteIndex).durationTicks();
+                noteIndex++;
             }
 
-            if (!note.isRest()) {
-                previousNoteId = note.noteId();
-                noteNumber++;
+            int scanIndex = noteIndex;
+            int scanTick = elapsedTicks;
+            while (scanIndex < melody.size() && scanTick < barEndTick) {
+                SongNote note = melody.get(scanIndex);
+                int noteEndTick = scanTick + note.durationTicks();
+                if (!note.isRest()) {
+                    int overlapTicks = Math.max(0, Math.min(noteEndTick, barEndTick) - Math.max(scanTick, barStartTick));
+                    pitchWeights[pitchClass(note.noteId())] += overlapTicks;
+                }
+                scanTick = noteEndTick;
+                scanIndex++;
+            }
+
+            BarHarmony current = bestHarmony(pitchWeights, previous);
+            harmony.add(current);
+            previous = current;
+        }
+
+        return List.copyOf(harmony);
+    }
+
+    private BarHarmony bestHarmony(int[] pitchWeights, BarHarmony fallback) {
+        int bestRoot = -1;
+        int bestScore = 0;
+        boolean bestMinor = false;
+
+        for (int root = 0; root < 12; root++) {
+            int majorScore = chordScore(pitchWeights, root, false);
+            if (majorScore > bestScore) {
+                bestScore = majorScore;
+                bestRoot = root;
+                bestMinor = false;
+            }
+
+            int minorScore = chordScore(pitchWeights, root, true);
+            if (minorScore > bestScore) {
+                bestScore = minorScore;
+                bestRoot = root;
+                bestMinor = true;
             }
         }
-        return List.copyOf(layer);
+
+        if (bestRoot < 0) return fallback;
+        return new BarHarmony(noteIdForPitchClass(bestRoot, 0), bestMinor);
+    }
+
+    private int chordScore(int[] pitchWeights, int root, boolean minor) {
+        int third = Math.floorMod(root + (minor ? 3 : 4), 12);
+        int fifth = Math.floorMod(root + 7, 12);
+        return pitchWeights[root] * 4 + pitchWeights[third] * 3 + pitchWeights[fifth] * 3;
+    }
+
+    private boolean isLayerEntrance(int elapsedTicks, int durationTicks) {
+        int halfBarTicks = barTicks() / 2;
+        return elapsedTicks % halfBarTicks == 0 || durationTicks >= tempoTicks * 2;
+    }
+
+    private int nearestChordTone(int melodyNoteId, BarHarmony harmony, boolean aboveMelody) {
+        int[] chordTones = {
+                harmony.rootNoteId(),
+                harmony.thirdNoteId(),
+                harmony.fifthNoteId(),
+                harmony.rootNoteId() + 12,
+                harmony.thirdNoteId() + 12,
+                harmony.fifthNoteId() + 12
+        };
+
+        int bestNoteId = harmony.thirdNoteId();
+        int bestDistance = Integer.MAX_VALUE;
+        for (int chordTone : chordTones) {
+            int candidate = chordTone;
+            int distance = candidate - melodyNoteId;
+            if (aboveMelody && distance <= 0) distance += 12;
+            if (!aboveMelody && distance >= 0) distance -= 12;
+            if (Math.abs(distance) < 3) distance += aboveMelody ? 12 : -12;
+
+            candidate = melodyNoteId + distance;
+            int absoluteDistance = Math.abs(candidate - melodyNoteId);
+            if (absoluteDistance < bestDistance) {
+                bestDistance = absoluteDistance;
+                bestNoteId = candidate;
+            }
+        }
+        return bestNoteId;
+    }
+
+    private List<SongNote> trimToDuration(List<SongNote> notes, int targetDurationTicks) {
+        List<SongNote> trimmed = new ArrayList<>();
+        int totalTicks = 0;
+        for (SongNote note : notes) {
+            if (totalTicks >= targetDurationTicks) break;
+            int durationTicks = Math.min(note.durationTicks(), targetDurationTicks - totalTicks);
+            trimmed.add(new SongNote(note.noteId(), durationTicks));
+            totalTicks += durationTicks;
+        }
+        if (totalTicks < targetDurationTicks) trimmed.add(new SongNote(-1, targetDurationTicks - totalTicks));
+        return List.copyOf(trimmed);
+    }
+
+    private int barTicks() {
+        return tempoTicks * 8;
+    }
+
+    private int pitchClass(int noteId) {
+        return Math.floorMod(noteId + 6, 12);
+    }
+
+    private int noteIdForPitchClass(int pitchClass, int preferredOctaveOffset) {
+        int noteId = Math.floorMod(pitchClass, 12) - 6 + preferredOctaveOffset;
+        return noteId;
+    }
+
+    private record BarHarmony(int rootNoteId, boolean minor) {
+        private int thirdNoteId() {
+            return rootNoteId + (minor ? 3 : 4);
+        }
+
+        private int fifthNoteId() {
+            return rootNoteId + 7;
+        }
+    }
+
+    private boolean isStrongBeat(List<SongNote> songNotes) {
+        int elapsedTicks = getTotalDuration(songNotes);
+        return elapsedTicks % (tempoTicks * 4) == 0;
     }
 
     private int getTotalDuration(List<SongNote> songNotes) {
