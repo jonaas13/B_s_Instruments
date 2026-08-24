@@ -16,6 +16,8 @@ import java.util.Locale;
 public class Song {
     static final int CUSTOM_MODEL_DATA = 101;
     private static final int REST_NOTE_ID = Integer.MIN_VALUE;
+    private static final int MIN_NOTE_ID = 0;
+    private static final int MAX_NOTE_ID = 24;
     private static final double TICKS_PER_MINUTE = 30.0 * 20.0;
 
     private final String id;
@@ -204,7 +206,13 @@ public class Song {
         };
 
         // Bukkit note block IDs are the 25 chromatic notes from F#3 through F#5.
-        return ((octave - 3) * 12 + semitone) - 6;
+        return normalizeNoteId(((octave - 3) * 12 + semitone) - 6);
+    }
+
+    private static int normalizeNoteId(int noteId) {
+        while (noteId < MIN_NOTE_ID) noteId += 12;
+        while (noteId > MAX_NOTE_ID) noteId -= 12;
+        return noteId;
     }
 
     public record SongNote(int noteId, int durationTicks) {

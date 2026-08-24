@@ -51,8 +51,6 @@ public class Instrument implements Listener {
     private static final int MUTED_WARNING_COOLDOWN_TICKS = 60;
     private static final int MIN_SONG_NOTE_ID = 0;
     private static final int MAX_SONG_NOTE_ID = 24;
-    private static final int MIN_CUSTOM_SONG_NOTE_ID = -24;
-    private static final int MAX_CUSTOM_SONG_NOTE_ID = 48;
     private static final List<Integer> CUSTOM_SONG_SOUND_OFFSETS = List.of(-24, -12, 0, 24);
     private static final List<Note.Tone> NATURAL_NOTES = List.of(Note.Tone.G, Note.Tone.A, Note.Tone.B, Note.Tone.C, Note.Tone.D, Note.Tone.E, Note.Tone.F);
     private static final List<Note.Tone> SHARP_NOTES = List.of(Note.Tone.F, Note.Tone.G, Note.Tone.A, Note.Tone.B, Note.Tone.C, Note.Tone.D, Note.Tone.E);
@@ -510,18 +508,11 @@ public class Instrument implements Listener {
     private SoundNote getSongSoundNote(int songNoteId) {
         int tunedNoteId = songNoteId + (octave * 12);
         if (customSoundBase != null) {
-            int supportedNoteId = transposeIntoCustomSongRange(tunedNoteId);
-            int soundOffset = closestCustomSongSoundOffset(supportedNoteId);
-            return new SoundNote(customSongSound(soundOffset), supportedNoteId - soundOffset);
+            int soundOffset = closestCustomSongSoundOffset(tunedNoteId);
+            return new SoundNote(customSongSound(soundOffset), tunedNoteId - soundOffset);
         }
 
         return new SoundNote("block.note_block.harp", transposeIntoVanillaSongRange(tunedNoteId));
-    }
-
-    private int transposeIntoCustomSongRange(int noteId) {
-        while (noteId < MIN_CUSTOM_SONG_NOTE_ID) noteId += 12;
-        while (noteId > MAX_CUSTOM_SONG_NOTE_ID) noteId -= 12;
-        return noteId;
     }
 
     private int transposeIntoVanillaSongRange(int noteId) {

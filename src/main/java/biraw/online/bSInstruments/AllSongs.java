@@ -18,6 +18,7 @@ public final class AllSongs {
     private static final Material SONG_MATERIAL = Material.PAPER;
     private static final String SONG_KEY_PREFIX = "song_";
     private static final float SONG_CUSTOM_MODEL_DATA = (float) Song.CUSTOM_MODEL_DATA;
+    private static final float MIDI_IMPORTED_BPM_MULTIPLIER = 0.6f;
 
     private static final List<SongSeed> BASE_SONG_SEEDS = List.of(
             new SongSeed(
@@ -1723,7 +1724,7 @@ public final class AllSongs {
         return octave * 12 + semitone;
     }
 
-    private static void slowImportedSeeds(List<SongSeed> seeds, int firstImportedSeedIndex) {
+    private static void tuneImportedSeedBpms(List<SongSeed> seeds, int firstImportedSeedIndex) {
         for (int i = firstImportedSeedIndex; i < seeds.size(); i++) {
             SongSeed seed = seeds.get(i);
             seeds.set(i, new SongSeed(
@@ -1731,7 +1732,7 @@ public final class AllSongs {
                     seed.style(),
                     seed.pattern(),
                     seed.layerPatterns(),
-                    Math.max(1, Math.round(seed.bpm() / 2.0f))
+                    Math.max(1, Math.round(seed.bpm() * MIDI_IMPORTED_BPM_MULTIPLIER))
             ));
         }
     }
@@ -3642,7 +3643,7 @@ public final class AllSongs {
                 )
         ));
 
-        slowImportedSeeds(seeds, firstImportedSeedIndex);
+        tuneImportedSeedBpms(seeds, firstImportedSeedIndex);
     }
 
     private static void addRecentMidiDemoSeeds(List<SongSeed> seeds) {
@@ -4017,7 +4018,7 @@ public final class AllSongs {
                 )
         ));
 
-        slowImportedSeeds(seeds, firstImportedSeedIndex);
+        tuneImportedSeedBpms(seeds, firstImportedSeedIndex);
     }
 
     private static final List<Song> ALL_SONGS;
