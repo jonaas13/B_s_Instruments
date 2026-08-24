@@ -44,6 +44,7 @@ public class SongPlayer {
         Participant participant = new Participant(player, instrument, song, layer, performance.currentSongTick());
         performance.add(participant);
         ACTIVE_PLAYERS.put(playerId, participant);
+        performance.playCurrentTickFor(participant);
 
         player.sendActionBar("§d♪ " + song.title() + " · Layer " + (layer + 1) + " ♪");
         return true;
@@ -86,6 +87,7 @@ public class SongPlayer {
         private final int startTick;
         private final Map<UUID, Participant> participants = new HashMap<>();
         private BukkitTask task;
+        private int lastRunTick = Integer.MIN_VALUE;
 
         private Performance(Song song, int startTick) {
             this.song = song;
@@ -103,6 +105,7 @@ public class SongPlayer {
                 return;
             }
 
+            lastRunTick = Bukkit.getCurrentTick();
             int songTick = currentSongTick();
             for (Participant participant : List.copyOf(participants.values())) {
                 if (!participant.isValid()) {
@@ -125,6 +128,16 @@ public class SongPlayer {
         private void add(Participant participant) {
             participant.setPerformance(this);
             participants.put(participant.playerId(), participant);
+        }
+
+        private void playCurrentTickFor(Participant participant) {
+            if (lastRunTick != Bukkit.getCurrentTick()) return;
+            if (!participant.isValid()) {
+                remove(participant);
+                return;
+            }
+
+            participant.playDueNote(currentSongTick());
         }
 
         private void remove(Participant participant) {
