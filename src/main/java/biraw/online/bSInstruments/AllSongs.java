@@ -135,9 +135,58 @@ public class AllSongs {
             new SongSeed("British Grenadiers", "Patriotic", "G4:1 A4:1 B4:1 C5:1 D5:2 B4:2 C5:1 D5:1 E5:1 F#5:1 G5:4 D5:4"),
             new SongSeed("Amazing Grace Reprise", "Traditional", "D4:3 G4:1 B4:4 G4:2 B4:2 A4:4 G4:2 E4:2 D4:4 D4:3 G4:1 B4:4"),
             new SongSeed("Simple Blues", "Original", "C4:2 E4:2 F4:2 F#4:1 G4:1 C5:2 A4:2 G4:2 E4:2 C4:4 R:2 G3:2 A#3:2 C4:4"),
-            new SongSeed("Miner's March", "Original", "C4:2 E4:2 G4:2 C5:2 B4:2 G4:2 E4:2 C4:2 D4:2 F4:2 A4:2 D5:2 C5:4")
+            new SongSeed("Miner's March", "Original", "C4:2 E4:2 G4:2 C5:2 B4:2 G4:2 E4:2 C4:2 D4:2 F4:2 A4:2 D5:2 C5:4"),
+            new SongSeed("Neon Skyline", "Modern Pop", "C4:2 E4:2 G4:2 A4:2 G4:4 E4:2 D4:2 C4:4 R:1 C4:2 E4:2 G4:2 A4:2 C5:4 B4:2 A4:2 G4:4"),
+            new SongSeed("Midnight Radio", "Modern Pop", "A3:2 C4:2 E4:2 G4:2 E4:4 C4:2 D4:2 E4:4 R:1 A3:2 C4:2 E4:2 A4:2 G4:4 E4:4"),
+            new SongSeed("City Lights", "Modern Pop", "F4:2 A4:2 C5:2 A4:2 G4:4 F4:2 E4:2 F4:4 R:1 F4:2 A4:2 C5:2 D5:2 C5:4 A4:2 G4:4"),
+            new SongSeed("Electric Heart", "Modern Pop", "D4:2 F#4:2 A4:2 B4:2 A4:4 F#4:2 E4:2 D4:4 R:1 D4:2 F#4:2 A4:2 D5:2 C#5:4 A4:4"),
+            new SongSeed("Summer Drive", "Modern Pop", "G4:2 B4:2 D5:2 E5:2 D5:4 B4:2 A4:2 G4:4 R:1 G4:2 A4:2 B4:2 D5:2 B4:4 G4:4"),
+            new SongSeed("Afterglow", "Modern Pop", "E4:2 G4:2 B4:2 C5:2 B4:4 G4:2 F#4:2 E4:4 R:1 E4:2 G4:2 B4:2 E5:2 D5:4 B4:4"),
+            new SongSeed("Starlit Avenue", "Modern Pop", "C4:1 D4:1 E4:2 G4:2 A4:2 G4:2 E4:4 D4:2 E4:2 G4:2 C5:2 B4:4 A4:4"),
+            new SongSeed("Golden Hour", "Modern Pop", "A3:2 E4:2 F#4:2 A4:2 B4:4 A4:2 F#4:2 E4:4 R:1 A3:2 C#4:2 E4:2 A4:2 G#4:4 E4:4"),
+            new SongSeed("Lost in the Beat", "Modern Pop", "D4:1 D4:1 F4:2 A4:2 C5:2 A4:2 F4:4 E4:2 F4:2 A4:2 D5:2 C5:4 A4:4"),
+            new SongSeed("Satellite", "Modern Pop", "G3:2 D4:2 G4:2 B4:2 A4:4 G4:2 E4:2 D4:4 R:1 G3:2 D4:2 G4:2 C5:2 B4:4 G4:4"),
+            new SongSeed("Velvet Chorus", "Modern Pop", "F4:2 G4:2 A4:2 C5:2 A4:4 G4:2 F4:2 E4:4 R:1 F4:2 A4:2 C5:2 F5:2 E5:4 C5:4"),
+            new SongSeed("Crystal Pulse", "Modern Pop", "C4:1 E4:1 G4:2 C5:2 B4:2 G4:2 E4:4 D4:1 F4:1 A4:2 D5:2 C5:2 A4:2 F4:4"),
+            new SongSeed("Dreamwave", "Modern Pop", "E4:2 B4:2 C5:2 B4:2 A4:4 E4:2 G4:2 A4:4 R:1 E4:2 B4:2 C5:2 E5:2 D5:4 B4:4"),
+            new SongSeed("Rain on Glass", "Modern Pop", "A3:2 D4:2 F4:2 A4:2 G4:4 F4:2 D4:2 C4:4 R:1 A3:2 D4:2 F4:2 C5:2 A4:4 F4:4"),
+            new SongSeed("Open Road", "Modern Pop", "G4:2 A4:2 B4:2 D5:2 B4:4 A4:2 G4:2 E4:4 R:1 G4:2 B4:2 D5:2 E5:2 D5:4 B4:4"),
+            new SongSeed("Firefly Dance", "Modern Pop", "C4:1 C4:1 E4:1 G4:1 A4:2 G4:2 E4:4 D4:1 D4:1 F4:1 A4:1 B4:2 A4:2 F4:4"),
+            new SongSeed("Echo Bloom", "Modern Pop", "D4:2 A4:2 B4:2 A4:2 G4:4 D4:2 F#4:2 G4:4 R:1 D4:2 A4:2 B4:2 D5:2 C5:4 A4:4"),
+            new SongSeed("Highrise", "Modern Pop", "F4:2 C5:2 D5:2 C5:2 A4:4 F4:2 G4:2 A4:4 R:1 F4:2 A4:2 C5:2 D5:2 C5:4 A4:4"),
+            new SongSeed("Lunar Arcade", "Modern Pop", "E4:1 G4:1 B4:2 D5:2 B4:2 G4:2 E4:4 F#4:1 A4:1 C5:2 E5:2 C5:2 A4:2 F#4:4"),
+            new SongSeed("Paper Lanterns", "Modern Pop", "C4:2 G4:2 A4:2 G4:2 E4:4 C4:2 D4:2 E4:4 R:1 C4:2 E4:2 G4:2 C5:2 A4:4 G4:4"),
+            new SongSeed("Dopamine Rush", "Modern Pop", "C4:1 E4:1 G4:2 A4:2 C5:2 A4:2 G4:4 E4:2 G4:2 A4:2 C5:2 D5:4 C5:4"),
+            new SongSeed("Chrome Sunset", "Modern Pop", "A3:2 C#4:2 E4:2 G#4:2 A4:4 E4:2 F#4:2 G#4:4 R:1 A3:2 C#4:2 E4:2 B4:2 A4:4 G#4:4"),
+            new SongSeed("Glass Elevator", "Modern Pop", "F4:1 A4:1 C5:2 E5:2 D5:2 C5:2 A4:4 G4:1 Bb4:1 D5:2 F5:2 E5:2 D5:2 Bb4:4"),
+            new SongSeed("Weekend Signal", "Modern Pop", "D4:2 F#4:2 A4:2 C#5:2 B4:4 A4:2 F#4:2 E4:4 R:1 D4:2 A4:2 B4:2 C#5:2 D5:4 A4:4"),
+            new SongSeed("Pink Horizon", "Modern Pop", "G4:2 D5:2 E5:2 D5:2 B4:4 G4:2 A4:2 B4:4 R:1 G4:2 B4:2 D5:2 G5:2 E5:4 D5:4"),
+            new SongSeed("Static Kiss", "Modern Pop", "E4:1 E4:1 G4:2 B4:2 C5:2 B4:2 G4:4 F#4:2 G4:2 B4:2 E5:2 D5:4 B4:4"),
+            new SongSeed("Blue Neon", "Modern Pop", "C4:2 D4:2 E4:2 G4:2 A4:4 G4:2 E4:2 D4:4 R:1 C4:2 E4:2 A4:2 G4:2 E4:4"),
+            new SongSeed("Velcro Heart", "Modern Pop", "A3:1 C4:1 E4:2 A4:2 G4:2 E4:2 C4:4 D4:1 F4:1 A4:2 C5:2 A4:2 F4:2 D4:4"),
+            new SongSeed("Rooftop Stereo", "Modern Pop", "F4:2 G4:2 A4:2 C5:2 D5:4 C5:2 A4:2 G4:4 R:1 F4:2 A4:2 D5:2 C5:2 A4:4"),
+            new SongSeed("Soft Focus", "Modern Pop", "D4:2 E4:2 F#4:2 A4:2 B4:4 A4:2 F#4:2 D4:4 R:1 E4:2 F#4:2 A4:2 C#5:2 B4:4"),
+            new SongSeed("Comet Trail", "Modern Pop", "G3:2 B3:2 D4:2 G4:2 A4:4 B4:2 A4:2 G4:4 R:1 D4:2 G4:2 B4:2 D5:2 C5:4 B4:4"),
+            new SongSeed("Bright Side", "Modern Pop", "C4:2 E4:2 F4:2 G4:2 A4:4 G4:2 F4:2 E4:4 R:1 C4:2 E4:2 G4:2 C5:2 B4:4 G4:4"),
+            new SongSeed("Night Bus", "Modern Pop", "A3:2 E4:2 G4:2 A4:2 C5:4 A4:2 G4:2 E4:4 R:1 A3:2 C4:2 E4:2 G4:2 A4:4"),
+            new SongSeed("Mirrorball", "Modern Pop", "F4:1 G4:1 A4:2 C5:2 A4:2 G4:2 F4:4 A4:1 C5:1 D5:2 F5:2 D5:2 C5:2 A4:4"),
+            new SongSeed("Arcade Romance", "Modern Pop", "E4:2 G#4:2 B4:2 C#5:2 B4:4 G#4:2 F#4:2 E4:4 R:1 E4:2 B4:2 C#5:2 E5:2 D#5:4 B4:4"),
+            new SongSeed("Polaroid Summer", "Modern Pop", "D4:2 F4:2 A4:2 D5:2 C5:4 A4:2 F4:2 D4:4 R:1 F4:2 A4:2 C5:2 D5:2 A4:4"),
+            new SongSeed("Late Night Glitter", "Modern Pop", "G4:1 A4:1 B4:2 D5:2 E5:2 D5:2 B4:4 A4:1 B4:1 D5:2 G5:2 E5:2 D5:2 B4:4"),
+            new SongSeed("Coffee Shop Chorus", "Modern Pop", "C4:2 G4:2 E4:2 G4:2 A4:4 G4:2 E4:2 C4:4 R:1 D4:2 A4:2 F4:2 A4:2 G4:4"),
+            new SongSeed("Silver Jacket", "Modern Pop", "F#4:2 A4:2 C#5:2 E5:2 C#5:4 A4:2 G#4:2 F#4:4 R:1 F#4:2 A4:2 C#5:2 F#5:2 E5:4 C#5:4"),
+            new SongSeed("Heatwave", "Modern Pop", "E4:2 A4:2 B4:2 C#5:2 B4:4 A4:2 E4:2 F#4:4 R:1 E4:2 A4:2 C#5:2 E5:2 C#5:4 B4:4"),
+            new SongSeed("Skyline Fever", "Modern Pop", "C4:1 D4:1 E4:2 G4:2 C5:2 B4:2 G4:4 E4:1 F4:1 G4:2 B4:2 D5:2 C5:2 G4:4"),
+            new SongSeed("Cassette Dreams", "Modern Pop", "A3:2 C4:2 D4:2 E4:2 G4:4 E4:2 D4:2 C4:4 R:1 A3:2 E4:2 G4:2 A4:2 G4:4 E4:4"),
+            new SongSeed("Prism", "Modern Pop", "D4:1 F#4:1 A4:2 C#5:2 D5:2 C#5:2 A4:4 F#4:1 A4:1 B4:2 D5:2 C#5:2 B4:2 A4:4"),
+            new SongSeed("Downtown Echo", "Modern Pop", "G3:2 D4:2 F4:2 G4:2 Bb4:4 G4:2 F4:2 D4:4 R:1 G3:2 D4:2 G4:2 Bb4:2 C5:4 Bb4:4"),
+            new SongSeed("Bubblegum Moon", "Modern Pop", "C4:2 E4:2 G4:2 B4:2 C5:4 B4:2 G4:2 E4:4 R:1 C4:2 F4:2 A4:2 C5:2 A4:4 G4:4"),
+            new SongSeed("Kinetic Love", "Modern Pop", "E4:1 F#4:1 G#4:2 B4:2 C#5:2 B4:2 G#4:4 F#4:1 G#4:1 B4:2 E5:2 C#5:2 B4:2 G#4:4"),
+            new SongSeed("Daydream Metro", "Modern Pop", "F4:2 A4:2 Bb4:2 C5:2 D5:4 C5:2 Bb4:2 A4:4 R:1 F4:2 C5:2 D5:2 F5:2 D5:4 C5:4"),
+            new SongSeed("Plastic Stars", "Modern Pop", "D4:2 G4:2 A4:2 B4:2 A4:4 G4:2 D4:2 E4:4 R:1 D4:2 G4:2 B4:2 D5:2 B4:4 A4:4"),
+            new SongSeed("Sunroof Anthem", "Modern Pop", "G4:2 B4:2 C5:2 D5:2 E5:4 D5:2 C5:2 B4:4 R:1 G4:2 C5:2 E5:2 G5:2 E5:4 D5:4"),
+            new SongSeed("Afterparty Lights", "Modern Pop", "A3:1 E4:1 A4:2 C5:2 B4:2 A4:2 E4:4 G3:1 D4:1 G4:2 B4:2 A4:2 G4:2 D4:4")
     );
-    private static final int[] TRANSPOSITIONS = {-5, -3, 0, 2, 4};
 
     public static final List<Song> AllSongs;
     private static final Map<String, Song> SONGS_BY_NAME;
@@ -149,13 +198,11 @@ public class AllSongs {
         List<String> songNames = new ArrayList<>();
 
         for (SongSeed seed : SONG_SEEDS) {
-            for (int transpose : TRANSPOSITIONS) {
-                Song song = new Song(seed.title(), seed.style(), transpose, 3, seed.pattern());
-                songs.add(song);
-                String lookupName = song.lookupName();
-                songsByName.put(lookupName, song);
-                songNames.add(lookupName);
-            }
+            Song song = new Song(seed.title(), seed.style(), 4, seed.pattern());
+            songs.add(song);
+            String lookupName = song.lookupName();
+            songsByName.put(lookupName, song);
+            songNames.add(lookupName);
         }
 
         AllSongs = List.copyOf(songs);

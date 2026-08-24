@@ -14,7 +14,30 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapelessRecipe;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class RegisterRecipes implements Listener {
+    private static final List<Material> SONG_RECIPE_ACCENTS = List.of(
+            Material.FEATHER,
+            Material.GOLD_NUGGET,
+            Material.REDSTONE,
+            Material.LAPIS_LAZULI,
+            Material.COPPER_INGOT,
+            Material.AMETHYST_SHARD,
+            Material.GLOWSTONE_DUST,
+            Material.SNOWBALL,
+            Material.KELP,
+            Material.STRING,
+            Material.BONE_MEAL,
+            Material.COAL,
+            Material.FLINT,
+            Material.CLAY_BALL,
+            Material.BRICK,
+            Material.QUARTZ,
+            Material.SUGAR,
+            Material.GUNPOWDER
+    );
 
     @EventHandler
     private void Descovery(CraftItemEvent event){
@@ -199,38 +222,46 @@ public class RegisterRecipes implements Listener {
             addTuningRecipe(baseName+"-1", baseName+"-0", Material.AMETHYST_SHARD);
             addTuningRecipe(baseName+"-high-2", baseName+"-1", Material.AMETHYST_BLOCK);
             addTuningRecipe(baseName+"-low-1", baseName+"-0", Material.DEEPSLATE);
-            addTuningRecipe(baseName+"-low-2", baseName+"-low-1", Material.REINFORCED_DEEPSLATE);
+            addTuningRecipe(baseName+"-low-2", baseName+"-low-1", Material.OBSIDIAN);
         }
     }
 
     private void addSongRecipes() {
-        addSongRecipe("ode-to-joy-classical", Material.FEATHER);
-        addSongRecipe("canon-in-d-classical", Material.DIAMOND);
-        addSongRecipe("greensleeves-traditional", Material.OAK_LEAVES);
-        addSongRecipe("amazing-grace-traditional", Material.GOLD_NUGGET);
-        addSongRecipe("drunken-sailor-sea-shanty", Material.KELP);
-        addSongRecipe("twinkle-twinkle-folk", Material.GLOWSTONE_DUST);
-        addSongRecipe("happy-birthday-celebration", Material.CAKE);
-        addSongRecipe("jingle-bells-holiday", Material.SNOWBALL);
-        addSongRecipe("fur-elise-classical", Material.AMETHYST_SHARD);
-        addSongRecipe("the-entertainer-ragtime", Material.REDSTONE);
-        addSongRecipe("simple-blues-original", Material.LAPIS_LAZULI);
-        addSongRecipe("miners-march-original", Material.COPPER_INGOT);
+        List<MaterialPair> accentPairs = getSongRecipeAccentPairs();
+        int recipeIndex = 0;
+        for (Song song : AllSongs.AllSongs) {
+            if (recipeIndex >= accentPairs.size()) break;
+
+            MaterialPair accents = accentPairs.get(recipeIndex);
+            addSongRecipe(song, accents.first(), accents.second());
+            recipeIndex++;
+        }
     }
 
-    private void addSongRecipe(String songName, Material accent) {
-        Song song = AllSongs.getSongByName(songName);
-        if (song == null) return;
-
+    private void addSongRecipe(Song song, Material firstAccent, Material secondAccent) {
         NamespacedKey key = new NamespacedKey(BSInstruments.getInstance(),
                 "song_recipe_" + BSInstruments.getIntForRecipe());
         ShapelessRecipe recipe = new ShapelessRecipe(key, song.getItem());
         recipe.addIngredient(Material.PAPER);
         recipe.addIngredient(Material.INK_SAC);
         recipe.addIngredient(Material.NOTE_BLOCK);
-        recipe.addIngredient(accent);
+        recipe.addIngredient(firstAccent);
+        recipe.addIngredient(secondAccent);
         Bukkit.addRecipe(recipe);
         BSRecipe.AllRecipeKeys.add(key);
+    }
+
+    private List<MaterialPair> getSongRecipeAccentPairs() {
+        List<MaterialPair> pairs = new ArrayList<>();
+        for (int first = 0; first < SONG_RECIPE_ACCENTS.size(); first++) {
+            for (int second = first; second < SONG_RECIPE_ACCENTS.size(); second++) {
+                pairs.add(new MaterialPair(SONG_RECIPE_ACCENTS.get(first), SONG_RECIPE_ACCENTS.get(second)));
+            }
+        }
+        return pairs;
+    }
+
+    private record MaterialPair(Material first, Material second) {
     }
 
     private void addTuningRecipe(String resultName, String sourceName, Material modifier) {

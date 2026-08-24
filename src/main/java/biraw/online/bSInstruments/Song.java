@@ -11,21 +11,22 @@ import java.util.Locale;
 
 public class Song {
     static final int CUSTOM_MODEL_DATA = 101;
+    private static final int MAX_DURATION_TICKS = 30 * 20;
+    private static final int TARGET_MIN_DURATION_TICKS = 18 * 20;
+    private static final int REPEAT_REST_TICKS = 8;
 
     private final String id;
     private final String title;
     private final String style;
-    private final int transpose;
     private final int tempoTicks;
     private final List<SongNote> notes;
 
-    public Song(String title, String style, int transpose, int tempoTicks, String pattern) {
-        this.id = toId(title, style, transpose);
+    public Song(String title, String style, int tempoTicks, String pattern) {
+        this.id = toId(title, style);
         this.title = title;
         this.style = style;
-        this.transpose = transpose;
         this.tempoTicks = tempoTicks;
-        this.notes = parsePattern(pattern);
+        this.notes = arrange(parsePattern(pattern));
     }
 
     public String id() {
@@ -38,10 +39,6 @@ public class Song {
 
     public String title() {
         return title;
-    }
-
-    public int transpose() {
-        return transpose;
     }
 
     public List<SongNote> notes() {
@@ -63,14 +60,12 @@ public class Song {
         return item;
     }
 
-    private static String toId(String title, String style, int transpose) {
-        String base = (title + "-" + style)
+    private static String toId(String title, String style) {
+        return (title + "-" + style)
                 .toLowerCase(Locale.ROOT)
                 .replace("'", "")
                 .replaceAll("[^a-z0-9]+", "-")
                 .replaceAll("(^-|-$)", "");
-        if (transpose == 0) return base;
-        return base + (transpose > 0 ? "-up-" + transpose : "-down-" + Math.abs(transpose));
     }
 
     private List<SongNote> parsePattern(String pattern) {
@@ -86,9 +81,31 @@ public class Song {
                 continue;
             }
 
-            parsed.add(new SongNote(toNoteId(parts[0]) + transpose, durationTicks));
+            parsed.add(new SongNote(toNoteId(parts[0]), durationTicks));
         }
         return List.copyOf(parsed);
+    }
+
+    private List<SongNote> arrange(List<SongNote> baseNotes) {
+        int baseDuration = getTotalDuration(baseNotes);
+        if (baseDuration >= TARGET_MIN_DURATION_TICKS) return baseNotes;
+
+        List<SongNote> arranged = new ArrayList<>(baseNotes);
+        while (getTotalDuration(arranged) + REPEAT_REST_TICKS + baseDuration <= MAX_DURATION_TICKS
+                && getTotalDuration(arranged) < TARGET_MIN_DURATION_TICKS) {
+            arranged.add(new SongNote(-1, REPEAT_REST_TICKS));
+            arranged.addAll(baseNotes);
+        }
+
+        return List.copyOf(arranged);
+    }
+
+    private int getTotalDuration(List<SongNote> songNotes) {
+        int totalTicks = 0;
+        for (SongNote songNote : songNotes) {
+            totalTicks += songNote.durationTicks();
+        }
+        return totalTicks;
     }
 
     private static int toNoteId(String noteName) {
