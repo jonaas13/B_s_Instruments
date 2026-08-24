@@ -270,7 +270,7 @@ public final class AllSongs {
             ),
             new SongSeed(
                     "Amazing Grace",
-                    "Traditional",
+                    "Folk",
                     phrase(
                             "G3:3 C4:1 E4:4 C4:2 E4:2 D4:4",
                             "C4:2 A3:2 G3:4 G3:3 C4:1 E4:4",
@@ -306,7 +306,7 @@ public final class AllSongs {
             ),
             new SongSeed(
                     "Yankee Doodle",
-                    "Traditional",
+                    "Folk",
                     phrase(
                             "C4:2 C4:2 D4:2 E4:2 C4:2 E4:2 D4:4",
                             "C4:2 C4:2 D4:2 E4:2 C4:4 B3:4",
@@ -445,7 +445,7 @@ public final class AllSongs {
             ),
             new SongSeed(
                     "Auld Lang Syne",
-                    "Traditional",
+                    "Folk",
                     phrase(
                             "G3:2 C4:3 C4:1 C4:2 E4:2 D4:3 C4:1 D4:2 E4:2",
                             "C4:3 C4:1 E4:2 G4:4 A4:3 G4:1 E4:2 E4:2",
@@ -548,7 +548,7 @@ public final class AllSongs {
             ),
             new SongSeed(
                     "Camptown Races",
-                    "Traditional",
+                    "Folk",
                     phrase(
                             "G4:2 E4:2 G4:2 E4:2 G4:2 A4:2 G4:2 E4:2",
                             "D4:2 E4:2 D4:4",
@@ -584,7 +584,7 @@ public final class AllSongs {
             ),
             new SongSeed(
                     "Oh Susanna",
-                    "Traditional",
+                    "Folk",
                     phrase(
                             "C4:2 D4:2 E4:2 G4:2 G4:2 A4:2 G4:4",
                             "E4:2 C4:2 D4:2 E4:2 E4:2 D4:2 C4:4",
@@ -620,7 +620,7 @@ public final class AllSongs {
             ),
             new SongSeed(
                     "Scarborough Fair",
-                    "Traditional",
+                    "Folk",
                     phrase(
                             "D4:3 D4:1 A4:2 A4:2 E4:2 F4:2 E4:4",
                             "D4:2 C4:2 D4:2 E4:2 D4:4",
@@ -656,7 +656,7 @@ public final class AllSongs {
             ),
             new SongSeed(
                     "When the Saints Go Marching In",
-                    "Traditional",
+                    "Folk",
                     phrase(
                             "C4:2 E4:2 F4:2 G4:4 C4:2 E4:2 F4:2 G4:4",
                             "C4:2 E4:2 F4:2 G4:2 E4:2 C4:2 E4:2 D4:4",
@@ -764,7 +764,7 @@ public final class AllSongs {
             ),
             new SongSeed(
                     "La Cucaracha",
-                    "Traditional",
+                    "Folk",
                     phrase(
                             "C4:2 C4:2 C4:2 F4:2 A4:4 C4:2 C4:2 C4:2 F4:2 A4:4",
                             "F4:2 F4:2 E4:2 E4:2 D4:2 D4:2 C4:4",
@@ -796,7 +796,7 @@ public final class AllSongs {
             ),
             new SongSeed(
                     "Hava Nagila",
-                    "Traditional",
+                    "Folk",
                     phrase(
                             "E4:1 F4:1 G4:2 G4:2 F4:1 E4:1 F4:2 E4:2 D4:2",
                             "E4:1 F4:1 G4:2 G4:2 F4:1 E4:1 F4:2 E4:4",
@@ -832,7 +832,7 @@ public final class AllSongs {
             ),
             new SongSeed(
                     "Greensleeves",
-                    "Traditional",
+                    "Folk",
                     phrase(
                             "A3:2 C4:4 D4:2 E4:3 F4:1 E4:2 D4:4",
                             "B3:2 G3:3 A3:1 B3:2 C4:4 A3:4",
@@ -868,7 +868,7 @@ public final class AllSongs {
             ),
             new SongSeed(
                     "Drunken Sailor",
-                    "Sea Shanty",
+                    "Folk",
                     phrase(
                             "D4:2 D4:2 D4:2 D4:2 D4:2 D4:2 A3:2 C4:2 D4:4",
                             "D4:2 D4:2 D4:2 D4:2 E4:2 F4:2 E4:2 D4:4",
@@ -904,7 +904,7 @@ public final class AllSongs {
             ),
             new SongSeed(
                     "Wellerman",
-                    "Sea Shanty",
+                    "Folk",
                     phrase(
                             "A3:2 C4:2 D4:2 E4:2 D4:2 C4:2 A3:4",
                             "A3:2 C4:2 D4:2 E4:2 G4:2 E4:2 D4:4",
@@ -976,7 +976,7 @@ public final class AllSongs {
             ),
             new SongSeed(
                     "America the Beautiful",
-                    "Patriotic",
+                    "March",
                     phrase(
                             "C4:2 C4:2 E4:2 E4:2 G4:2 G4:2 C5:4",
                             "B4:2 A4:2 G4:2 F4:2 E4:4",
@@ -1013,7 +1013,7 @@ public final class AllSongs {
             ,
             simpleSeed(
                     "Also Sprach Zarathustra",
-                    "Screen Theme",
+                    "Theme",
                     "C3:8 G3:8 C4:8 E4:16 R:2 Eb4:8 C4:20"
             ),
             simpleSeed(
@@ -1028,7 +1028,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Toccata and Fugue",
-                    "Horror",
+                    "Theme",
                     phrase(
                             "D5:2 A4:2 D5:2 C5:2 Bb4:2 A4:2 G4:2 F4:2",
                             "E4:2 D4:4 R:2 D4:2 F4:2 A4:2 D5:4",
@@ -1037,7 +1037,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Ride of the Valkyries",
-                    "Adventure",
+                    "Theme",
                     phrase(
                             "B3:2 E4:2 G4:2 B4:4 G4:2 B4:2 E5:4",
                             "B4:2 E5:2 G5:2 B5:4 G5:2 B5:2 E6:4",
@@ -1046,7 +1046,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "William Tell Overture",
-                    "Adventure",
+                    "Theme",
                     phrase(
                             "E4:1 E4:1 E4:2 E4:1 E4:1 E4:2 E4:1 G4:1 C4:1 D4:1 E4:4",
                             "F4:1 F4:1 F4:1 F4:1 F4:1 E4:1 E4:1 E4:1 E4:1 D4:1 D4:1 E4:1 D4:4",
@@ -1055,7 +1055,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Can Can",
-                    "Cartoon",
+                    "Theme",
                     phrase(
                             "G4:1 G4:1 A4:1 B4:1 C5:1 C5:1 A4:1 G4:1",
                             "E4:1 E4:1 F#4:1 G4:1 A4:1 A4:1 F#4:1 E4:1",
@@ -1065,7 +1065,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Funeral March",
-                    "Screen Theme",
+                    "Theme",
                     phrase(
                             "C4:3 C4:1 C4:2 C4:2 Eb4:3 D4:1 D4:4",
                             "C4:3 C4:1 C4:2 C4:2 F4:3 E4:1 E4:4",
@@ -1074,7 +1074,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Wedding March",
-                    "Ceremony",
+                    "March",
                     phrase(
                             "C4:2 F4:4 F4:2 F4:4 C4:2 G4:4 E4:4",
                             "F4:2 A4:4 A4:2 A4:4 F4:2 C5:4 A4:4",
@@ -1083,7 +1083,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Bridal Chorus",
-                    "Ceremony",
+                    "March",
                     phrase(
                             "C4:4 F4:4 F4:4 F4:8 C4:4 G4:4 E4:8",
                             "F4:4 A4:4 A4:4 A4:8 F4:4 C5:4 A4:8",
@@ -1101,7 +1101,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Nutcracker Dance of the Sugar Plum Fairy",
-                    "Fantasy",
+                    "Theme",
                     phrase(
                             "E5:1 D#5:1 E5:1 D#5:1 E5:2 B4:2 D5:2 C5:2 A4:4",
                             "C4:1 E4:1 A4:2 B4:4 E4:1 G#4:1 B4:2 C5:4",
@@ -1110,7 +1110,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Swan Lake Theme",
-                    "Drama",
+                    "Theme",
                     phrase(
                             "B3:2 F#4:2 B4:2 C#5:2 D5:4 C#5:2 B4:2 A4:4",
                             "F#4:2 A4:2 B4:2 C#5:2 D5:4 C#5:2 B4:2 A4:4",
@@ -1137,7 +1137,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Dies Irae",
-                    "Horror",
+                    "Theme",
                     phrase(
                             "D4:2 C4:2 D4:2 E4:2 F4:2 E4:2 D4:2 C4:2",
                             "Bb3:2 C4:2 D4:4 D4:2 C4:2 D4:2 E4:2",
@@ -1146,7 +1146,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Korobeiniki",
-                    "Game Theme",
+                    "Theme",
                     phrase(
                             "E4:2 B3:1 C4:1 D4:2 C4:1 B3:1 A3:2 A3:1 C4:1 E4:2 D4:1 C4:1 B3:4",
                             "C4:1 D4:1 E4:2 C4:2 A3:2 A3:4 B3:1 C4:1 D4:2 B3:2 G#3:2 G#3:4",
@@ -1219,7 +1219,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Maple Leaf Rag",
-                    "Ragtime",
+                    "Jazz",
                     phrase(
                             "Ab4:1 C5:1 Eb5:1 F5:1 Ab5:2 F5:1 Eb5:1 C5:2 Ab4:2",
                             "Bb4:1 C5:1 Eb5:1 F5:1 G5:2 F5:1 Eb5:1 C5:2 Bb4:2",
@@ -1228,7 +1228,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "The Entertainer",
-                    "Ragtime",
+                    "Jazz",
                     phrase(
                             "D4:1 D#4:1 E4:2 C5:1 E4:1 C5:1 E4:1 C5:4",
                             "C5:1 B4:1 A4:1 G4:1 F#4:1 A4:1 C5:1 E5:4",
@@ -1237,7 +1237,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Entry of the Gladiators",
-                    "Circus",
+                    "Theme",
                     phrase(
                             "C5:1 B4:1 C5:1 G4:1 E4:1 G4:1 C5:1 E5:1",
                             "D5:1 C5:1 D5:1 A4:1 F4:1 A4:1 D5:1 F5:1",
@@ -1246,7 +1246,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Dance of the Hours",
-                    "Cartoon",
+                    "Theme",
                     phrase(
                             "E4:2 F4:2 G4:2 C5:2 B4:2 A4:2 G4:4",
                             "E4:2 F4:2 G4:2 C5:2 B4:2 A4:2 G4:4",
@@ -1282,7 +1282,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Pomp and Circumstance",
-                    "Ceremony",
+                    "March",
                     phrase(
                             "G4:2 C5:2 B4:2 C5:2 D5:4 C5:2 B4:2 A4:4",
                             "G4:2 A4:2 B4:2 C5:2 D5:4 E5:4",
@@ -1310,7 +1310,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "La Marseillaise",
-                    "Anthem",
+                    "March",
                     phrase(
                             "G4:2 G4:2 G4:2 C5:4 C5:2 D5:2 E5:4",
                             "E5:2 D5:2 C5:2 B4:2 C5:4 G4:4",
@@ -1328,7 +1328,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Danse Macabre",
-                    "Horror",
+                    "Theme",
                     phrase(
                             "G4:2 F#4:2 G4:2 E4:2 F4:2 D#4:2 E4:2 C4:2",
                             "D4:2 B3:2 C4:2 A3:2 B3:2 G#3:2 A3:4",
@@ -1337,7 +1337,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Happy Birthday",
-                    "Celebration",
+                    "Theme",
                     phrase(
                             "C4:2 C4:1 D4:3 C4:3 F4:3 E4:6",
                             "C4:2 C4:1 D4:3 C4:3 G4:3 F4:6",
@@ -1347,7 +1347,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Brahms Lullaby",
-                    "Lullaby",
+                    "Chill",
                     phrase(
                             "E4:2 E4:2 G4:4 E4:2 E4:2 G4:4",
                             "E4:2 G4:2 C5:4 B4:4 A4:4 A4:4 G4:8",
@@ -1357,7 +1357,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Take Me Out to the Ball Game",
-                    "Sports",
+                    "March",
                     phrase(
                             "C4:2 C5:3 A4:1 G4:2 E4:2 G4:4",
                             "D4:2 D5:3 B4:1 A4:2 F4:2 A4:4",
@@ -1367,7 +1367,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "God Save the King",
-                    "Anthem",
+                    "March",
                     phrase(
                             "G4:2 G4:2 A4:2 F#4:3 G4:1 A4:2 B4:2 B4:2 C5:2 B4:3 A4:1",
                             "G4:2 A4:2 G4:2 F#4:2 G4:4 D5:4",
@@ -1376,7 +1376,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Rule Britannia",
-                    "Anthem",
+                    "March",
                     phrase(
                             "G4:2 C5:2 B4:2 A4:2 G4:4 D5:4",
                             "E5:2 D5:2 C5:2 B4:2 C5:4 G4:4",
@@ -1385,7 +1385,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Aloha Oe",
-                    "Traditional",
+                    "Folk",
                     phrase(
                             "G4:2 E4:2 C4:2 E4:2 G4:4 A4:2 G4:2 E4:4",
                             "F4:2 E4:2 D4:2 C4:2 D4:4 G4:4",
@@ -1395,7 +1395,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Mexican Hat Dance",
-                    "Traditional",
+                    "Folk",
                     phrase(
                             "C4:1 E4:1 G4:2 C4:1 E4:1 G4:2 C4:1 E4:1 G4:2 C5:4",
                             "B4:1 A4:1 G4:2 F4:1 E4:1 D4:2 C4:4",
@@ -1404,7 +1404,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Liberty Bell March",
-                    "Comedy",
+                    "Theme",
                     phrase(
                             "G4:2 E4:2 C4:2 E4:2 G4:4 E4:4",
                             "A4:2 F4:2 D4:2 F4:2 A4:4 F4:4",
@@ -1472,7 +1472,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Miserlou",
-                    "Traditional",
+                    "Folk",
                     phrase(
                             "E4:1 F4:1 G4:1 A4:1 B4:1 C5:1 D5:1 E5:2",
                             "D5:1 C5:1 B4:1 A4:1 G4:1 F4:1 E4:2",
@@ -1482,7 +1482,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "When Irish Eyes Are Smiling",
-                    "Traditional",
+                    "Folk",
                     phrase(
                             "C4:2 E4:2 G4:2 C5:4 B4:2 A4:2 G4:4",
                             "E4:2 G4:2 A4:2 G4:2 E4:4 D4:4",
@@ -1492,7 +1492,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Daisy Bell",
-                    "Vintage Pop",
+                    "Pop",
                     phrase(
                             "C4:2 E4:2 G4:2 C5:4 G4:2 E4:2 C4:4",
                             "D4:2 F4:2 A4:2 D5:4 A4:2 F4:2 D4:4",
@@ -1502,7 +1502,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Let Me Call You Sweetheart",
-                    "Vintage Pop",
+                    "Pop",
                     phrase(
                             "G3:2 C4:2 E4:2 G4:4 E4:2 C4:2 G3:4",
                             "A3:2 D4:2 F4:2 A4:4 F4:2 D4:2 A3:4",
@@ -1511,7 +1511,7 @@ public final class AllSongs {
                     )
             ),
             simpleSeed(
-                    "Love Story Chorus",
+                    "Love Story",
                     "Pop",
                     120,
                     phrase(
@@ -1523,7 +1523,7 @@ public final class AllSongs {
                     )
             ),
             simpleSeed(
-                    "Fifteen Verse",
+                    "Fifteen",
                     "Pop",
                     96,
                     phrase(
@@ -1548,8 +1548,8 @@ public final class AllSongs {
                     )
             ),
             simpleSeed(
-                    "Escape Chorus",
-                    "Latin Pop",
+                    "Escape",
+                    "Pop",
                     126,
                     phrase(
                             "R:0.5 B4:0.25 R:0.25 F#5:2 R:0.25 E5:0.25 R:0.75 Eb5:1 R:0.25 E5:0.5",
@@ -1562,8 +1562,8 @@ public final class AllSongs {
                     )
             ),
             simpleSeed(
-                    "These Words Chorus",
-                    "Dance Pop",
+                    "These Words",
+                    "Dance",
                     97,
                     phrase(
                             "R:0.25 G4:0.25 F4:0.5 D4:0.25 C5:2.25 R:0.25 A4:1.25 G4:0.5 G4:1 R:0.25",
@@ -1575,8 +1575,8 @@ public final class AllSongs {
                     )
             ),
             simpleSeed(
-                    "Bad Day Chorus",
-                    "Pop Rock",
+                    "Bad Day",
+                    "Rock",
                     70,
                     phrase(
                             "R:0.25 C4:0.25 R:0.25 Eb4:0.5 R:0.25 F4:3.75 R:0.5 Bb3:0.25 R:0.25 Bb3:0.5",
@@ -1600,7 +1600,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Monkeys Spinning Monkeys",
-                    "Comedy",
+                    "Theme",
                     phrase(
                             "C5:4 G#5:2 A5:4 G#5:4 F#5:2 G5:4 D#5:2 E5:8",
                             "E5:2 C5:4 G#5:2 A5:4 G#5:4 F#5:4 G5:8",
@@ -1611,7 +1611,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Sneaky Snitch",
-                    "Comedy",
+                    "Theme",
                     phrase(
                             "A5:1 G#5:1 A5:2 F5:2 E5:2 R:2 F5:1 G5:1 R:6",
                             "G#5:1 A5:2 E5:2 D5:2 A5:1 G#5:1 A5:2 F5:2 E5:2 R:2 F5:1 G5:1",
@@ -1622,7 +1622,7 @@ public final class AllSongs {
             ),
             simpleSeed(
                     "Scheming Weasel",
-                    "Comedy",
+                    "Theme",
                     phrase(
                             "C5:2 D5:1 Eb5:1 F5:1 G5:1 Ab5:1 G5:1 F5:1 Eb5:1 D5:1 C5:4",
                             "F5:1 G5:1 Ab5:1 G5:1 F5:1 Eb5:1 D5:1 C5:2 G4:1 Ab4:4",
@@ -1644,16 +1644,14 @@ public final class AllSongs {
     }
 
     private static int defaultBpm(String style) {
-        return switch (style.toLowerCase(Locale.ROOT)) {
-            case "lo fi", "lullaby" -> 82;
-            case "jazz", "vintage pop" -> 96;
-            case "folk", "traditional", "holiday" -> 108;
-            case "classical", "ceremony", "anthem" -> 116;
-            case "march", "patriotic", "sports" -> 120;
-            case "sea shanty", "ragtime", "cartoon", "comedy" -> 126;
-            case "adventure", "screen theme", "cinematic", "fantasy" -> 132;
-            case "dance pop", "synth pop", "retro pop", "pop rock" -> 128;
-            case "horror" -> 140;
+        return switch (normalizeStyle(style)) {
+            case "Chill" -> 82;
+            case "Jazz", "Pop" -> 96;
+            case "Folk", "Holiday" -> 108;
+            case "Classical" -> 116;
+            case "March" -> 120;
+            case "Dance", "Rock" -> 128;
+            case "Theme" -> 132;
             default -> 112;
         };
     }
@@ -1677,11 +1675,18 @@ public final class AllSongs {
     }
 
     private static String canonicalSongKey(SongSeed seed) {
-        return (seed.title() + "-" + seed.style()).toLowerCase(Locale.ROOT);
+        return seed.title().toLowerCase(Locale.ROOT);
     }
 
     private static String normalizeTitle(String title) {
+        if (title.equalsIgnoreCase("Bridal Chorus")
+                || title.equalsIgnoreCase("Hallelujah Chorus")
+                || title.equalsIgnoreCase("London Bridge")) {
+            return title.trim();
+        }
+
         String normalized = title
+                .replaceAll("(?i)\\b(solo)\\s+\\d+\\b", "")
                 .replaceAll("(?i)\\b(pre-chorus|lead-out|chorus|verse|bridge|intro|instrumental|solo|outro|demo)\\b", "")
                 .replaceAll("(?i)^\\s*(and|&)\\s+|\\s+(and|&)\\s*$", "")
                 .replaceAll("\\s+", " ")
@@ -1691,30 +1696,30 @@ public final class AllSongs {
     }
 
     private static String normalizeStyle(String style) {
-        return switch (style.toLowerCase(Locale.ROOT)) {
-            case "album rock", "arena rock", "art rock", "classic rock", "country rock", "folk rock",
-                    "glam rock", "hard rock", "modern rock", "piano rock", "pop rock", "post-grunge",
-                    "sixties rock", "soft rock" -> "rock";
-            case "alternative rock", "grunge", "metal", "permanent wave" -> "alt";
-            case "dance", "dance pop", "disco", "dutch trance", "italo dance", "synth pop", "trance" -> "dance";
-            case "christmas pop", "electro pop", "europop", "latin pop", "mellow gold", "mexican pop",
-                    "neo mellow", "pop", "retro pop", "sunshine pop", "vintage pop" -> "pop";
-            case "anthem", "ceremony", "march", "patriotic", "sports" -> "march";
-            case "cartoon", "comedy", "screen theme", "musical" -> "comedy";
-            case "adventure", "cinematic", "fantasy", "horror", "sci fi" -> "theme";
-            case "folk", "traditional", "sea shanty" -> "folk";
-            case "holiday" -> "holiday";
-            case "classical" -> "classical";
-            case "jazz", "ragtime" -> "jazz";
-            case "funk", "motown", "rnb", "soul" -> "soul";
-            case "hip hop" -> "hiphop";
-            case "country pop" -> "country";
-            case "lo fi", "lullaby" -> "chill";
-            case "indie rock", "lilith", "new wave", "new wave pop" -> "indie";
-            case "original" -> "original";
+        String compact = style.trim().toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]", "");
+        return switch (compact) {
+            case "albumrock", "arenarock", "artrock", "classicrock", "countryrock", "folkrock",
+                    "glamrock", "hardrock", "modernrock", "pianorock", "poprock", "postgrunge",
+                    "rock", "sixtiesrock", "softrock" -> "Rock";
+            case "alternative", "alternativerock", "alt", "grunge", "metal", "permanentwave" -> "Alt";
+            case "dance", "dancepop", "disco", "dutchtrance", "italodance", "synthpop", "trance" -> "Dance";
+            case "christmaspop", "electropop", "europop", "latinpop", "mellowgold", "mexicanpop",
+                    "neomellow", "newwavepop", "pop", "retropop", "sunshinepop", "vintagepop" -> "Pop";
+            case "anthem", "ceremony", "march", "patriotic", "sports" -> "March";
+            case "adventure", "cartoon", "celebration", "cinematic", "circus", "comedy", "drama",
+                    "fantasy", "gametheme", "horror", "musical", "scifi", "screentheme", "theme" -> "Theme";
+            case "folk", "seashanty", "traditional" -> "Folk";
+            case "holiday" -> "Holiday";
+            case "classical" -> "Classical";
+            case "jazz", "ragtime" -> "Jazz";
+            case "funk", "motown", "rnb", "soul" -> "Soul";
+            case "hiphop" -> "HipHop";
+            case "country", "countrypop" -> "Country";
+            case "chill", "lofi", "lullaby" -> "Chill";
+            case "indie", "indierock", "lilith", "newwave" -> "Indie";
+            case "original" -> "Original";
             default -> {
-                String compact = style.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]", "");
-                yield compact.isEmpty() ? "other" : compact;
+                yield compact.isEmpty() ? "Other" : Character.toUpperCase(compact.charAt(0)) + compact.substring(1);
             }
         };
     }
@@ -1724,8 +1729,8 @@ public final class AllSongs {
         // Imported from MulTTiPop aligned MIDI labels, distributed as CC-BY-4.0.
 
         seeds.add(simpleSeed(
-                "Ain't Too Proud to Beg Verse",
-                "Motown",
+                "Ain't Too Proud to Beg",
+                "Soul",
                 120,
                 phrase(
                         "R:1 G4:1 R:1.5 A4:0.25 R:0.25 C5:0.25 R:0.25 E5:1 R:0.25 D5:0.25",
@@ -1742,8 +1747,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "For Once In My Life Verse",
-                "Motown",
+                "For Once In My Life",
+                "Soul",
                 108,
                 phrase(
                         "R:0.75 G4:0.5 R:0.25 A4:0.5 R:0.25 A4:0.5 R:0.25 A4:0.5 R:0.25 A4:0.75",
@@ -1765,7 +1770,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Crying Chorus",
+                "Crying",
                 "Rock",
                 98,
                 phrase(
@@ -1784,7 +1789,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Those Were The Days Chorus",
+                "Those Were The Days",
                 "Pop",
                 84,
                 phrase(
@@ -1803,7 +1808,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Brown Eyed Girl Pre-Chorus",
+                "Brown Eyed Girl",
                 "Rock",
                 147,
                 phrase(
@@ -1821,7 +1826,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Down On The Corner Chorus",
+                "Down On The Corner",
                 "Rock",
                 102,
                 phrase(
@@ -1835,8 +1840,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "What Becomes Of The Brokenhearted Chorus",
-                "Motown",
+                "What Becomes Of The Brokenhearted",
+                "Soul",
                 98,
                 phrase(
                         "R:0.25 C4:0.5 Bb3:0.5 R:1.25 C4:0.5 R:0.25 D4:0.5 R:0.25 C4:1 R:0.25",
@@ -1851,7 +1856,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "I Can't Help Myself (Sugar Pie Honey Bunch) Verse",
+                "I Can't Help Myself (Sugar Pie Honey Bunch)",
                 "Rock",
                 127,
                 phrase(
@@ -1865,8 +1870,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Never My Love Verse",
-                "Sunshine Pop",
+                "Never My Love",
+                "Pop",
                 94,
                 phrase(
                         "R:3.75 F4:0.5 R:0.25 F#4:0.5 R:0.25 Ab4:0.5 R:0.25 Ab4:0.75 R:0.5 Eb5:1.75",
@@ -1878,8 +1883,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Wouldn't It Be Nice Chorus",
-                "Sunshine Pop",
+                "Wouldn't It Be Nice",
+                "Pop",
                 122,
                 phrase(
                         "R:1.75 A3:0.25 R:0.25 A3:0.5 R:0.25 Bb3:0.25 R:0.25 C4:0.5 R:0.25 D4:0.25",
@@ -1891,7 +1896,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Brown Eyed Girl Chorus",
+                "Brown Eyed Girl",
                 "Rock",
                 148,
                 phrase(
@@ -1906,7 +1911,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "More Today Than Yesterday Chorus",
+                "More Today Than Yesterday",
                 "Rock",
                 142,
                 phrase(
@@ -1928,7 +1933,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Lightnin' Strikes Chorus",
+                "Lightnin' Strikes",
                 "Pop",
                 133,
                 phrase(
@@ -1940,7 +1945,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Lightnin' Strikes Verse",
+                "Lightnin' Strikes",
                 "Pop",
                 128,
                 phrase(
@@ -1956,8 +1961,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Easy Chorus",
-                "Motown",
+                "Easy",
+                "Soul",
                 66,
                 phrase(
                         "R:0.25 Bb4:1 R:0.5 F4:6 C#4:6 Ab3:5.75 R:0.25 Eb3:3.5 Ab2:3 Ab3:2.5",
@@ -1972,8 +1977,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Sweet Talkin' Woman Chorus",
-                "Classic Rock",
+                "Sweet Talkin' Woman",
+                "Rock",
                 122,
                 phrase(
                         "R:0.25 E5:0.25 R:0.25 G5:0.5 R:0.25 E5:0.5 R:0.25 A5:2 R:0.25 G5:2",
@@ -1988,8 +1993,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Rosalinda's Eyes Chorus",
-                "Mellow Gold",
+                "Rosalinda's Eyes",
+                "Pop",
                 163,
                 phrase(
                         "R:2.5 D5:0.75 R:0.25 D5:0.25 D5:0.75 R:0.25 C5:0.75 R:0.25 C5:0.75 C5:0.75",
@@ -2007,8 +2012,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Turn to Stone Chorus",
-                "Classic Rock",
+                "Turn to Stone",
+                "Rock",
                 141,
                 phrase(
                         "R:4 Ab3:0.5 R:0.25 C#4:0.5 R:0.25 B3:0.5 B3:0.75 R:1.25 Ab3:0.5 R:0.25",
@@ -2028,8 +2033,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Bang-A-Boomerang Chorus",
-                "Europop",
+                "Bang-A-Boomerang",
+                "Pop",
                 132,
                 phrase(
                         "R:0.25 F4:0.25 G4:1 R:0.25 A4:1 R:1.75 A4:0.5 R:0.25 A4:1 G4:0.5",
@@ -2049,8 +2054,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Rock And Roll All Nite Pre-Chorus",
-                "Glam Rock",
+                "Rock And Roll All Nite",
+                "Rock",
                 148,
                 phrase(
                         "R:1.5 E5:0.25 R:0.25 E5:0.25 R:0.25 E5:0.25 R:0.25 E5:0.75 R:0.25 Eb5:0.25",
@@ -2060,8 +2065,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "So Lonely Chorus",
-                "Alternative Rock",
+                "So Lonely",
+                "Alt",
                 160,
                 phrase(
                         "R:0.25 F1:0.5 R:0.25 F1:0.25 R:0.25 C2:0.25 R:0.25 C2:0.25 R:0.25 C2:0.25",
@@ -2080,8 +2085,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Rosalinda's Eyes Verse",
-                "Mellow Gold",
+                "Rosalinda's Eyes",
+                "Pop",
                 161,
                 phrase(
                         "R:2.75 G4:0.25 A4:1 R:0.25 C5:1.5 R:0.25 G4:0.75 R:0.25 G4:0.25 R:0.25",
@@ -2092,8 +2097,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Last Train To London Chorus",
-                "Classic Rock",
+                "Last Train To London",
+                "Rock",
                 122,
                 phrase(
                         "R:3 D5:0.5 R:0.25 E5:0.5 R:0.25 G5:0.5 R:0.25 G5:0.5 R:0.25 E5:0.5",
@@ -2112,8 +2117,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "I Was Made for Lovin' You Chorus",
-                "Glam Rock",
+                "I Was Made for Lovin' You",
+                "Rock",
                 129,
                 phrase(
                         "R:0.25 E2:0.75 C#2:0.25 Bb1:0.25 R:0.25 E1:0.5 R:0.25 E2:0.5 R:0.25 E1:0.5",
@@ -2133,8 +2138,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Evil Woman Chorus",
-                "Classic Rock",
+                "Evil Woman",
+                "Rock",
                 121,
                 phrase(
                         "R:2 E3:1 G3:0.5 A3:1 C4:0.5 A3:1 R:4 E3:1 G3:0.5 A3:1",
@@ -2144,8 +2149,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Rock And Roll All Nite Chorus",
-                "Glam Rock",
+                "Rock And Roll All Nite",
+                "Rock",
                 145,
                 phrase(
                         "R:4 C5:0.75 Bb4:0.5 Ab4:1.5 R:0.25 Eb5:0.25 R:0.25 Eb5:0.25 R:0.25 F5:0.25",
@@ -2164,8 +2169,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "The Stranger Verse",
-                "Mellow Gold",
+                "The Stranger",
+                "Pop",
                 180,
                 phrase(
                         "R:0.25 E4:0.25 R:0.25 G4:0.25 R:0.25 B4:1.25 R:0.5 A4:0.5 R:0.25 G4:0.25",
@@ -2184,8 +2189,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "The Name Of The Game Verse",
-                "Europop",
+                "The Name Of The Game",
+                "Pop",
                 77,
                 phrase(
                         "R:0.25 B1:0.75 R:0.25 F#2:0.75 Ab2:0.75 A2:0.75 R:0.25 B2:0.5 R:0.25 B2:0.25",
@@ -2201,8 +2206,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Ring Ring Chorus",
-                "Europop",
+                "Ring Ring",
+                "Pop",
                 138,
                 phrase(
                         "R:1 A2:1.25 R:0.25 C#3:1 D3:0.5 Eb3:0.5 E3:0.25 R:0.25 A2:1.25 R:0.25",
@@ -2225,8 +2230,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Bang-A-Boomerang Intro",
-                "Europop",
+                "Bang-A-Boomerang",
+                "Pop",
                 132,
                 phrase(
                         "R:1 F5:1 R:0.25 G5:0.5 R:0.25 E5:0.5 R:0.25 F5:0.5 R:0.25 G5:0.5",
@@ -2239,8 +2244,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "The Stranger Instrumental",
-                "Mellow Gold",
+                "The Stranger",
+                "Pop",
                 153,
                 phrase(
                         "R:2.5 B4:0.25 R:0.25 E5:0.5 R:0.25 F#5:0.5 R:0.25 G5:1.5 R:0.75 B5:0.5",
@@ -2257,8 +2262,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Strange Magic Verse",
-                "Classic Rock",
+                "Strange Magic",
+                "Rock",
                 92,
                 phrase(
                         "R:1.25 B4:1.25 R:2.5 G4:0.75 R:0.25 A4:0.75 R:0.25 B4:0.75 R:0.25 B4:0.75",
@@ -2271,8 +2276,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Does Your Mother Know Pre-Chorus",
-                "Europop",
+                "Does Your Mother Know",
+                "Pop",
                 138,
                 phrase(
                         "R:3.25 D4:0.25 R:0.25 D4:0.25 R:0.25 D4:0.5 R:0.25 E4:0.5 R:0.25 E4:0.5",
@@ -2289,8 +2294,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Summer Night City Pre-Chorus",
-                "Europop",
+                "Summer Night City",
+                "Pop",
                 131,
                 phrase(
                         "R:0.75 D5:0.5 Bb5:0.5 R:0.5 Bb5:0.5 R:0.25 D5:0.5 R:0.25 Eb5:0.5 R:0.5",
@@ -2306,8 +2311,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Rock And Roll All Nite Verse",
-                "Glam Rock",
+                "Rock And Roll All Nite",
+                "Rock",
                 146,
                 phrase(
                         "R:1.75 F5:0.5 R:0.5 Eb5:0.5 C5:0.25 R:0.25 Eb5:0.5 R:0.25 C5:0.25 R:0.25",
@@ -2320,8 +2325,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Confusion Verse",
-                "Classic Rock",
+                "Confusion",
+                "Rock",
                 112,
                 phrase(
                         "R:2 G4:0.5 R:0.25 G4:0.5 R:0.25 F4:0.5 F4:0.5 R:0.25 E4:0.5 R:0.25",
@@ -2335,8 +2340,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Beth Verse",
-                "Glam Rock",
+                "Beth",
+                "Rock",
                 115,
                 phrase(
                         "R:0.25 D5:0.75 R:0.25 C5:1.5 R:0.25 C3:0.5 R:0.25 C3:0.75 R:0.75 C3:0.5",
@@ -2350,8 +2355,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Mr Blue Sky Solo 2",
-                "Classic Rock",
+                "Mr Blue Sky",
+                "Rock",
                 174,
                 phrase(
                         "R:1 C3:0.25 R:0.5 F2:0.25 R:0.5 F2:0.25 R:0.25 F2:0.25 R:0.25 F2:0.25",
@@ -2368,8 +2373,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Living On A Prayer Chorus",
-                "Pop Rock",
+                "Living On A Prayer",
+                "Rock",
                 124,
                 phrase(
                         "R:0.25 D2:0.75 R:0.25 E1:0.5 F#1:0.5 R:0.25 G1:0.5 C2:1 R:0.25 B1:0.5",
@@ -2388,8 +2393,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "True Colors Chorus",
-                "New Wave",
+                "True Colors",
+                "Indie",
                 86,
                 phrase(
                         "R:0.25 G3:0.75 C4:0.5 A3:1 F4:1 F3:0.75 A3:0.25 R:0.5 E4:1.5 R:0.25",
@@ -2408,8 +2413,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Carrie Chorus",
-                "Hard Rock",
+                "Carrie",
+                "Rock",
                 68,
                 phrase(
                         "R:0.25 D4:1 R:0.25 G3:3.5 D4:3.5 G4:3.25 F#3:3.5 D4:3.5 F#4:3.25 E3:3.5",
@@ -2424,7 +2429,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Wanna Be Startin' Somethin' Chorus",
+                "Wanna Be Startin' Somethin'",
                 "Soul",
                 120,
                 phrase(
@@ -2440,8 +2445,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Overjoyed Chorus",
-                "Motown",
+                "Overjoyed",
+                "Soul",
                 82,
                 phrase(
                         "R:0.25 D5:0.25 Eb5:0.25 R:0.25 F5:0.5 R:0.25 G5:1 R:0.25 F5:0.75 R:0.25",
@@ -2457,7 +2462,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "So Emotional Chorus",
+                "So Emotional",
                 "Pop",
                 120,
                 phrase(
@@ -2477,8 +2482,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Our Last Summer Chorus",
-                "Europop",
+                "Our Last Summer",
+                "Pop",
                 98,
                 phrase(
                         "R:0.25 E5:2.25 R:1.25 E5:0.5 R:0.25 F#5:0.5 R:0.25 G5:0.5 R:0.25 E5:0.5",
@@ -2492,8 +2497,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "I Still Haven't Found What I'm Looking For Chorus",
-                "Alternative Rock",
+                "I Still Haven't Found What I'm Looking For",
+                "Alt",
                 102,
                 phrase(
                         "R:3.75 C#5:0.5 R:0.25 C#5:0.5 R:0.25 Ab5:2.5 R:1 F#5:0.75 F5:0.5 R:0.25",
@@ -2505,7 +2510,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "One Moment In Time Chorus",
+                "One Moment In Time",
                 "Pop",
                 77,
                 phrase(
@@ -2523,8 +2528,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Overjoyed Pre-Chorus",
-                "Motown",
+                "Overjoyed",
+                "Soul",
                 82,
                 phrase(
                         "R:0.75 B4:0.25 D5:1 R:0.25 C5:0.75 R:0.25 B4:1 A4:2 R:0.25 G4:0.75",
@@ -2535,8 +2540,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Take It on the Run Chorus",
-                "Album Rock",
+                "Take It on the Run",
+                "Rock",
                 77,
                 phrase(
                         "R:2.25 G5:0.5 G5:0.5 G5:0.5 G5:0.5 G5:0.5 G5:1.5 F#5:0.75 E5:0.75 R:1.25",
@@ -2549,8 +2554,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "With or Without You Verse",
-                "Alternative Rock",
+                "With or Without You",
+                "Alt",
                 111,
                 phrase(
                         "R:0.25 G1:0.5 R:0.25 G1:0.5 R:0.25 D2:0.5 R:0.25 D2:0.5 R:0.25 D2:0.5",
@@ -2571,7 +2576,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Dude (Looks Like a Lady) Chorus",
+                "Dude (Looks Like a Lady)",
                 "Rock",
                 127,
                 phrase(
@@ -2585,8 +2590,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Every Breath You Take Verse",
-                "Alternative Rock",
+                "Every Breath You Take",
+                "Alt",
                 118,
                 phrase(
                         "R:2 C5:0.5 C#5:0.5 C5:1 Bb4:0.5 Ab4:1 R:0.25 Ab4:1.5 R:3 C5:0.5",
@@ -2601,8 +2606,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Last Christmas Chorus",
-                "New Wave",
+                "Last Christmas",
+                "Indie",
                 108,
                 phrase(
                         "R:0.25 E2:0.5 R:0.25 E2:0.25 R:0.5 D2:0.25 R:0.25 D2:0.25 R:0.25 D2:0.25",
@@ -2622,8 +2627,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Wake Me Up Before You Go-Go Verse",
-                "New Wave",
+                "Wake Me Up Before You Go-Go",
+                "Indie",
                 163,
                 phrase(
                         "R:3.25 G3:0.25 R:0.25 A3:0.5 R:0.25 G3:0.25 R:0.25 C3:0.5 R:0.25 C3:0.5",
@@ -2648,8 +2653,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Super Trouper Verse",
-                "Europop",
+                "Super Trouper",
+                "Pop",
                 118,
                 phrase(
                         "R:0.25 E2:0.5 R:0.25 D2:0.5 R:0.25 C2:0.25 R:0.25 C2:0.5 R:0.25 A1:0.75",
@@ -2667,8 +2672,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Our Last Summer Verse",
-                "Europop",
+                "Our Last Summer",
+                "Pop",
                 98,
                 phrase(
                         "R:1.75 F#5:0.5 R:0.25 F#5:0.5 R:0.25 F#5:0.25 F#5:1 F#5:0.5 R:0.25 F#5:0.5",
@@ -2692,8 +2697,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Super Trouper Chorus",
-                "Europop",
+                "Super Trouper",
+                "Pop",
                 118,
                 phrase(
                         "R:0.25 C5:0.5 R:0.25 E5:0.5 R:0.25 G5:0.75 R:0.25 G5:0.75 R:0.25 F5:0.75",
@@ -2712,8 +2717,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Total Eclipse of the Heart Pre-Chorus",
-                "Europop",
+                "Total Eclipse of the Heart",
+                "Pop",
                 65,
                 phrase(
                         "R:0.25 B3:0.25 R:0.25 E4:1.75 E4:1.25 F#4:0.5 Ab4:2.25 R:0.25 Ab4:1.75 R:0.25",
@@ -2725,8 +2730,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Super Trouper Intro",
-                "Europop",
+                "Super Trouper",
+                "Pop",
                 118,
                 phrase(
                         "R:1.25 G5:0.5 R:0.25 C6:0.5 R:0.25 E6:0.5 R:0.25 G6:0.5 R:0.25 D6:1",
@@ -2745,7 +2750,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Thriller Bridge",
+                "Thriller",
                 "Soul",
                 118,
                 phrase(
@@ -2763,8 +2768,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Last Christmas Instrumental",
-                "New Wave",
+                "Last Christmas",
+                "Indie",
                 108,
                 phrase(
                         "R:0.25 E2:0.5 R:0.25 E2:0.25 R:0.5 D2:0.25 R:0.25 D2:0.25 R:0.25 D2:0.25",
@@ -2784,7 +2789,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Runaway Verse",
+                "Runaway",
                 "Rock",
                 153,
                 phrase(
@@ -2800,8 +2805,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "I Still Haven't Found What I'm Looking For Verse",
-                "Alternative Rock",
+                "I Still Haven't Found What I'm Looking For",
+                "Alt",
                 101,
                 phrase(
                         "R:0.25 F5:0.25 R:0.25 Ab5:0.75 R:0.25 Ab5:0.75 R:0.25 F5:0.75 R:1.25 Bb5:1",
@@ -2814,8 +2819,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Super Trouper Pre-Chorus",
-                "Europop",
+                "Super Trouper",
+                "Pop",
                 118,
                 phrase(
                         "R:0.25 D5:1 R:0.25 C5:4 A4:4 R:0.25 C5:2 G4:2 R:0.25 C6:1",
@@ -2829,8 +2834,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "What's Up Chorus",
-                "Pop Rock",
+                "What's Up",
+                "Rock",
                 134,
                 phrase(
                         "E5:0.75 R:0.25 C#6:1.75 R:0.25 A5:1.75 R:0.25 E5:1.25 R:0.25 D5:1 R:0.25",
@@ -2844,8 +2849,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Half The World Away Chorus",
-                "Alternative Rock",
+                "Half The World Away",
+                "Alt",
                 116,
                 phrase(
                         "R:2.5 A4:0.5 E5:0.5 D5:1 C5:2.5 R:0.5 A4:0.5 C5:1 E5:0.5 R:0.5",
@@ -2856,8 +2861,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Don't Want You Back Chorus",
-                "Alternative Rock",
+                "Don't Want You Back",
+                "Alt",
                 102,
                 phrase(
                         "R:0.25 F#1:0.5 R:0.25 F#1:0.5 R:0.25 F#1:0.5 R:0.75 C#1:0.5 R:0.25 D1:0.5",
@@ -2871,8 +2876,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Born to make you happy Chorus",
-                "Dance Pop",
+                "Born to make you happy",
+                "Dance",
                 169,
                 phrase(
                         "R:0.25 F#4:0.5 R:0.25 E4:1.5 D4:0.25 R:0.25 F#4:0.25 D4:1.25 F#4:0.25 F#4:0.25",
@@ -2894,8 +2899,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Say It Ain't So Chorus",
-                "Modern Rock",
+                "Say It Ain't So",
+                "Rock",
                 78,
                 phrase(
                         "R:7.25 G5:0.75 F5:0.5 R:0.25 F5:0.5 R:0.5 F5:1.25 R:0.25 G5:0.5 F5:0.5",
@@ -2907,8 +2912,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "What's Up Verse",
-                "Pop Rock",
+                "What's Up",
+                "Rock",
                 134,
                 phrase(
                         "R:2 C#5:0.25 R:0.25 C#5:0.25 R:0.25 C#5:0.75 R:0.25 C#5:0.5 E4:0.5 C#5:0.25",
@@ -2926,8 +2931,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "If I Let You Go Chorus",
-                "Alternative Rock",
+                "If I Let You Go",
+                "Alt",
                 93,
                 phrase(
                         "R:1 E4:1 G3:0.75 C4:0.25 R:0.25 E4:1.25 R:0.25 G3:0.25 R:0.25 D4:1",
@@ -2943,7 +2948,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Run To You Chorus",
+                "Run To You",
                 "Pop",
                 74,
                 phrase(
@@ -2960,8 +2965,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Larger Than Life Chorus",
-                "Alternative Rock",
+                "Larger Than Life",
+                "Alt",
                 108,
                 phrase(
                         "R:1.25 C5:1 Eb4:1 R:0.25 Eb4:0.25 C5:0.25 R:0.25 Eb4:0.25 C5:0.25 R:0.25",
@@ -2977,8 +2982,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "The One Pre-Chorus",
-                "Alternative Rock",
+                "The One",
+                "Alt",
                 110,
                 phrase(
                         "R:1 C#4:0.25 R:0.5 C#4:0.25 R:0.5 C#4:0.25 R:0.5 C#4:0.25 R:0.25 C#4:0.25",
@@ -2996,8 +3001,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "El Scorcho Bridge",
-                "Modern Rock",
+                "El Scorcho",
+                "Rock",
                 151,
                 phrase(
                         "R:1.5 Ab4:0.25 R:0.25 Ab4:0.25 R:0.25 G4:0.25 R:0.25 F4:1 Eb4:0.25 R:0.25",
@@ -3020,8 +3025,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Born to make you happy Pre-Chorus",
-                "Dance Pop",
+                "Born to make you happy",
+                "Dance",
                 169,
                 phrase(
                         "R:1 G1:0.25 R:0.25 G1:0.25 R:0.5 G1:0.25 R:0.25 G1:0.25 R:0.25 G1:0.25",
@@ -3038,8 +3043,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Wonderwall Chorus",
-                "Alternative Rock",
+                "Wonderwall",
+                "Alt",
                 87,
                 phrase(
                         "R:1.25 F#4:1.25 R:0.25 D4:0.75 C#4:0.75 D4:0.75 A4:0.75 F#4:1.5 R:1.25 D4:0.75",
@@ -3052,8 +3057,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "She's Electric Verse",
-                "Alternative Rock",
+                "She's Electric",
+                "Alt",
                 126,
                 phrase(
                         "R:0.25 F#4:0.25 R:0.75 Ab4:2 R:0.5 Ab4:0.75 R:0.25 F#4:0.5 R:0.5 E4:0.5",
@@ -3074,7 +3079,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Spiderwebs Verse",
+                "Spiderwebs",
                 "Rock",
                 143,
                 phrase(
@@ -3088,8 +3093,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "All I Want For Christmas Is You Verse",
-                "Dance Pop",
+                "All I Want For Christmas Is You",
+                "Dance",
                 149,
                 phrase(
                         "R:1.25 G3:0.75 B3:0.75 D4:0.75 F#4:0.5 G4:0.75 F#4:1.25 E4:0.5 D4:1.25 A4:0.75",
@@ -3103,8 +3108,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Born to make you happy Verse",
-                "Dance Pop",
+                "Born to make you happy",
+                "Dance",
                 169,
                 phrase(
                         "R:2.25 D4:0.25 R:0.25 F#4:0.25 R:0.25 F#4:0.25 R:0.25 F#4:0.25 R:0.25 F#4:0.25",
@@ -3123,8 +3128,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "What's Up Chorus Lead-Out",
-                "Pop Rock",
+                "What's Up",
+                "Rock",
                 134,
                 phrase(
                         "R:1.75 A3:4 R:0.5 A3:0.25 R:0.25 A3:1.25 R:0.25 F#3:1.75 R:0.25 E3:1.25",
@@ -3139,8 +3144,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "All I Want For Christmas Is You Bridge",
-                "Dance Pop",
+                "All I Want For Christmas Is You",
+                "Dance",
                 149,
                 phrase(
                         "R:1.25 B4:2 D5:0.5 B4:0.75 B4:1.25 A4:1.25 D5:0.75 B4:0.75 R:0.75 B4:0.75",
@@ -3155,8 +3160,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Wanted Verse And Pre-Chorus",
-                "Pop Rock",
+                "Wanted",
+                "Rock",
                 111,
                 phrase(
                         "R:1 D2:1 R:0.25 D2:0.5 R:0.25 Bb1:1 R:0.25 Bb1:0.5 R:0.25 Bb1:0.75",
@@ -3182,7 +3187,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Spiderwebs Intro",
+                "Spiderwebs",
                 "Rock",
                 144,
                 phrase(
@@ -3194,8 +3199,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "No Surprises Intro",
-                "Alternative Rock",
+                "No Surprises",
+                "Alt",
                 75,
                 phrase(
                         "Bb2:0.25 G2:0.75 F2:3.25 F2:0.5 R:0.25 F2:2.5 F2:3.25 Bb2:1.25 Bb2:0.5 Bb2:0.75",
@@ -3205,8 +3210,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "U Can't Touch This Instrumental",
-                "Alternative Rock",
+                "U Can't Touch This",
+                "Alt",
                 134,
                 phrase(
                         "R:1.25 D3:0.75 R:0.25 C3:0.5 R:0.25 B2:0.5 R:0.25 A2:0.5 R:1 E2:0.5",
@@ -3220,8 +3225,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Experiencia Religiosa Intro And Verse",
-                "Latin Pop",
+                "Experiencia Religiosa",
+                "Pop",
                 112,
                 phrase(
                         "R:0.25 C4:0.75 G2:0.5 E4:1.5 R:0.5 E4:1.75 R:0.5 E4:1.75 R:0.5 E4:1.75",
@@ -3236,7 +3241,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Fearless Chorus",
+                "Fearless",
                 "Pop",
                 100,
                 phrase(
@@ -3254,8 +3259,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Drops Of Jupiter Chorus",
-                "Neo Mellow",
+                "Drops Of Jupiter",
+                "Pop",
                 80,
                 phrase(
                         "R:1.5 G4:1 R:0.25 G4:1.5 D4:0.25 R:0.25 G4:0.75 R:0.25 G4:0.75 R:0.25",
@@ -3271,8 +3276,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Square One Chorus",
-                "Alternative Rock",
+                "Square One",
+                "Alt",
                 62,
                 phrase(
                         "R:3 Eb4:0.5 Eb4:0.5 D4:1.5 D4:0.5 C4:0.5 D4:1 C4:3 R:8.25 C4:0.5",
@@ -3284,7 +3289,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "World Of Our Own Chorus",
+                "World Of Our Own",
                 "Pop",
                 98,
                 phrase(
@@ -3304,8 +3309,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Island in the Sun Chorus",
-                "Modern Rock",
+                "Island in the Sun",
+                "Rock",
                 114,
                 phrase(
                         "R:1.25 E4:1 G4:1 E4:1 G4:1 E4:1 G4:1 E4:1 G4:0.5 D4:1",
@@ -3319,7 +3324,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Fifteen Chorus",
+                "Fifteen",
                 "Pop",
                 95,
                 phrase(
@@ -3340,7 +3345,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Love Story Pre-Chorus",
+                "Love Story",
                 "Pop",
                 119,
                 phrase(
@@ -3353,8 +3358,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Clocks Chorus",
-                "Alternative Rock",
+                "Clocks",
+                "Alt",
                 132,
                 phrase(
                         "R:0.25 F2:0.25 R:0.25 F2:0.5 R:0.25 F2:0.5 R:0.25 Eb2:0.5 R:0.25 Eb2:0.5",
@@ -3374,8 +3379,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Bad Day Verse",
-                "Neo Mellow",
+                "Bad Day",
+                "Pop",
                 70,
                 phrase(
                         "R:2.75 Bb3:0.5 R:0.25 C4:0.25 R:0.25 Eb4:0.5 R:0.25 Eb4:0.75 R:0.25 C4:0.25",
@@ -3393,7 +3398,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Who says you can't go home Chorus",
+                "Who says you can't go home",
                 "Rock",
                 132,
                 phrase(
@@ -3414,7 +3419,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Sk8er Boi Chorus",
+                "Sk8er Boi",
                 "Pop",
                 150,
                 phrase(
@@ -3427,7 +3432,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Fireflies Verse",
+                "Fireflies",
                 "Pop",
                 90,
                 phrase(
@@ -3441,8 +3446,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Yellow Chorus",
-                "Alternative Rock",
+                "Yellow",
+                "Alt",
                 87,
                 phrase(
                         "R:0.25 Eb4:0.25 R:0.25 Eb4:0.75 R:0.25 Ab4:0.75 R:0.25 Ab4:0.75 R:0.25 Ab4:0.75",
@@ -3461,8 +3466,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "We Belong Together Verse",
-                "Dance Pop",
+                "We Belong Together",
+                "Dance",
                 140,
                 phrase(
                         "R:1 F1:0.5 R:2 G1:0.5 R:2 G1:0.5 R:0.25 D2:0.5 R:0.25 G1:0.5",
@@ -3478,8 +3483,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "You And Me Verse",
-                "Pop Rock",
+                "You And Me",
+                "Rock",
                 96,
                 phrase(
                         "R:1.25 Eb3:1.75 D4:0.5 Bb3:0.5 G3:0.25 R:0.25 F4:0.5 R:0.25 D4:0.25 R:0.25",
@@ -3499,8 +3504,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Square One Verse",
-                "Alternative Rock",
+                "Square One",
+                "Alt",
                 62,
                 phrase(
                         "R:1 Bb3:0.5 Bb3:0.5 Bb3:0.5 Bb3:0.5 Bb3:0.5 Bb3:0.5 C3:0.5 A3:0.5 A3:1",
@@ -3512,7 +3517,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Fireflies Chorus",
+                "Fireflies",
                 "Pop",
                 90,
                 phrase(
@@ -3529,8 +3534,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Jenny Was A Friend Of Mine Chorus",
-                "Modern Rock",
+                "Jenny Was A Friend Of Mine",
+                "Rock",
                 115,
                 phrase(
                         "R:0.25 Ab4:1 R:0.25 Eb5:0.5 R:0.25 C#5:1 B4:1 Bb4:1 Bb4:1 Ab4:1",
@@ -3543,8 +3548,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Circus Pre-Chorus",
-                "Dance Pop",
+                "Circus",
+                "Dance",
                 115,
                 phrase(
                         "R:1 F#2:0.5 R:0.25 F#2:0.5 R:0.25 F#2:0.5 R:0.25 F#2:0.5 R:0.25 F#2:0.5",
@@ -3564,7 +3569,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Sk8er Boi Intro",
+                "Sk8er Boi",
                 "Pop",
                 150,
                 phrase(
@@ -3579,8 +3584,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Celebration Pre-Chorus",
-                "Dance Pop",
+                "Celebration",
+                "Dance",
                 126,
                 phrase(
                         "R:0.25 D4:0.25 R:0.25 C#4:0.25 R:0.25 B3:0.25 R:0.25 A3:0.25 R:0.5 B3:0.25",
@@ -3602,7 +3607,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Fifteen Bridge",
+                "Fifteen",
                 "Pop",
                 95,
                 phrase(
@@ -3631,8 +3636,8 @@ public final class AllSongs {
         // Imported from MIDIdb free demo MIDI files; MIDIdb states copyright-owner permission for demo downloads.
 
         seeds.add(simpleSeed(
-                "Uptown Funk Demo",
-                "Funk",
+                "Uptown Funk",
+                "Soul",
                 100,
                 phrase(
                         "A4:8 C3:0.25 F#2:0.25 C3:0.25 F#2:0.25 D4:0.25 C3:0.25 C4:0.25 F#2:0.25 C3:0.25",
@@ -3646,7 +3651,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Happy Demo",
+                "Happy",
                 "Pop",
                 100,
                 phrase(
@@ -3664,7 +3669,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Thinking Out Loud Demo",
+                "Thinking Out Loud",
                 "Pop",
                 100,
                 phrase(
@@ -3680,8 +3685,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Get Lucky Demo",
-                "Dance Pop",
+                "Get Lucky",
+                "Dance",
                 116,
                 phrase(
                         "D4:4 R:1 C#4:1 D4:1 F#4:4.5 R:1.5 F#4:1.25 Ab4:1.25 A4:4.5 R:1.5",
@@ -3701,7 +3706,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "All Of Me Demo",
+                "All Of Me",
                 "Pop",
                 63,
                 phrase(
@@ -3717,7 +3722,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "All About That Bass Demo",
+                "All About That Bass",
                 "Pop",
                 100,
                 phrase(
@@ -3732,8 +3737,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Shut Up And Dance Demo",
-                "Pop Rock",
+                "Shut Up And Dance",
+                "Rock",
                 100,
                 phrase(
                         "C#5:82.25 F4:2.75 C#3:0.25 C#3:0.25 Ab4:2.75 C#3:0.25 C#3:0.25 C#5:2.75 C#3:0.25 F#4:2.75",
@@ -3747,8 +3752,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Can't Stop The Feeling Demo",
-                "Dance Pop",
+                "Can't Stop The Feeling",
+                "Dance",
                 113,
                 phrase(
                         "E4:1.25 F4:1 E4:1 F4:1 E4:1.25 D4:0.5 C4:3.25 R:1.25 Bb3:0.75 R:0.25",
@@ -3766,7 +3771,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Rolling In The Deep Demo",
+                "Rolling In The Deep",
                 "Pop",
                 105,
                 phrase(
@@ -3788,8 +3793,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Shape Of You Demo",
-                "Dance Pop",
+                "Shape Of You",
+                "Dance",
                 100,
                 phrase(
                         "C#5:0.5 R:1 E5:0.5 R:1 C#5:0.25 R:0.75 C#5:0.5 R:1 E5:0.5 R:1",
@@ -3806,7 +3811,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Flowers Demo",
+                "Flowers",
                 "Pop",
                 118,
                 phrase(
@@ -3828,8 +3833,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Cold Heart Demo",
-                "Dance Pop",
+                "Cold Heart",
+                "Dance",
                 116,
                 phrase(
                         "Bb6:8 F1:0.5 Eb3:0.25 Eb3:0.5 Bb5:0.25 Bb5:0.25 E2:0.25 F#2:0.25 Bb5:0.25 C4:1.5",
@@ -3843,8 +3848,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Bad Habits Demo",
-                "Dance Pop",
+                "Bad Habits",
+                "Dance",
                 150,
                 phrase(
                         "B3:1 R:0.25 E4:2 B4:5 F#4:0.75 E4:0.5 E4:1 D4:0.5 R:0.25 Bb4:0.25",
@@ -3861,7 +3866,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Leave The Door Open Demo",
+                "Leave The Door Open",
                 "Soul",
                 74,
                 phrase(
@@ -3880,7 +3885,7 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Easy On Me Demo",
+                "Easy On Me",
                 "Pop",
                 71,
                 phrase(
@@ -3900,8 +3905,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "As It Was Demo",
-                "Pop Rock",
+                "As It Was",
+                "Rock",
                 174,
                 phrase(
                         "Ab3:1.25 R:0.25 E3:0.75 R:0.5 E3:0.75 R:0.5 E3:2 R:6 B3:1.25 R:0.25",
@@ -3922,8 +3927,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Shivers Demo",
-                "Dance Pop",
+                "Shivers",
+                "Dance",
                 141,
                 phrase(
                         "B4:0.5 R:2.5 D5:0.5 R:3.5 E5:0.5 R:3.5 F#5:0.5 R:4.5 B4:0.5 R:2.5",
@@ -3943,8 +3948,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "We Don't Talk About Bruno Demo",
-                "Musical",
+                "We Don't Talk About Bruno",
+                "Theme",
                 103,
                 phrase(
                         "Eb4:0.5 R:0.25 C4:0.5 R:0.25 Eb4:0.5 R:0.5 Eb4:1 R:0.25 D4:0.5 R:0.5",
@@ -3965,8 +3970,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Dance The Night Demo",
-                "Dance Pop",
+                "Dance The Night",
+                "Dance",
                 150,
                 phrase(
                         "A3:0.25 E5:0.5 R:0.25 F5:0.5 R:0.25 F#5:0.5 R:0.5 F#2:0.25 F#5:0.5 R:0.5",
@@ -3981,8 +3986,8 @@ public final class AllSongs {
         ));
 
         seeds.add(simpleSeed(
-                "Save Your Tears Demo",
-                "Synth Pop",
+                "Save Your Tears",
+                "Dance",
                 118,
                 phrase(
                         "G4:1 G4:2 E4:1 D4:1.5 R:0.5 C4:1 A3:1 C4:1 D4:0.5 R:0.5",

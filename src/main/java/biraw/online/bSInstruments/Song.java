@@ -18,6 +18,7 @@ public class Song {
     private static final int MAX_DURATION_TICKS = 180 * 20;
     private static final int TARGET_MIN_DURATION_TICKS = 120 * 20;
     private static final int PHRASE_REST_TICKS = 4;
+    private static final double TICKS_PER_MINUTE = 60.0 * 20.0;
 
     private final String id;
     private final String title;
@@ -44,7 +45,7 @@ public class Song {
         this.id = toId(title, style);
         this.title = title;
         this.style = style;
-        this.durationUnitTicks = 600.0 / Math.max(1, bpm);
+        this.durationUnitTicks = TICKS_PER_MINUTE / Math.max(1, bpm);
         this.tempoTicks = Math.max(1, (int) Math.round(durationUnitTicks));
         this.notes = extendArrangement ? arrange(parsePattern(pattern), preserveMelody) : parsePattern(pattern);
         this.durationTicks = getTotalDuration(notes);
@@ -143,38 +144,12 @@ public class Song {
     }
 
     static boolean shouldPreserveMelody(String style) {
-        String normalizedStyle = style.toLowerCase(Locale.ROOT);
-        return !List.of(
-                "original",
-                "pop",
-                "rock",
-                "alt",
-                "dance",
-                "comedy",
-                "theme",
-                "soul",
-                "hiphop",
-                "country",
-                "indie",
-                "modern pop",
-                "retro pop",
-                "sixties rock",
-                "disco",
-                "synth pop",
-                "arena pop",
-                "pop rock",
-                "pop punk",
-                "dance pop",
-                "cinematic",
-                "adventure",
-                "sci fi",
-                "fantasy",
-                "screen theme"
-        ).contains(normalizedStyle);
+        return true;
     }
 
     private List<SongNote> arrange(List<SongNote> baseNotes, boolean preserveMelody) {
         int baseDuration = getTotalDuration(baseNotes);
+        if (baseDuration <= 0) return List.of(rest(TARGET_MIN_DURATION_TICKS));
         if (baseDuration >= TARGET_MIN_DURATION_TICKS) return baseNotes;
 
         List<SongNote> arranged = new ArrayList<>();
@@ -182,9 +157,9 @@ public class Song {
         while (getTotalDuration(arranged) < TARGET_MIN_DURATION_TICKS) {
             List<SongNote> phrase = preserveMelody ? baseNotes : varyPhrase(baseNotes, variation);
             int phraseDuration = getTotalDuration(phrase);
-            int restDuration = arranged.isEmpty() ? 0 : PHRASE_REST_TICKS;
+            int restDuration = arranged.isEmpty() ? 0 : repeatRestTicks(getTotalDuration(arranged));
             if (!arranged.isEmpty() && getTotalDuration(arranged) + restDuration + phraseDuration > MAX_DURATION_TICKS) break;
-            if (!arranged.isEmpty()) arranged.add(rest(restDuration));
+            if (!arranged.isEmpty() && restDuration > 0) arranged.add(rest(restDuration));
             arranged.addAll(phrase);
             variation++;
         }
@@ -251,9 +226,11 @@ public class Song {
         int cycle = 0;
         while (totalTicks < targetDurationTicks) {
             if (!arranged.isEmpty()) {
-                int restTicks = Math.min(PHRASE_REST_TICKS, targetDurationTicks - totalTicks);
-                arranged.add(rest(restTicks));
-                totalTicks += restTicks;
+                int restTicks = Math.min(repeatRestTicks(totalTicks), targetDurationTicks - totalTicks);
+                if (restTicks > 0) {
+                    arranged.add(rest(restTicks));
+                    totalTicks += restTicks;
+                }
             }
 
             for (SongNote note : developLayerPhrase(baseNotes, cycle, layerIndex)) {
@@ -291,6 +268,13 @@ public class Song {
             noteNumber++;
         }
         return List.copyOf(developed);
+    }
+
+    private int repeatRestTicks(int elapsedTicks) {
+        int barTicks = barTicks();
+        int ticksIntoBar = Math.floorMod(elapsedTicks, barTicks);
+        if (ticksIntoBar == 0) return 0;
+        return Math.max(PHRASE_REST_TICKS, barTicks - ticksIntoBar);
     }
 
     private List<SongNote> makeChordToneLayer(List<SongNote> melody, List<BarHarmony> harmony, boolean aboveMelody) {

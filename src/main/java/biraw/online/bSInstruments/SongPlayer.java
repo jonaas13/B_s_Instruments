@@ -221,7 +221,6 @@ public class SongPlayer {
                 Song.SongNote note = notes.get(noteIndex);
                 int noteEndTick = nextNoteStartTick + Math.max(1, note.durationTicks());
                 if (songTick <= nextNoteStartTick) return;
-                if (songTick < noteEndTick) return;
 
                 noteIndex++;
                 nextNoteStartTick = noteEndTick;
