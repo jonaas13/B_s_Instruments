@@ -262,7 +262,7 @@ public class SongPlayer {
             this.instrument = instrument;
             this.song = song;
             this.layer = layer;
-            this.tuning = instrument.createSongPlaybackTuning(song.layer(layer));
+            this.tuning = instrument.createSongPlaybackTuning();
             this.lastSongTick = songTick <= 0 ? song.durationTicks() - 1 : songTick - 1;
         }
 
@@ -280,7 +280,7 @@ public class SongPlayer {
 
         private void setInstrument(Instrument instrument) {
             this.instrument = instrument;
-            this.tuning = instrument.createSongPlaybackTuning(song.layer(layer));
+            this.tuning = instrument.createSongPlaybackTuning();
             reassignLayerForInstrument();
         }
 
@@ -299,7 +299,7 @@ public class SongPlayer {
             if (nextLayer == layer) return;
 
             layer = nextLayer;
-            tuning = instrument.createSongPlaybackTuning(song.layer(layer));
+            tuning = instrument.createSongPlaybackTuning();
             player.sendActionBar("§d♪ " + song.title() + " · Layer " + (layer + 1) + " ♪");
         }
 

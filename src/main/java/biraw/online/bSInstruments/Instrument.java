@@ -53,8 +53,6 @@ public class Instrument implements Listener {
     private static final int MIN_SONG_NOTE_ID = 0;
     private static final int MAX_SONG_NOTE_ID = 24;
     private static final int MIDI_NOTE_BLOCK_F_SHARP_3 = 54;
-    private static final int MIN_CUSTOM_SOUND_OFFSET = -24;
-    private static final int MAX_CUSTOM_SOUND_OFFSET = 24;
     private static final List<Note.Tone> NATURAL_NOTES = List.of(Note.Tone.G, Note.Tone.A, Note.Tone.B, Note.Tone.C, Note.Tone.D, Note.Tone.E, Note.Tone.F);
     private static final List<Note.Tone> SHARP_NOTES = List.of(Note.Tone.F, Note.Tone.G, Note.Tone.A, Note.Tone.B, Note.Tone.C, Note.Tone.D, Note.Tone.E);
     private static final List<String> NATURAL_NOTE_COLORS = List.of(
@@ -234,35 +232,9 @@ public class Instrument implements Listener {
         playForListeners(plr, note);
     }
 
-    void playSongNote(Player plr, int midiNote, int velocity, double pitchOffsetSemitones) {
-        warnIfMuted(plr, Bukkit.getCurrentTick());
-        playSongForListeners(plr, midiNote, velocity, pitchOffsetSemitones);
-    }
-
-    SongPlaybackTuning createSongPlaybackTuning(Song.SongLayer layer) {
-        int preferredSoundOffset = customSoundOffsetForOctave();
+    SongPlaybackTuning createSongPlaybackTuning() {
         if (customSoundBase == null) return new SongPlaybackTuning(0);
-
-        int bestSoundOffset = preferredSoundOffset;
-        int bestScore = Integer.MAX_VALUE;
-        for (int relativeOffset = -12; relativeOffset <= 12; relativeOffset += 12) {
-            int soundOffset = preferredSoundOffset + relativeOffset;
-            if (soundOffset < MIN_CUSTOM_SOUND_OFFSET || soundOffset > MAX_CUSTOM_SOUND_OFFSET) continue;
-
-            int score = Math.abs(relativeOffset) * 20;
-            for (Song.SongNoteEvent event : layer.events()) {
-                int noteId = tunedSongNoteId(event.midiNote()) - soundOffset;
-                if (noteId < MIN_SONG_NOTE_ID) score += (MIN_SONG_NOTE_ID - noteId) * 100;
-                else if (noteId > MAX_SONG_NOTE_ID) score += (noteId - MAX_SONG_NOTE_ID) * 100;
-                else score += Math.abs(noteId - 12);
-            }
-
-            if (score < bestScore) {
-                bestSoundOffset = soundOffset;
-                bestScore = score;
-            }
-        }
-        return new SongPlaybackTuning(bestSoundOffset);
+        return new SongPlaybackTuning(customSoundOffsetForOctave());
     }
 
     void playSongNotes(Player player, List<Song.SongNoteEvent> events, SongPlaybackTuning tuning) {
@@ -668,13 +640,6 @@ public class Instrument implements Listener {
             case 24 -> customSoundBase + "_2";
             default -> customSoundBase;
         };
-    }
-
-    private void playSongForListeners(Player player, int midiNote, int velocity, double pitchOffsetSemitones) {
-        SoundNote soundNote = getSongSoundNote(midiNote, velocity, pitchOffsetSemitones, new SongPlaybackTuning(0));
-        for (Player listener : getSongListeners(player)) {
-            listener.playSound(player.getLocation(), soundNote.sound(), SoundCategory.RECORDS, soundNote.volume(), soundNote.pitch());
-        }
     }
 
     record SongPlaybackTuning(int soundOffset) {

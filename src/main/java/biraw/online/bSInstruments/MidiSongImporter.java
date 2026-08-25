@@ -349,21 +349,6 @@ final class MidiSongImporter {
         return normalizeDenseTicks(events);
     }
 
-    private static String inferLeadInstrument(List<SourceLayer> sourceLayers) {
-        Map<String, Integer> noteCounts = new HashMap<>();
-        for (SourceLayer sourceLayer : sourceLayers) {
-            String instrumentName = sourceLayer.preferredInstrumentName();
-            if (instrumentName.equals("percussion") || instrumentName.equals("bass-guitar") || instrumentName.equals("didgeridoo")) {
-                continue;
-            }
-            noteCounts.merge(instrumentName, sourceLayer.events().size(), Integer::sum);
-        }
-        return noteCounts.entrySet().stream()
-                .max(Map.Entry.comparingByValue())
-                .map(Map.Entry::getKey)
-                .orElse("piano");
-    }
-
     private static Map<Integer, List<Song.SongNoteEvent>> eventsByTick(List<Song.SongNoteEvent> events) {
         Map<Integer, List<Song.SongNoteEvent>> byTick = new HashMap<>();
         for (Song.SongNoteEvent event : events) {
