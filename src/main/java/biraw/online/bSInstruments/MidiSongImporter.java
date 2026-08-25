@@ -601,6 +601,7 @@ final class MidiSongImporter {
         if (program <= 23) return "chime";
         if (program <= 31) return "guitar";
         if (program <= 39) return "bass-guitar";
+        if (program == 46) return "harp";
         if (program <= 47) return "xylophone";
         if (program <= 55) return "flute";
         if (program <= 63) return "trumpet";

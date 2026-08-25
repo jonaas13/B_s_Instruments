@@ -573,6 +573,7 @@ public class Instrument implements Listener {
 
     private boolean isKeyboardLike(String instrumentName) {
         return instrumentName.equals("piano")
+                || instrumentName.equals("harp")
                 || instrumentName.equals("pling")
                 || instrumentName.equals("bit");
     }
