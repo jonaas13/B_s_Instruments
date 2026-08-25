@@ -400,7 +400,7 @@ final class MidiSongImporter {
     private static List<Song.SongNoteEvent> transposeLayerIntoPlayableRange(List<Song.SongNoteEvent> events) {
         if (events.isEmpty()) return events;
 
-        LayerRange sourceRange = centralSourceRange(events);
+        LayerRange sourceRange = fullSourceRange(events);
         int bestShift = 0;
         int bestScore = Integer.MAX_VALUE;
         for (int shift = -72; shift <= 72; shift += 12) {
@@ -441,6 +441,18 @@ final class MidiSongImporter {
         return new LayerRange(
                 notes.get(lowIndex),
                 notes.get(highIndex),
+                notes.get(notes.size() / 2)
+        );
+    }
+
+    private static LayerRange fullSourceRange(List<Song.SongNoteEvent> events) {
+        List<Integer> notes = events.stream()
+                .map(Song.SongNoteEvent::midiNote)
+                .sorted()
+                .toList();
+        return new LayerRange(
+                notes.get(0),
+                notes.get(notes.size() - 1),
                 notes.get(notes.size() / 2)
         );
     }
