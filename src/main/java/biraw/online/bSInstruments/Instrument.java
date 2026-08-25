@@ -604,7 +604,7 @@ public class Instrument implements Listener {
         if (customSoundBase != null) {
             return new SoundNote(
                     customSongSound(tuning.soundOffset()),
-                    transposeIntoRangePreservingTone(tunedNoteId - tuning.soundOffset(), MIN_SONG_NOTE_ID, MAX_SONG_NOTE_ID),
+                    tunedNoteId - tuning.soundOffset(),
                     velocity,
                     pitchOffsetSemitones
             );
