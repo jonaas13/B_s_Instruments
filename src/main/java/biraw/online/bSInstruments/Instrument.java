@@ -211,7 +211,7 @@ public class Instrument implements Listener {
 
         float pitch = plr.getPitch();
 
-        pitch+=90; pitch /= 180; pitch *=NATURAL_NOTES.size()-1; // convert player pitch to a note
+        pitch = (90 - pitch) / 180 * (NATURAL_NOTES.size() - 1); // convert player pitch to a note
         int noteIndex = Math.max(0, Math.min(NATURAL_NOTES.size() - 1, Math.round(pitch)));
 
         Note note;
@@ -233,7 +233,6 @@ public class Instrument implements Listener {
     }
 
     SongPlaybackTuning createSongPlaybackTuning() {
-        if (customSoundBase == null) return new SongPlaybackTuning(0);
         return new SongPlaybackTuning(customSoundOffsetForOctave());
     }
 
@@ -638,8 +637,13 @@ public class Instrument implements Listener {
             case -12 -> customSoundBase + "_-1";
             case 12 -> customSoundBase + "_1";
             case 24 -> customSoundBase + "_2";
-            default -> customSoundBase;
+            default -> normalSongSound();
         };
+    }
+
+    private String normalSongSound() {
+        if (sname.equals("sticks")) return "block.note_block.hat";
+        return customSoundBase;
     }
 
     record SongPlaybackTuning(int soundOffset) {
@@ -696,6 +700,7 @@ public class Instrument implements Listener {
             case "banjo" -> 14;
             case "pling" -> 15;
             case "piano" -> 16;
+            case "harp" -> 21;
             case "trumpet" -> 17;
             case "exposed-trumpet" -> 18;
             case "weathered-trumpet" -> 19;

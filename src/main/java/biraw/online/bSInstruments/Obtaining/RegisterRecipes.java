@@ -147,6 +147,14 @@ public class RegisterRecipes implements Listener {
                 null,null,null,
                 null,null,null,
                 Material.BLACKSTONE_SLAB,Material.BLACKSTONE_SLAB,Material.BLACKSTONE_SLAB);
+        new BSRecipe(AllInstruments.GetInstrumentByName("harp").getItem(),
+                null,Material.STRING,null,
+                Material.STRING,Material.NOTE_BLOCK,Material.STRING,
+                Material.STICK,null,Material.STICK);
+        new BSRecipe(AllInstruments.GetInstrumentByName("harp+1").getItem(),
+                null,Material.STRING,null,
+                null,Material.NOTE_BLOCK,Material.STRING,
+                Material.STICK,null,null);
 
         new BSRecipe(AllInstruments.GetInstrumentByName("chime+1").getItem(),
                 Material.STICK,Material.STICK,Material.STICK,

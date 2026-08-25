@@ -14,6 +14,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class AllInstruments {
     private static final List<InstrumentDefinition> INSTRUMENT_DEFINITIONS = List.of(
             new InstrumentDefinition("Piano", org.bukkit.Instrument.PIANO, "block.note_block.harp"),
+            new InstrumentDefinition("Harp", org.bukkit.Instrument.PIANO, "block.note_block.harp"),
             new InstrumentDefinition("Bass Drum", org.bukkit.Instrument.BASS_DRUM, "block.note_block.basedrum"),
             new InstrumentDefinition("Snare Drum", org.bukkit.Instrument.SNARE_DRUM, "block.note_block.snare"),
             new InstrumentDefinition("Sticks", org.bukkit.Instrument.STICKS, "block.note_block.click"),
