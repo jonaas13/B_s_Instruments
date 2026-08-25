@@ -53,6 +53,8 @@ public class Instrument implements Listener {
     private static final int MIN_SONG_NOTE_ID = 0;
     private static final int MAX_SONG_NOTE_ID = 24;
     private static final int MIDI_NOTE_BLOCK_F_SHARP_3 = 54;
+    private static final int MIN_CUSTOM_SOUND_OFFSET = -24;
+    private static final int MAX_CUSTOM_SOUND_OFFSET = 24;
     private static final List<Note.Tone> NATURAL_NOTES = List.of(Note.Tone.G, Note.Tone.A, Note.Tone.B, Note.Tone.C, Note.Tone.D, Note.Tone.E, Note.Tone.F);
     private static final List<Note.Tone> SHARP_NOTES = List.of(Note.Tone.F, Note.Tone.G, Note.Tone.A, Note.Tone.B, Note.Tone.C, Note.Tone.D, Note.Tone.E);
     private static final List<String> NATURAL_NOTE_COLORS = List.of(
@@ -602,17 +604,34 @@ public class Instrument implements Listener {
     private SoundNote getSongSoundNote(int midiNote, int velocity, double pitchOffsetSemitones, SongPlaybackTuning tuning) {
         int tunedNoteId = tunedSongNoteId(midiNote);
         if (customSoundBase != null) {
-            return new SoundNote(
-                    customSongSound(tuning.soundOffset()),
-                    tunedNoteId - tuning.soundOffset(),
-                    velocity,
-                    pitchOffsetSemitones
-            );
+            return getCustomSongSoundNote(tunedNoteId, velocity, pitchOffsetSemitones, tuning.soundOffset());
         }
 
         return new SoundNote(
                 "block.note_block.harp",
                 transposeIntoRangePreservingTone(tunedNoteId, MIN_SONG_NOTE_ID, MAX_SONG_NOTE_ID),
+                velocity,
+                pitchOffsetSemitones
+        );
+    }
+
+    private SoundNote getCustomSongSoundNote(int tunedNoteId, int velocity, double pitchOffsetSemitones, int preferredSoundOffset) {
+        int soundOffset = preferredSoundOffset;
+        int noteId = tunedNoteId - soundOffset;
+
+        while (noteId < MIN_SONG_NOTE_ID && soundOffset > MIN_CUSTOM_SOUND_OFFSET) {
+            soundOffset -= 12;
+            noteId += 12;
+        }
+        while (noteId > MAX_SONG_NOTE_ID && soundOffset < MAX_CUSTOM_SOUND_OFFSET) {
+            soundOffset += 12;
+            noteId -= 12;
+        }
+        noteId = transposeIntoRangePreservingTone(noteId, MIN_SONG_NOTE_ID, MAX_SONG_NOTE_ID);
+
+        return new SoundNote(
+                customSongSound(soundOffset),
+                noteId,
                 velocity,
                 pitchOffsetSemitones
         );
