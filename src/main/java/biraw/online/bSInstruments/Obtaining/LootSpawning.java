@@ -32,9 +32,12 @@ public class LootSpawning implements Listener {
         }
 
         if (random.nextDouble() <= profile.songChance()) {
-            event.getLoot().add(AllSongs.getRandomSong().getItem());
+            var song = AllSongs.getRandomSong();
+            if (song == null) return;
+            event.getLoot().add(song.getItem());
             if (random.nextDouble() <= profile.bonusSongChance()) {
-                event.getLoot().add(AllSongs.getRandomSong().getItem());
+                var bonusSong = AllSongs.getRandomSong();
+                if (bonusSong != null) event.getLoot().add(bonusSong.getItem());
             }
         }
     }

@@ -40,7 +40,7 @@ public class SongPlayer {
             performance.setTask(Bukkit.getScheduler().runTaskTimer(BSInstruments.getInstance(), performance, 0L, 1L));
         }
 
-        int layer = performance.nextAvailableLayer();
+        int layer = performance.nextAvailableLayer(instrument);
         Participant participant = new Participant(player, instrument, song, layer, performance.currentSongTick());
         performance.add(participant);
         ACTIVE_PLAYERS.put(playerId, participant);
@@ -146,16 +146,73 @@ public class SongPlayer {
             if (participants.isEmpty()) finish();
         }
 
-        private int nextAvailableLayer() {
+        private int nextAvailableLayer(Instrument instrument) {
+            return bestLayerFor(instrument, -1, null);
+        }
+
+        private int bestLayerFor(Instrument instrument, int currentLayer, UUID currentPlayerId) {
             Set<Integer> usedLayers = new HashSet<>();
             for (Participant participant : participants.values()) {
+                if (participant.playerId().equals(currentPlayerId)) continue;
                 usedLayers.add(participant.layer());
             }
 
-            for (int layer = 0; layer < song.layerCount(); layer++) {
-                if (!usedLayers.contains(layer)) return layer;
+            if (usedLayers.isEmpty() && currentLayer < 0) {
+                return firstPlayableLayerFor(instrument);
             }
-            return usedLayers.size() % song.layerCount();
+
+            if (currentLayer >= 0
+                    && !usedLayers.contains(currentLayer)
+                    && instrument.matchesSongLayer(song.layer(currentLayer))) {
+                return currentLayer;
+            }
+
+            int bestUnusedMatchingLayer = bestMatchingLayer(instrument, usedLayers);
+            if (bestUnusedMatchingLayer >= 0) return bestUnusedMatchingLayer;
+
+            int unusedFallbackLayer = firstFallbackLayer(instrument, usedLayers);
+            if (unusedFallbackLayer >= 0) return unusedFallbackLayer;
+
+            int bestMatchingLayer = bestMatchingLayer(instrument, Set.of());
+            if (bestMatchingLayer >= 0) return bestMatchingLayer;
+
+            int fallbackLayer = firstFallbackLayer(instrument, Set.of());
+            if (fallbackLayer >= 0) return fallbackLayer;
+
+            return 0;
+        }
+
+        private int firstPlayableLayerFor(Instrument instrument) {
+            if (instrument.matchesSongLayer(song.layer(0))) return 0;
+
+            int bestMatchingLayer = bestMatchingLayer(instrument, Set.of());
+            if (bestMatchingLayer >= 0 && song.layer(bestMatchingLayer).preferredInstrumentName().equals("percussion")) {
+                return bestMatchingLayer;
+            }
+            return 0;
+        }
+
+        private int firstFallbackLayer(Instrument instrument, Set<Integer> skippedLayers) {
+            for (int layer = 0; layer < song.layerCount(); layer++) {
+                if (skippedLayers.contains(layer)) continue;
+                if (instrument.canUseSongLayerAsFallback(song.layer(layer))) return layer;
+            }
+            return -1;
+        }
+
+        private int bestMatchingLayer(Instrument instrument, Set<Integer> skippedLayers) {
+            int bestLayer = -1;
+            int bestScore = 0;
+            for (int layer = 0; layer < song.layerCount(); layer++) {
+                if (skippedLayers.contains(layer)) continue;
+
+                int score = instrument.songLayerMatchScore(song.layer(layer));
+                if (score > bestScore) {
+                    bestLayer = layer;
+                    bestScore = score;
+                }
+            }
+            return bestLayer;
         }
 
         private boolean isJoinableBy(Player joiningPlayer, Song joiningSong) {
@@ -195,11 +252,9 @@ public class SongPlayer {
         private final Player player;
         private Instrument instrument;
         private final Song song;
-        private final int layer;
-        private final List<Song.SongNote> notes;
+        private int layer;
+        private Instrument.SongPlaybackTuning tuning;
         private Performance performance;
-        private int noteIndex;
-        private int nextNoteStartTick;
         private int lastSongTick = -1;
 
         private Participant(Player player, Instrument instrument, Song song, int layer, int songTick) {
@@ -207,8 +262,8 @@ public class SongPlayer {
             this.instrument = instrument;
             this.song = song;
             this.layer = layer;
-            this.notes = song.notesForLayer(layer);
-            seek(songTick);
+            this.tuning = instrument.createSongPlaybackTuning(song.layer(layer));
+            this.lastSongTick = songTick <= 0 ? song.durationTicks() - 1 : songTick - 1;
         }
 
         private UUID playerId() {
@@ -225,6 +280,8 @@ public class SongPlayer {
 
         private void setInstrument(Instrument instrument) {
             this.instrument = instrument;
+            this.tuning = instrument.createSongPlaybackTuning(song.layer(layer));
+            reassignLayerForInstrument();
         }
 
         private Performance performance() {
@@ -235,52 +292,32 @@ public class SongPlayer {
             this.performance = performance;
         }
 
+        private void reassignLayerForInstrument() {
+            if (performance == null) return;
+
+            int nextLayer = performance.bestLayerFor(instrument, layer, playerId());
+            if (nextLayer == layer) return;
+
+            layer = nextLayer;
+            tuning = instrument.createSongPlaybackTuning(song.layer(layer));
+            player.sendActionBar("§d♪ " + song.title() + " · Layer " + (layer + 1) + " ♪");
+        }
+
         private boolean isValid() {
             if (!player.isOnline()) return false;
 
             Instrument currentInstrument = AllInstruments.GetInstrumentFromItem(player.getInventory().getItemInOffHand());
-            if (currentInstrument != null) instrument = currentInstrument;
+            if (currentInstrument != null && currentInstrument != instrument) setInstrument(currentInstrument);
 
             return currentInstrument != null
                     && AllSongs.isSameSong(player.getInventory().getItemInMainHand(), song);
         }
 
-        private void seek(int songTick) {
-            noteIndex = 0;
-            nextNoteStartTick = 0;
-            while (noteIndex < notes.size()) {
-                Song.SongNote note = notes.get(noteIndex);
-                int noteEndTick = nextNoteStartTick + Math.max(1, note.durationTicks());
-                if (songTick <= nextNoteStartTick) return;
-
-                noteIndex++;
-                nextNoteStartTick = noteEndTick;
-            }
-        }
-
         private void playDueNote(int songTick) {
-            if (songTick < lastSongTick) seek(0);
+            int previousSongTick = lastSongTick;
             lastSongTick = songTick;
 
-            for (Song.SongNote songNote : getDueNotes(songTick)) {
-                if (!songNote.isRest()) {
-                    instrument.playSongNote(player, songNote.noteId());
-                }
-            }
-        }
-
-        private List<Song.SongNote> getDueNotes(int songTick) {
-            List<Song.SongNote> dueNotes = new java.util.ArrayList<>();
-            while (noteIndex < notes.size() && songTick >= nextNoteStartTick) {
-                Song.SongNote note = notes.get(noteIndex);
-                int noteEndTick = nextNoteStartTick + Math.max(1, note.durationTicks());
-                dueNotes.add(note);
-
-                noteIndex++;
-                nextNoteStartTick = noteEndTick;
-                if (songTick < noteEndTick) break;
-            }
-            return dueNotes;
+            instrument.playSongNotes(player, song.eventsBetweenTicks(layer, previousSongTick, songTick), tuning);
         }
     }
 }

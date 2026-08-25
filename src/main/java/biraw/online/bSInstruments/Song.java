@@ -1,48 +1,37 @@
 package biraw.online.bSInstruments;
 
-import org.bukkit.Material;
-import org.bukkit.inventory.meta.components.CustomModelDataComponent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.components.CustomModelDataComponent;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 
 public class Song {
     static final int CUSTOM_MODEL_DATA = 101;
-    private static final int REST_NOTE_ID = Integer.MIN_VALUE;
-    private static final int MIN_NOTE_ID = 0;
-    private static final int MAX_NOTE_ID = 24;
-    private static final double TICKS_PER_MINUTE = 30.0 * 20.0;
-    private static final int MAX_HELD_NOTE_RETRIGGER_TICKS = 20;
 
     private final String id;
     private final String title;
-    private final String style;
-    private final double durationUnitTicks;
-    private final List<SongNote> notes;
-    private final List<List<SongNote>> layerNotes;
+    private final List<SongLayer> layers;
     private final int durationTicks;
 
-    public Song(String title, String style, int bpm, String pattern) {
-        this(title, style, bpm, pattern, List.of());
-    }
-
-    public Song(String title, String style, int bpm, String pattern, List<String> layerPatterns) {
-        this.id = toId(title, style);
+    public Song(String title, List<SongLayer> layers, int durationTicks) {
+        this.id = toId(title);
         this.title = title;
-        this.style = style;
-        this.durationUnitTicks = TICKS_PER_MINUTE / Math.max(1, bpm);
-        List<SongNote> melody = parsePattern(pattern);
-        List<List<SongNote>> parsedLayers = parseLayers(melody, layerPatterns);
-        this.durationTicks = getMaxDuration(parsedLayers);
-        this.notes = fitToDuration(melody, durationTicks);
-        this.layerNotes = fitLayersToDuration(parsedLayers, durationTicks);
+        this.layers = List.copyOf(layers);
+        this.durationTicks = Math.max(1, durationTicks);
+        if (this.layers.isEmpty()) throw new IllegalArgumentException("Song must have at least one layer: " + title);
     }
 
     public String id() {
@@ -57,20 +46,41 @@ public class Song {
         return title;
     }
 
-    public List<SongNote> notes() {
-        return notes;
+    public SongLayer layer(int layer) {
+        return layers.get(Math.floorMod(layer, layers.size()));
     }
 
-    public List<SongNote> notesForLayer(int layer) {
-        return layerNotes.get(Math.floorMod(layer, layerNotes.size()));
+    public List<SongNoteEvent> eventsAtTick(int layer, int tick) {
+        return layer(layer).eventsAtTick(tick);
+    }
+
+    public List<SongNoteEvent> eventsBetweenTicks(int layer, int fromExclusive, int toInclusive) {
+        SongLayer songLayer = layer(layer);
+        if (fromExclusive < toInclusive) {
+            return songLayer.eventsBetweenTicks(fromExclusive + 1, toInclusive);
+        }
+        if (fromExclusive == toInclusive) return songLayer.eventsAtTick(toInclusive);
+
+        List<SongNoteEvent> wrappedEvents = new ArrayList<>();
+        wrappedEvents.addAll(songLayer.eventsBetweenTicks(fromExclusive + 1, durationTicks - 1));
+        wrappedEvents.addAll(songLayer.eventsBetweenTicks(0, toInclusive));
+        return List.copyOf(wrappedEvents);
     }
 
     public int layerCount() {
-        return layerNotes.size();
+        return layers.size();
     }
 
     public int durationTicks() {
         return durationTicks;
+    }
+
+    public int totalEventCount() {
+        int count = 0;
+        for (SongLayer layer : layers) {
+            count += layer.events().size();
+        }
+        return count;
     }
 
     public ItemStack getItem() {
@@ -80,7 +90,6 @@ public class Song {
                 .append(Component.text(title, NamedTextColor.WHITE))
                 .decoration(TextDecoration.ITALIC, false));
         meta.lore(List.of(
-                Component.text(style, NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
                 Component.text("Hold in main hand and play an instrument", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false),
                 Component.text("MinearchyInstruments", NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, false)
         ));
@@ -92,142 +101,88 @@ public class Song {
         return item;
     }
 
-    private static String toId(String title, String style) {
-        return (title + "-" + style)
+    static String toId(String title) {
+        return title
                 .toLowerCase(Locale.ROOT)
                 .replace("'", "")
                 .replaceAll("[^a-z0-9]+", "-")
                 .replaceAll("(^-|-$)", "");
     }
 
-    private List<SongNote> parsePattern(String pattern) {
-        List<SongNote> parsed = new ArrayList<>();
-        double exactElapsedTicks = 0.0;
-        int roundedElapsedTicks = 0;
-        for (String token : pattern.split("\\s+")) {
-            if (token.isBlank()) continue;
-            String[] parts = token.split(":");
-            if (parts.length != 2) throw new IllegalArgumentException("Invalid song token: " + token);
+    public static final class SongLayer {
+        private final String name;
+        private final String preferredInstrumentName;
+        private final List<SongNoteEvent> events;
+        private final NavigableMap<Integer, List<SongNoteEvent>> eventsByTick;
 
-            exactElapsedTicks += parseDurationUnits(parts[1]) * durationUnitTicks;
-            int nextRoundedElapsedTicks = Math.max(roundedElapsedTicks + 1, (int) Math.round(exactElapsedTicks));
-            int durationTicks = nextRoundedElapsedTicks - roundedElapsedTicks;
-            roundedElapsedTicks = nextRoundedElapsedTicks;
-            if (parts[0].equalsIgnoreCase("R")) {
-                parsed.add(rest(durationTicks));
-                continue;
+        public SongLayer(String name, String preferredInstrumentName, List<SongNoteEvent> events) {
+            this.name = name == null || name.isBlank() ? "Layer" : name;
+            this.preferredInstrumentName = preferredInstrumentName == null || preferredInstrumentName.isBlank()
+                    ? "piano"
+                    : preferredInstrumentName;
+            this.events = sorted(events);
+            this.eventsByTick = indexByTick(this.events);
+        }
+
+        public String name() {
+            return name;
+        }
+
+        public String preferredInstrumentName() {
+            return preferredInstrumentName;
+        }
+
+        public List<SongNoteEvent> events() {
+            return events;
+        }
+
+        public List<SongNoteEvent> eventsAtTick(int tick) {
+            List<SongNoteEvent> matching = eventsByTick.get(tick);
+            return matching == null ? List.of() : matching;
+        }
+
+        public List<SongNoteEvent> eventsBetweenTicks(int fromInclusive, int toInclusive) {
+            if (fromInclusive > toInclusive) return List.of();
+
+            List<SongNoteEvent> matching = new ArrayList<>();
+            for (List<SongNoteEvent> tickEvents : eventsByTick.subMap(fromInclusive, true, toInclusive, true).values()) {
+                matching.addAll(tickEvents);
             }
-
-            addTriggeredNote(parsed, toNoteId(parts[0]), durationTicks);
-        }
-        return List.copyOf(parsed);
-    }
-
-    private void addTriggeredNote(List<SongNote> parsed, int noteId, int durationTicks) {
-        int remainingTicks = durationTicks;
-        while (remainingTicks > MAX_HELD_NOTE_RETRIGGER_TICKS) {
-            parsed.add(new SongNote(noteId, MAX_HELD_NOTE_RETRIGGER_TICKS));
-            remainingTicks -= MAX_HELD_NOTE_RETRIGGER_TICKS;
-        }
-        parsed.add(new SongNote(noteId, remainingTicks));
-    }
-
-    private double parseDurationUnits(String duration) {
-        if (duration.contains("/")) {
-            String[] fractionParts = duration.split("/");
-            if (fractionParts.length != 2) throw new IllegalArgumentException("Invalid song duration: " + duration);
-
-            double numerator = Double.parseDouble(fractionParts[0]);
-            double denominator = Double.parseDouble(fractionParts[1]);
-            if (denominator == 0.0) throw new IllegalArgumentException("Invalid song duration: " + duration);
-            return numerator / denominator;
+            return List.copyOf(matching);
         }
 
-        return Double.parseDouble(duration);
-    }
-
-    private List<List<SongNote>> parseLayers(List<SongNote> melody, List<String> layerPatterns) {
-        List<List<SongNote>> layers = new ArrayList<>();
-        layers.add(melody);
-        for (String layerPattern : layerPatterns) {
-            layers.add(parsePattern(layerPattern));
+        private static NavigableMap<Integer, List<SongNoteEvent>> indexByTick(List<SongNoteEvent> events) {
+            Map<Integer, List<SongNoteEvent>> eventsByTick = new HashMap<>();
+            for (SongNoteEvent event : events) {
+                eventsByTick.computeIfAbsent(event.tick(), ignored -> new ArrayList<>()).add(event);
+            }
+            NavigableMap<Integer, List<SongNoteEvent>> immutable = new TreeMap<>();
+            for (Map.Entry<Integer, List<SongNoteEvent>> entry : eventsByTick.entrySet()) {
+                immutable.put(entry.getKey(), List.copyOf(entry.getValue()));
+            }
+            return java.util.Collections.unmodifiableNavigableMap(immutable);
         }
-        return List.copyOf(layers);
-    }
 
-    private List<List<SongNote>> fitLayersToDuration(List<List<SongNote>> layers, int targetDurationTicks) {
-        List<List<SongNote>> fittedLayers = new ArrayList<>();
-        for (List<SongNote> layer : layers) {
-            fittedLayers.add(fitToDuration(layer, targetDurationTicks));
+        private static List<SongNoteEvent> sorted(List<SongNoteEvent> events) {
+            if (events == null) return List.of();
+            List<SongNoteEvent> sortedEvents = new ArrayList<>(events);
+            sortedEvents.sort(Comparator.comparingInt(SongNoteEvent::tick)
+                    .thenComparing(Comparator.comparingInt(SongNoteEvent::velocity).reversed())
+                    .thenComparingInt(SongNoteEvent::midiNote));
+            return List.copyOf(sortedEvents);
         }
-        return List.copyOf(fittedLayers);
     }
 
-    private List<SongNote> fitToDuration(List<SongNote> notes, int targetDurationTicks) {
-        List<SongNote> fitted = new ArrayList<>();
-        int totalTicks = 0;
-        for (SongNote note : notes) {
-            if (totalTicks >= targetDurationTicks) break;
-            int durationTicks = Math.min(note.durationTicks(), targetDurationTicks - totalTicks);
-            fitted.add(new SongNote(note.noteId(), durationTicks));
-            totalTicks += durationTicks;
+    public record SongNoteEvent(int tick, int midiNote, int velocity, double pitchOffsetSemitones) {
+        public SongNoteEvent(int tick, int midiNote, int velocity) {
+            this(tick, midiNote, velocity, 0.0);
         }
-        if (totalTicks < targetDurationTicks) fitted.add(rest(targetDurationTicks - totalTicks));
-        return List.copyOf(fitted);
-    }
 
-    private SongNote rest(int durationTicks) {
-        return new SongNote(REST_NOTE_ID, durationTicks);
-    }
-
-    private int getMaxDuration(List<List<SongNote>> layers) {
-        int maxDurationTicks = 0;
-        for (List<SongNote> layer : layers) {
-            maxDurationTicks = Math.max(maxDurationTicks, getTotalDuration(layer));
-        }
-        return maxDurationTicks;
-    }
-
-    private int getTotalDuration(List<SongNote> songNotes) {
-        int totalTicks = 0;
-        for (SongNote songNote : songNotes) {
-            totalTicks += songNote.durationTicks();
-        }
-        return totalTicks;
-    }
-
-    private static int toNoteId(String noteName) {
-        int octave = Character.digit(noteName.charAt(noteName.length() - 1), 10);
-        String pitchName = noteName.substring(0, noteName.length() - 1).toUpperCase(Locale.ROOT);
-        int semitone = switch (pitchName) {
-            case "C" -> 0;
-            case "C#", "DB" -> 1;
-            case "D" -> 2;
-            case "D#", "EB" -> 3;
-            case "E" -> 4;
-            case "F" -> 5;
-            case "F#", "GB" -> 6;
-            case "G" -> 7;
-            case "G#", "AB" -> 8;
-            case "A" -> 9;
-            case "A#", "BB" -> 10;
-            case "B" -> 11;
-            default -> throw new IllegalArgumentException("Invalid note name: " + noteName);
-        };
-
-        // Bukkit note block IDs are the 25 chromatic notes from F#3 through F#5.
-        return normalizeNoteId(((octave - 3) * 12 + semitone) - 6);
-    }
-
-    private static int normalizeNoteId(int noteId) {
-        while (noteId < MIN_NOTE_ID) noteId += 12;
-        while (noteId > MAX_NOTE_ID) noteId -= 12;
-        return noteId;
-    }
-
-    public record SongNote(int noteId, int durationTicks) {
-        public boolean isRest() {
-            return noteId == REST_NOTE_ID;
+        public SongNoteEvent {
+            tick = Math.max(0, tick);
+            midiNote = Math.max(0, Math.min(127, midiNote));
+            velocity = Math.max(1, Math.min(127, velocity));
+            pitchOffsetSemitones = Math.max(-2.0, Math.min(2.0, pitchOffsetSemitones));
         }
     }
 }

@@ -1,0 +1,9 @@
+# Adjust this only if every imported MIDI song sounds consistently sharp or flat.
+# Use -1 when songs sound one semitone too high, 1 when they sound one semitone too low.
+song-pitch-offset-semitones: 0
+
+# Song sounds are only sent to listeners in the same world within this radius.
+song-hearing-radius-blocks: 48.0
+
+# Keep enabled by default. Disable only if hundreds of song recipes make startup too heavy.
+register-song-recipes: true

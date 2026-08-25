@@ -14,16 +14,33 @@ public final class BSInstruments extends JavaPlugin {
     public static NamespacedKey NSKEY;
 
     private static int lastID = 1;
+    private static int songPitchOffsetSemitones;
+    private static double songHearingRadiusSquared;
+    private static boolean registerSongRecipes;
 
     public static int getIntForRecipe(){
         lastID+=1;
         return lastID;
     }
 
+    public static int getSongPitchOffsetSemitones() {
+        return songPitchOffsetSemitones;
+    }
+
+    public static double getSongHearingRadiusSquared() {
+        return songHearingRadiusSquared;
+    }
+
+    public static boolean shouldRegisterSongRecipes() {
+        return registerSongRecipes;
+    }
+
     @Override
     public void onEnable() {
         instance = this;
         NSKEY = new NamespacedKey(instance, "bsi");
+        saveDefaultConfig();
+        loadSettings();
 
         CommandManager cm = new CommandManager();
         instance.getCommand("instrument").setExecutor(cm);
@@ -46,5 +63,12 @@ public final class BSInstruments extends JavaPlugin {
     @Override
     public void onDisable() {
         SongPlayer.stopAll();
+    }
+
+    private void loadSettings() {
+        songPitchOffsetSemitones = getConfig().getInt("song-pitch-offset-semitones", 0);
+        double songHearingRadiusBlocks = Math.max(1.0, getConfig().getDouble("song-hearing-radius-blocks", 48.0));
+        songHearingRadiusSquared = songHearingRadiusBlocks * songHearingRadiusBlocks;
+        registerSongRecipes = getConfig().getBoolean("register-song-recipes", true);
     }
 }

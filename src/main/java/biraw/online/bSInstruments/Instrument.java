@@ -33,6 +33,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.RayTraceResult;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -51,7 +52,9 @@ public class Instrument implements Listener {
     private static final int MUTED_WARNING_COOLDOWN_TICKS = 60;
     private static final int MIN_SONG_NOTE_ID = 0;
     private static final int MAX_SONG_NOTE_ID = 24;
-    private static final List<Integer> CUSTOM_SONG_SOUND_OFFSETS = List.of(-24, -12, 0, 24);
+    private static final int MIDI_NOTE_BLOCK_F_SHARP_3 = 54;
+    private static final int MIN_CUSTOM_SOUND_OFFSET = -24;
+    private static final int MAX_CUSTOM_SOUND_OFFSET = 24;
     private static final List<Note.Tone> NATURAL_NOTES = List.of(Note.Tone.G, Note.Tone.A, Note.Tone.B, Note.Tone.C, Note.Tone.D, Note.Tone.E, Note.Tone.F);
     private static final List<Note.Tone> SHARP_NOTES = List.of(Note.Tone.F, Note.Tone.G, Note.Tone.A, Note.Tone.B, Note.Tone.C, Note.Tone.D, Note.Tone.E);
     private static final List<String> NATURAL_NOTE_COLORS = List.of(
@@ -112,10 +115,7 @@ public class Instrument implements Listener {
         ItemStack give = new ItemStack(item);
         ItemMeta meta = give.getItemMeta();
         meta.displayName(Component.text(name, NamedTextColor.LIGHT_PURPLE).decoration(TextDecoration.ITALIC, false));
-        if (octave > 1) meta.lore(instrumentLore("♪ Extra high note "+octave+" ♪"));
-        else if (octave > 0) meta.lore(instrumentLore("♪ High note ♪"));
-        else if (octave < 0) meta.lore(instrumentLore("♫ Extra low note "+Math.abs(octave)+" ♫"));
-        else meta.lore(instrumentLore("♫ Low note ♫"));
+        meta.lore(instrumentLore(octaveDescription()));
         meta.getPersistentDataContainer().set(
                 BSInstruments.NSKEY,
                 PersistentDataType.STRING,
@@ -132,6 +132,16 @@ public class Instrument implements Listener {
                 Component.text(description, NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false),
                 Component.text("MinearchyInstruments", NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, false)
         );
+    }
+
+    private String octaveDescription() {
+        return switch (octave) {
+            case -2 -> "♫ Extra Low ♫";
+            case -1 -> "♫ Low ♫";
+            case 1 -> "♪ High ♪";
+            case 2 -> "♪ Extra High ♪";
+            default -> "♪ Normal ♪";
+        };
     }
 
     @EventHandler
@@ -224,9 +234,50 @@ public class Instrument implements Listener {
         playForListeners(plr, note);
     }
 
-    void playSongNote(Player plr, int songNoteId) {
+    void playSongNote(Player plr, int midiNote, int velocity, double pitchOffsetSemitones) {
         warnIfMuted(plr, Bukkit.getCurrentTick());
-        playSongForListeners(plr, songNoteId);
+        playSongForListeners(plr, midiNote, velocity, pitchOffsetSemitones);
+    }
+
+    SongPlaybackTuning createSongPlaybackTuning(Song.SongLayer layer) {
+        int preferredSoundOffset = customSoundOffsetForOctave();
+        if (customSoundBase == null) return new SongPlaybackTuning(0);
+
+        int bestSoundOffset = preferredSoundOffset;
+        int bestScore = Integer.MAX_VALUE;
+        for (int relativeOffset = -12; relativeOffset <= 12; relativeOffset += 12) {
+            int soundOffset = preferredSoundOffset + relativeOffset;
+            if (soundOffset < MIN_CUSTOM_SOUND_OFFSET || soundOffset > MAX_CUSTOM_SOUND_OFFSET) continue;
+
+            int score = Math.abs(relativeOffset) * 20;
+            for (Song.SongNoteEvent event : layer.events()) {
+                int noteId = tunedSongNoteId(event.midiNote()) - soundOffset;
+                if (noteId < MIN_SONG_NOTE_ID) score += (MIN_SONG_NOTE_ID - noteId) * 100;
+                else if (noteId > MAX_SONG_NOTE_ID) score += (noteId - MAX_SONG_NOTE_ID) * 100;
+                else score += Math.abs(noteId - 12);
+            }
+
+            if (score < bestScore) {
+                bestSoundOffset = soundOffset;
+                bestScore = score;
+            }
+        }
+        return new SongPlaybackTuning(bestSoundOffset);
+    }
+
+    void playSongNotes(Player player, List<Song.SongNoteEvent> events, SongPlaybackTuning tuning) {
+        if (events.isEmpty()) return;
+
+        warnIfMuted(player, Bukkit.getCurrentTick());
+        List<Player> listeners = getSongListeners(player);
+        if (listeners.isEmpty()) return;
+
+        for (Song.SongNoteEvent event : events) {
+            SoundNote soundNote = getSongSoundNote(event.midiNote(), event.velocity(), event.pitchOffsetSemitones(), tuning);
+            for (Player listener : listeners) {
+                listener.playSound(player.getLocation(), soundNote.sound(), SoundCategory.RECORDS, soundNote.volume(), soundNote.pitch());
+            }
+        }
     }
 
     @EventHandler
@@ -493,56 +544,118 @@ public class Instrument implements Listener {
     }
 
     private int getPlayableBukkitOctave() {
+        if (usesCustomOctaveSound()) return 0;
         if (octave >= 0 && octave <= 1) return octave;
         return 0;
     }
 
-    private boolean usesCustomExtraOctaveSound() {
-        return customSoundBase != null && octave != 0 && octave != 1;
+    private boolean usesCustomOctaveSound() {
+        return customSoundBase != null && octave != 0;
     }
 
-    private String getCustomExtraOctaveSound() {
-        return customSoundBase+"_"+octave;
+    private String getCustomOctaveSound() {
+        return customSongSound(customSoundOffsetForOctave());
     }
 
-    private SoundNote getSongSoundNote(int songNoteId) {
-        int tunedNoteId = songNoteId + (octave * 12);
+    boolean matchesSongLayer(Song.SongLayer layer) {
+        return songLayerMatchScore(layer) > 0;
+    }
+
+    int songLayerMatchScore(Song.SongLayer layer) {
+        String preferredInstrumentName = layer.preferredInstrumentName();
+        if (preferredInstrumentName.equals("percussion")) {
+            return sname.equals("bass-drum")
+                    || sname.equals("snare-drum")
+                    || sname.equals("sticks")
+                    || sname.equals("cow-bell")
+                    ? 100
+                    : 0;
+        }
+        if (preferredInstrumentName.equals(sname)) return 100;
+        if (sname.startsWith("exposed-trumpet") || sname.startsWith("weathered-trumpet") || sname.startsWith("oxidized-trumpet")) {
+            return preferredInstrumentName.equals("trumpet") ? 90 : 0;
+        }
+        if (isKeyboardLike(preferredInstrumentName) && isKeyboardLike(sname)) return 60;
+        if (isMalletLike(preferredInstrumentName) && isMalletLike(sname)) return 60;
+        if (isWindLike(preferredInstrumentName) && isWindLike(sname)) return 60;
+        return 0;
+    }
+
+    boolean canUseSongLayerAsFallback(Song.SongLayer layer) {
+        String preferredInstrumentName = layer.preferredInstrumentName();
+        if (preferredInstrumentName.equals("percussion")) return isPercussionLike();
+        if (preferredInstrumentName.equals("bass-guitar") || preferredInstrumentName.equals("didgeridoo")) return isBassLike();
+        return !isPercussionLike() && !isBassLike();
+    }
+
+    private boolean isPercussionLike() {
+        return sname.equals("bass-drum")
+                || sname.equals("snare-drum")
+                || sname.equals("sticks")
+                || sname.equals("cow-bell");
+    }
+
+    private boolean isBassLike() {
+        return sname.equals("bass-guitar")
+                || sname.equals("didgeridoo");
+    }
+
+    private boolean isKeyboardLike(String instrumentName) {
+        return instrumentName.equals("piano")
+                || instrumentName.equals("pling")
+                || instrumentName.equals("bit");
+    }
+
+    private boolean isMalletLike(String instrumentName) {
+        return instrumentName.equals("bell")
+                || instrumentName.equals("chime")
+                || instrumentName.equals("xylophone")
+                || instrumentName.equals("iron-xylophone");
+    }
+
+    private boolean isWindLike(String instrumentName) {
+        return instrumentName.equals("flute")
+                || instrumentName.equals("trumpet")
+                || instrumentName.equals("exposed-trumpet")
+                || instrumentName.equals("weathered-trumpet")
+                || instrumentName.equals("oxidized-trumpet");
+    }
+
+    private int tunedSongNoteId(int midiNote) {
+        return (midiNote - MIDI_NOTE_BLOCK_F_SHARP_3)
+                + (octave * 12)
+                + BSInstruments.getSongPitchOffsetSemitones();
+    }
+
+    private SoundNote getSongSoundNote(int midiNote, int velocity, double pitchOffsetSemitones, SongPlaybackTuning tuning) {
+        int tunedNoteId = tunedSongNoteId(midiNote);
         if (customSoundBase != null) {
-            int soundOffset = closestCustomSongSoundOffset(tunedNoteId);
-            return new SoundNote(customSongSound(soundOffset), tunedNoteId - soundOffset);
+            return new SoundNote(
+                    customSongSound(tuning.soundOffset()),
+                    transposeIntoRangePreservingTone(tunedNoteId - tuning.soundOffset(), MIN_SONG_NOTE_ID, MAX_SONG_NOTE_ID),
+                    velocity,
+                    pitchOffsetSemitones
+            );
         }
 
-        return new SoundNote("block.note_block.harp", transposeIntoVanillaSongRange(tunedNoteId));
+        return new SoundNote(
+                "block.note_block.harp",
+                transposeIntoRangePreservingTone(tunedNoteId, MIN_SONG_NOTE_ID, MAX_SONG_NOTE_ID),
+                velocity,
+                pitchOffsetSemitones
+        );
     }
 
-    private int transposeIntoVanillaSongRange(int noteId) {
-        while (noteId < MIN_SONG_NOTE_ID) noteId += 12;
-        while (noteId > MAX_SONG_NOTE_ID) noteId -= 12;
+    private int transposeIntoRangePreservingTone(int noteId, int minNoteId, int maxNoteId) {
+        while (noteId < minNoteId) noteId += 12;
+        while (noteId > maxNoteId) noteId -= 12;
         return noteId;
     }
 
-    private int closestCustomSongSoundOffset(int noteId) {
-        int preferredOffset = preferredCustomSongSoundOffset();
-        int closestOffset = 0;
-        int closestDistance = Integer.MAX_VALUE;
-
-        for (int soundOffset : CUSTOM_SONG_SOUND_OFFSETS) {
-            int pitchedNoteId = noteId - soundOffset;
-            if (pitchedNoteId < MIN_SONG_NOTE_ID || pitchedNoteId > MAX_SONG_NOTE_ID) continue;
-
-            int distance = Math.abs(soundOffset - preferredOffset);
-            if (distance < closestDistance) {
-                closestOffset = soundOffset;
-                closestDistance = distance;
-            }
-        }
-
-        return closestOffset;
-    }
-
-    private int preferredCustomSongSoundOffset() {
+    private int customSoundOffsetForOctave() {
         if (octave <= -2) return -24;
         if (octave == -1) return -12;
+        if (octave == 1) return 12;
         if (octave >= 2) return 24;
         return 0;
     }
@@ -551,23 +664,40 @@ public class Instrument implements Listener {
         return switch (soundOffset) {
             case -24 -> customSoundBase + "_-2";
             case -12 -> customSoundBase + "_-1";
+            case 12 -> customSoundBase + "_1";
             case 24 -> customSoundBase + "_2";
             default -> customSoundBase;
         };
     }
 
-    private void playSongForListeners(Player player, int songNoteId) {
-        SoundNote soundNote = getSongSoundNote(songNoteId);
-        for (Player listener : Bukkit.getOnlinePlayers()) {
-            if (MuteManager.isMuted(listener)) continue;
-
-            listener.playSound(player.getLocation(), soundNote.sound(), SoundCategory.RECORDS, NOTE_VOLUME, soundNote.pitch());
+    private void playSongForListeners(Player player, int midiNote, int velocity, double pitchOffsetSemitones) {
+        SoundNote soundNote = getSongSoundNote(midiNote, velocity, pitchOffsetSemitones, new SongPlaybackTuning(0));
+        for (Player listener : getSongListeners(player)) {
+            listener.playSound(player.getLocation(), soundNote.sound(), SoundCategory.RECORDS, soundNote.volume(), soundNote.pitch());
         }
     }
 
-    private record SoundNote(String sound, int noteId) {
+    record SongPlaybackTuning(int soundOffset) {
+    }
+
+    private List<Player> getSongListeners(Player player) {
+        List<Player> listeners = new ArrayList<>();
+        for (Player listener : Bukkit.getOnlinePlayers()) {
+            if (MuteManager.isMuted(listener)) continue;
+            if (!listener.getWorld().equals(player.getWorld())) continue;
+            if (listener.getLocation().distanceSquared(player.getLocation()) > BSInstruments.getSongHearingRadiusSquared()) continue;
+            listeners.add(listener);
+        }
+        return listeners;
+    }
+
+    private record SoundNote(String sound, int noteId, int velocity, double pitchOffsetSemitones) {
+        private float volume() {
+            return NOTE_VOLUME * Math.max(0.35f, Math.min(1.0f, velocity / 96.0f));
+        }
+
         private float pitch() {
-            return (float) Math.pow(2.0, (noteId - 12) / 12.0);
+            return (float) Math.pow(2.0, ((noteId + pitchOffsetSemitones) - 12) / 12.0);
         }
     }
 
@@ -575,8 +705,8 @@ public class Instrument implements Listener {
         for (Player listener : Bukkit.getOnlinePlayers()) {
             if (MuteManager.isMuted(listener)) continue;
 
-            if (usesCustomExtraOctaveSound()) {
-                listener.playSound(player.getLocation(), getCustomExtraOctaveSound(), SoundCategory.RECORDS, NOTE_VOLUME, note.getPitch());
+            if (usesCustomOctaveSound()) {
+                listener.playSound(player.getLocation(), getCustomOctaveSound(), SoundCategory.RECORDS, NOTE_VOLUME, note.getPitch());
             } else {
                 listener.playNote(player.getLocation(), instrument, note);
             }

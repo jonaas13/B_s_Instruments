@@ -97,9 +97,9 @@ public class AllInstruments {
     }
 
     private static String getLookupName(Instrument instrument) {
-        if (instrument.octave < 0) return instrument.sname+"-low-"+Math.abs(instrument.octave);
-        if (instrument.octave > 1) return instrument.sname+"-high-"+instrument.octave;
-        return instrument.sname+"-"+instrument.octave;
+        if (instrument.octave == 0) return instrument.sname;
+        if (instrument.octave > 0) return instrument.sname+"+"+instrument.octave;
+        return instrument.sname+instrument.octave;
     }
 
     private record InstrumentDefinition(String name, org.bukkit.Instrument bukkitInstrument, String customSoundBase) {

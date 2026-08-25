@@ -1,0 +1,5 @@
+# Add bundled MIDI resources here, one per line, for example:
+# songs/example.mid
+#
+# Server owners can also place .mid or .midi files in:
+# plugins/MinearchyInstruments/songs/

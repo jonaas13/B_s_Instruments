@@ -76,146 +76,146 @@ public class RegisterRecipes implements Listener {
     }
 
     public RegisterRecipes(){
-        new BSRecipe(AllInstruments.GetInstrumentByName("guitar-0").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("guitar").getItem(),
                 null,Material.STRING,Material.STICK,
                 Material.STRING,Material.STICK,Material.STRING,
                 Material.NOTE_BLOCK,Material.STRING,null);
-        new BSRecipe(AllInstruments.GetInstrumentByName("guitar-1").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("guitar+1").getItem(),
                 null,Material.STRING,Material.STICK,
                 null,Material.STICK,Material.STRING,
                 Material.NOTE_BLOCK,null,null);
 
-        new BSRecipe(AllInstruments.GetInstrumentByName("bass-drum-0").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("bass-drum").getItem(),
                 Material.LEATHER,Material.LEATHER,Material.LEATHER,
                 Material.STICK,null,Material.STICK,
                 Material.STICK,Material.STICK,Material.STICK);
-        new BSRecipe(AllInstruments.GetInstrumentByName("bass-drum-1").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("bass-drum+1").getItem(),
                 Material.RABBIT_HIDE,Material.RABBIT_HIDE,Material.RABBIT_HIDE,
                 Material.STICK,null,Material.STICK,
                 Material.STICK,Material.STICK,Material.STICK);
 
-        new BSRecipe(AllInstruments.GetInstrumentByName("snare-drum-0").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("snare-drum").getItem(),
                 Material.LEATHER,Material.LEATHER,Material.LEATHER,
                 Material.STICK,null,Material.STICK,
                 null,null,null);
-        new BSRecipe(AllInstruments.GetInstrumentByName("snare-drum-1").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("snare-drum+1").getItem(),
                 Material.RABBIT_HIDE,Material.RABBIT_HIDE,Material.RABBIT_HIDE,
                 Material.STICK,null,Material.STICK,
                 null,null,null);
 
-        new BSRecipe(AllInstruments.GetInstrumentByName("sticks-1").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("sticks+1").getItem(),
                 Material.BONE,null,Material.BONE,
                 Material.STICK,null,Material.STICK,
                 Material.STICK,null,Material.STICK);
-        new BSRecipe(AllInstruments.GetInstrumentByName("sticks-0").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("sticks").getItem(),
                 Material.BONE,null,Material.BONE,
                 Material.BAMBOO,null,Material.BAMBOO,
                 Material.BAMBOO,null,Material.BAMBOO);
 
-        new BSRecipe(AllInstruments.GetInstrumentByName("bass-guitar-0").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("bass-guitar").getItem(),
                 null,Material.IRON_NUGGET,Material.STICK,
                 Material.IRON_NUGGET,Material.STICK,Material.IRON_NUGGET,
                 Material.NOTE_BLOCK,Material.IRON_NUGGET,null);
-        new BSRecipe(AllInstruments.GetInstrumentByName("bass-guitar-1").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("bass-guitar+1").getItem(),
                 null,Material.IRON_NUGGET,Material.STICK,
                 null,Material.STICK,Material.IRON_NUGGET,
                 Material.NOTE_BLOCK,null,null);
 
-        new BSRecipe(AllInstruments.GetInstrumentByName("flute-0").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("flute").getItem(),
                 null,Material.IRON_INGOT,null,
                 null,Material.COPPER_INGOT,null,
                 null,null,null);
-        new BSRecipe(AllInstruments.GetInstrumentByName("flute-1").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("flute+1").getItem(),
                 null,Material.IRON_NUGGET,null,
                 null,Material.COPPER_INGOT,null,
                 null,null,null);
 
-        new BSRecipe(AllInstruments.GetInstrumentByName("cow-bell-0").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("cow-bell").getItem(),
                 null,Material.BELL,null,
                 null,Material.BLAZE_ROD,null,
                 null,null,null);
-        new BSRecipe(AllInstruments.GetInstrumentByName("cow-bell-1").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("cow-bell+1").getItem(),
                 null,Material.BELL,null,
                 null,Material.STICK,null,
                 null,null,null);
 
-        new BSRecipe(AllInstruments.GetInstrumentByName("piano-0").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("piano").getItem(),
                 null,null,null,
                 null,null,null,
                 Material.QUARTZ_SLAB,Material.QUARTZ_SLAB,Material.QUARTZ_SLAB);
-        new BSRecipe(AllInstruments.GetInstrumentByName("piano-1").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("piano+1").getItem(),
                 null,null,null,
                 null,null,null,
                 Material.BLACKSTONE_SLAB,Material.BLACKSTONE_SLAB,Material.BLACKSTONE_SLAB);
 
-        new BSRecipe(AllInstruments.GetInstrumentByName("chime-1").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("chime+1").getItem(),
                 Material.STICK,Material.STICK,Material.STICK,
                 Material.POINTED_DRIPSTONE,Material.POINTED_DRIPSTONE,Material.POINTED_DRIPSTONE,
                 null,null,null);
-        new BSRecipe(AllInstruments.GetInstrumentByName("chime-0").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("chime").getItem(),
                 Material.STICK,Material.STICK,Material.STICK,
                 Material.POINTED_DRIPSTONE,Material.POINTED_DRIPSTONE,Material.POINTED_DRIPSTONE,
                 Material.POINTED_DRIPSTONE,Material.POINTED_DRIPSTONE,Material.POINTED_DRIPSTONE);
 
-        new BSRecipe(AllInstruments.GetInstrumentByName("xylophone-1").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("xylophone+1").getItem(),
                 null,null,null,
                 Material.BONE,Material.BONE,Material.BONE,
                 Material.STICK,null,Material.STICK);
-        new BSRecipe(AllInstruments.GetInstrumentByName("xylophone-0").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("xylophone").getItem(),
                 null,null,null,
                 Material.BONE_BLOCK,Material.BONE_BLOCK,Material.BONE_BLOCK,
                 Material.STICK,null,Material.STICK);
 
-        new BSRecipe(AllInstruments.GetInstrumentByName("iron-xylophone-0").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("iron-xylophone").getItem(),
                 null,null,null,
                 Material.IRON_INGOT,Material.IRON_INGOT,Material.IRON_INGOT,
                 Material.STICK,null,Material.STICK);
-        new BSRecipe(AllInstruments.GetInstrumentByName("iron-xylophone-1").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("iron-xylophone+1").getItem(),
                 null,null,null,
                 Material.IRON_NUGGET,Material.IRON_NUGGET,Material.IRON_NUGGET,
                 Material.STICK,null,Material.STICK);
 
-        new BSRecipe(AllInstruments.GetInstrumentByName("bell-1").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("bell+1").getItem(),
                 null,Material.GOLD_INGOT,null,
                 null,Material.GOLD_NUGGET,null,
                 null,null,null);
-        new BSRecipe(AllInstruments.GetInstrumentByName("bell-0").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("bell").getItem(),
                 null,Material.IRON_INGOT,null,
                 null,Material.IRON_NUGGET,null,
                 null,null,null);
 
-        new BSRecipe(AllInstruments.GetInstrumentByName("didgeridoo-0").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("didgeridoo").getItem(),
                 null,Material.MANGROVE_ROOTS,null,
                 null,Material.MANGROVE_ROOTS,null,
                 null,Material.MANGROVE_ROOTS,null);
-        new BSRecipe(AllInstruments.GetInstrumentByName("didgeridoo-1").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("didgeridoo+1").getItem(),
                 null,Material.MANGROVE_ROOTS,null,
                 null,Material.MANGROVE_ROOTS,null,
                 null,null,null);
 
-        new BSRecipe(AllInstruments.GetInstrumentByName("bit-0").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("bit").getItem(),
                 null,null,null,
                 Material.STONE_PRESSURE_PLATE,Material.STONE_PRESSURE_PLATE,Material.STONE_PRESSURE_PLATE,
                 null,Material.CALIBRATED_SCULK_SENSOR,null);
-        new BSRecipe(AllInstruments.GetInstrumentByName("bit-1").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("bit+1").getItem(),
                 null,null,null,
                 Material.STONE_BUTTON,Material.STONE_BUTTON,Material.STONE_BUTTON,
                 null,Material.CALIBRATED_SCULK_SENSOR,null);
 
-        new BSRecipe(AllInstruments.GetInstrumentByName("banjo-0").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("banjo").getItem(),
                 null,Material.STRING,Material.STICK,
                 null,Material.STICK,Material.STRING,
                 Material.PUMPKIN,null,null);
-        new BSRecipe(AllInstruments.GetInstrumentByName("banjo-1").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("banjo+1").getItem(),
                 null,Material.STRING,Material.STICK,
                 null,Material.STICK,Material.STRING,
                 Material.CARVED_PUMPKIN,null,null);
 
-        new BSRecipe(AllInstruments.GetInstrumentByName("pling-0").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("pling").getItem(),
                 null,Material.AMETHYST_SHARD,null,
                 null,Material.REDSTONE_BLOCK,null,
                 null,null,null);
-        new BSRecipe(AllInstruments.GetInstrumentByName("pling-1").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName("pling+1").getItem(),
                 null,Material.AMETHYST_SHARD,null,
                 null,Material.REDSTONE,null,
                 null,null,null);
@@ -230,11 +230,11 @@ public class RegisterRecipes implements Listener {
     }
 
     private void addTrumpetRecipes(String instrumentName, Material bodyMaterial) {
-        new BSRecipe(AllInstruments.GetInstrumentByName(instrumentName+"-0").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName(instrumentName).getItem(),
                 null,bodyMaterial,null,
                 bodyMaterial,Material.NOTE_BLOCK,bodyMaterial,
                 null,Material.STICK,null);
-        new BSRecipe(AllInstruments.GetInstrumentByName(instrumentName+"-1").getItem(),
+        new BSRecipe(AllInstruments.GetInstrumentByName(instrumentName+"+1").getItem(),
                 null,bodyMaterial,null,
                 bodyMaterial,Material.NOTE_BLOCK,null,
                 null,Material.STICK,null);
@@ -242,17 +242,26 @@ public class RegisterRecipes implements Listener {
 
     private void addTuningRecipes() {
         for (String instrumentName : AllInstruments.GetAllInstrumentNames()) {
-            if (!instrumentName.endsWith("-0")) continue;
+            if (!isDefaultInstrumentName(instrumentName)) continue;
 
-            String baseName = instrumentName.substring(0, instrumentName.length() - 2);
-            addTuningRecipe(baseName+"-1", baseName+"-0", Material.AMETHYST_SHARD);
-            addTuningRecipe(baseName+"-high-2", baseName+"-1", Material.AMETHYST_BLOCK);
-            addTuningRecipe(baseName+"-low-1", baseName+"-0", Material.DEEPSLATE);
-            addTuningRecipe(baseName+"-low-2", baseName+"-low-1", Material.OBSIDIAN);
+            String baseName = instrumentName;
+            addTuningRecipe(baseName+"+1", baseName, Material.AMETHYST_SHARD);
+            addTuningRecipe(baseName+"+2", baseName+"+1", Material.AMETHYST_BLOCK);
+            addTuningRecipe(baseName+"-1", baseName, Material.DEEPSLATE);
+            addTuningRecipe(baseName+"-2", baseName+"-1", Material.OBSIDIAN);
         }
     }
 
+    private boolean isDefaultInstrumentName(String instrumentName) {
+        return !instrumentName.endsWith("+1")
+                && !instrumentName.endsWith("+2")
+                && !instrumentName.endsWith("-1")
+                && !instrumentName.endsWith("-2");
+    }
+
     private void addSongRecipes() {
+        if (!BSInstruments.shouldRegisterSongRecipes()) return;
+
         List<MaterialPair> accentPairs = getSongRecipeAccentPairs();
         int recipeIndex = 0;
         for (Song song : AllSongs.getAllSongs()) {
