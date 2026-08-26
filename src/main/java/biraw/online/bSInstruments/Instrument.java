@@ -3,7 +3,6 @@ package biraw.online.bSInstruments;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.Consumable;
 import io.papermc.paper.datacomponent.item.FoodProperties;
-import io.papermc.paper.datacomponent.item.consumable.ItemUseAnimation;
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import io.papermc.paper.event.player.PlayerStopUsingItemEvent;
 import net.kyori.adventure.key.Key;
@@ -317,7 +316,7 @@ public class Instrument implements Listener {
                 DataComponentTypes.CONSUMABLE,
                 Consumable.consumable()
                         .consumeSeconds(72000.0f)
-                        .animation(ItemUseAnimation.NONE)
+                        .animation(BSInstruments.getInstrumentUseAnimation())
                         .sound(Key.key("minecraft:intentionally_empty"))
                         .hasConsumeParticles(false)
         );

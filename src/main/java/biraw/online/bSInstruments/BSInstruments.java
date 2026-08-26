@@ -3,9 +3,12 @@ package biraw.online.bSInstruments;
 import biraw.online.bSInstruments.Obtaining.CommandManager;
 import biraw.online.bSInstruments.Obtaining.LootSpawning;
 import biraw.online.bSInstruments.Obtaining.RegisterRecipes;
+import io.papermc.paper.datacomponent.item.consumable.ItemUseAnimation;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.Locale;
 
 public final class BSInstruments extends JavaPlugin {
 
@@ -17,6 +20,7 @@ public final class BSInstruments extends JavaPlugin {
     private static int songPitchOffsetSemitones;
     private static double songHearingRadiusSquared;
     private static boolean registerSongRecipes;
+    private static ItemUseAnimation instrumentUseAnimation;
 
     public static int getIntForRecipe(){
         lastID+=1;
@@ -33,6 +37,10 @@ public final class BSInstruments extends JavaPlugin {
 
     public static boolean shouldRegisterSongRecipes() {
         return registerSongRecipes;
+    }
+
+    public static ItemUseAnimation getInstrumentUseAnimation() {
+        return instrumentUseAnimation;
     }
 
     @Override
@@ -70,5 +78,17 @@ public final class BSInstruments extends JavaPlugin {
         double songHearingRadiusBlocks = Math.max(1.0, getConfig().getDouble("song-hearing-radius-blocks", 48.0));
         songHearingRadiusSquared = songHearingRadiusBlocks * songHearingRadiusBlocks;
         registerSongRecipes = getConfig().getBoolean("register-song-recipes", true);
+        instrumentUseAnimation = parseInstrumentUseAnimation(getConfig().getString("instrument-use-animation", "TOOT_HORN"));
+    }
+
+    private ItemUseAnimation parseInstrumentUseAnimation(String configuredAnimation) {
+        if (configuredAnimation == null || configuredAnimation.isBlank()) return ItemUseAnimation.TOOT_HORN;
+
+        try {
+            return ItemUseAnimation.valueOf(configuredAnimation.trim().toUpperCase(Locale.ROOT).replace('-', '_'));
+        } catch (IllegalArgumentException exception) {
+            getLogger().warning("Unknown instrument-use-animation '" + configuredAnimation + "'. Falling back to TOOT_HORN.");
+            return ItemUseAnimation.TOOT_HORN;
+        }
     }
 }
