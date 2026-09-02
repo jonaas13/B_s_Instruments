@@ -57,6 +57,8 @@ public final class BSInstruments extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new LootSpawning(),instance);
         Bukkit.getPluginManager().registerEvents(new RegisterRecipes(),instance);
         Bukkit.getPluginManager().registerEvents(new PlayerStateCleanup(), instance);
+        Bukkit.getPluginManager().registerEvents(new SongBookMenu(), instance);
+        Bukkit.getPluginManager().registerEvents(new DirectorMode(), instance);
 
         Bukkit.getLogger().info(" ");
         Bukkit.getLogger().info("O=========================================================O");

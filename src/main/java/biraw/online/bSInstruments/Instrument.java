@@ -3,6 +3,7 @@ package biraw.online.bSInstruments;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.Consumable;
 import io.papermc.paper.datacomponent.item.FoodProperties;
+import io.papermc.paper.datacomponent.item.consumable.ItemUseAnimation;
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import io.papermc.paper.event.player.PlayerStopUsingItemEvent;
 import net.kyori.adventure.key.Key;
@@ -155,8 +156,10 @@ public class Instrument implements Listener {
         if (isRightClick(event.getAction())) {
             stopLeftAirRepeat(plr);
             cancelWorldInteractionButAllowUse(event);
+            boolean canHoldOffHandRightClick = isHoldableOffHandRightClick(event, plr);
+            prioritizeOffHandUse(plr);
             playNote(plr, false);
-            if (event.getHand() == EquipmentSlot.OFF_HAND && !SongPlayer.isActive(plr)) startRightClickRepeat(plr);
+            if (canHoldOffHandRightClick && !SongPlayer.isActive(plr)) startRightClickRepeat(plr);
             return;
         }
 
@@ -202,6 +205,7 @@ public class Instrument implements Listener {
 
     private void playNote(Player plr, boolean sharp) {
         if (SongPlayer.tryStart(plr, this)) return;
+        SongPlayer.stop(plr);
 
         int currentTick = Bukkit.getCurrentTick();
         if (Objects.equals(LAST_PLAY_TICK.get(plr.getUniqueId()), currentTick)) return;
@@ -306,7 +310,8 @@ public class Instrument implements Listener {
 
     @EventHandler
     private void playerStopUsingItemEvent(PlayerStopUsingItemEvent event) {
-        if (isThisInstrument(event.getItem())) {
+        if (isThisInstrument(event.getItem())
+                && isThisInstrument(event.getPlayer().getInventory().getItemInOffHand())) {
             stopRightClickRepeat(event.getPlayer());
         }
     }
@@ -316,7 +321,7 @@ public class Instrument implements Listener {
                 DataComponentTypes.CONSUMABLE,
                 Consumable.consumable()
                         .consumeSeconds(72000.0f)
-                        .animation(BSInstruments.getInstrumentUseAnimation())
+                        .animation(getRightClickUseAnimation())
                         .sound(Key.key("minecraft:intentionally_empty"))
                         .hasConsumeParticles(false)
         );
@@ -335,7 +340,40 @@ public class Instrument implements Listener {
 
     private boolean isInstrumentControlMode(Player player) {
         ItemStack mainHand = player.getInventory().getItemInMainHand();
-        return mainHand == null || mainHand.getType().isAir() || AllSongs.getSongFromItem(mainHand) != null;
+        return mainHand == null
+                || mainHand.getType().isAir()
+                || AllSongs.getSongFromItem(mainHand) != null
+                || AllInstruments.GetInstrumentFromItem(mainHand) != null;
+    }
+
+    private boolean isHoldableOffHandRightClick(PlayerInteractEvent event, Player player) {
+        return event.getHand() == EquipmentSlot.OFF_HAND
+                && AllInstruments.GetInstrumentFromItem(player.getInventory().getItemInMainHand()) == null;
+    }
+
+    private ItemUseAnimation getRightClickUseAnimation() {
+        return usesWindUseAnimation()
+                ? BSInstruments.getInstrumentUseAnimation()
+                : ItemUseAnimation.NONE;
+    }
+
+    private void prioritizeOffHandUse(Player player) {
+        if (player.hasActiveItem() && player.getActiveItemHand() == EquipmentSlot.HAND) {
+            player.clearActiveItem();
+        }
+
+        if (usesWindUseAnimation()) {
+            player.startUsingItem(EquipmentSlot.OFF_HAND);
+        }
+    }
+
+    private boolean usesWindUseAnimation() {
+        return sname.equals("flute")
+                || sname.equals("didgeridoo")
+                || sname.equals("trumpet")
+                || sname.equals("exposed-trumpet")
+                || sname.equals("weathered-trumpet")
+                || sname.equals("oxidized-trumpet");
     }
 
     boolean isThisInstrument(ItemStack itemStack) {
@@ -403,6 +441,7 @@ public class Instrument implements Listener {
                 BSInstruments.getInstance(),
                 () -> {
                     if (!player.isOnline()
+                            || !isActivelyUsingOffHand(player)
                             || !isThisInstrument(player.getInventory().getItemInOffHand())) {
                         stopRightClickRepeat(player);
                         return;
@@ -414,6 +453,11 @@ public class Instrument implements Listener {
                 RIGHT_CLICK_REPEAT_TICKS
         );
         RIGHT_CLICK_TASKS.put(playerId, task);
+    }
+
+    private boolean isActivelyUsingOffHand(Player player) {
+        return player.hasActiveItem()
+                && player.getActiveItemHand() == EquipmentSlot.OFF_HAND;
     }
 
     private void stopRightClickRepeat(Player player) {

@@ -3,9 +3,12 @@ package biraw.online.bSInstruments.Obtaining;
 import biraw.online.bSInstruments.AllInstruments;
 import biraw.online.bSInstruments.AllSongs;
 import biraw.online.bSInstruments.BSInstruments;
+import biraw.online.bSInstruments.DirectorMode;
 import biraw.online.bSInstruments.Instrument;
 import biraw.online.bSInstruments.MuteManager;
 import biraw.online.bSInstruments.Song;
+import biraw.online.bSInstruments.SongBookMenu;
+import biraw.online.bSInstruments.SongPlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -22,6 +25,7 @@ public class CommandManager implements CommandExecutor, TabExecutor {
     private static final String PERMISSION_GET = "minearchyinstruments.instrument.get";
     private static final String PERMISSION_ALL = "minearchyinstruments.instrument.all";
     private static final String PERMISSION_SONG = "minearchyinstruments.instrument.song";
+    private static final String PERMISSION_DIRECTOR = "minearchyinstruments.instrument.director";
     private static final String PERMISSION_MUTE = "minearchyinstruments.instrument.mute";
     private static final List<String> MUTE_OPTIONS = List.of("true", "false");
 
@@ -45,7 +49,11 @@ public class CommandManager implements CommandExecutor, TabExecutor {
 
         if (subcommand.equals("songs")) {
             if (!hasPermission(player, PERMISSION_SONG)) return true;
-            AllSongs.giveAllSongs(player);
+            if (strings.length >= 2 && strings[1].equalsIgnoreCase("all")) {
+                AllSongs.giveAllSongs(player);
+            } else {
+                SongBookMenu.open(player);
+            }
             return true;
         }
 
@@ -59,6 +67,25 @@ public class CommandManager implements CommandExecutor, TabExecutor {
             if (!hasPermission(player, PERMISSION_SONG)) return true;
             if (strings.length < 2) return false;
             return giveSong(player, strings[1]);
+        }
+
+        if (subcommand.equals("accept")) {
+            return DirectorMode.accept(player);
+        }
+
+        if (subcommand.equals("director")) {
+            if (!hasPermission(player, PERMISSION_DIRECTOR)) return true;
+            DirectorMode.open(player);
+            return true;
+        }
+
+        if (subcommand.equals("stop")) {
+            if (SongPlayer.stop(player)) {
+                player.sendMessage("§aStopped playing the song.");
+            } else {
+                player.sendMessage("§eYou are not playing a song.");
+            }
+            return true;
         }
 
         if (subcommand.equals("mute")) {
@@ -121,11 +148,14 @@ public class CommandManager implements CommandExecutor, TabExecutor {
 
         if (strings.length == 1) {
             List<String> completions = new ArrayList<>();
+            completions.add("accept");
             if (player.hasPermission(PERMISSION_GET)) completions.add("get");
+            if (player.hasPermission(PERMISSION_DIRECTOR)) completions.add("director");
             if (player.hasPermission(PERMISSION_SONG)) {
                 completions.add("song");
                 completions.add("songs");
             }
+            completions.add("stop");
             if (player.hasPermission(PERMISSION_ALL)) completions.add("all");
             if (player.hasPermission(PERMISSION_MUTE)) completions.add("mute");
             return filterCompletions(completions, strings[0]);
@@ -141,6 +171,12 @@ public class CommandManager implements CommandExecutor, TabExecutor {
                 && strings[0].equalsIgnoreCase("song")
                 && player.hasPermission(PERMISSION_SONG)) {
             return filterCompletions(AllSongs.getAllSongNames(), strings[1]);
+        }
+
+        if (strings.length == 2
+                && strings[0].equalsIgnoreCase("songs")
+                && player.hasPermission(PERMISSION_SONG)) {
+            return filterCompletions(List.of("all"), strings[1]);
         }
 
         if (strings.length == 2

@@ -8,6 +8,6 @@ song-hearing-radius-blocks: 48.0
 # Keep enabled by default. Disable only if hundreds of song recipes make startup too heavy.
 register-song-recipes: true
 
-# Vanilla hand animation shown while holding right-click with an instrument.
+# Vanilla hand animation shown while holding right-click with wind instruments.
 # Try TOOT_HORN, BOW, SPYGLASS, CROSSBOW, SPEAR, BRUSH, EAT, DRINK, BLOCK, or NONE.
 instrument-use-animation: TOOT_HORN

@@ -19,19 +19,29 @@ public class SongPlayer {
     private static final Map<UUID, Participant> ACTIVE_PLAYERS = new HashMap<>();
 
     public static boolean tryStart(Player player, Instrument instrument) {
+        Song song = AllSongs.getSongFromItem(player.getInventory().getItemInMainHand());
+        if (song == null) return false;
+
+        return tryStart(player, instrument, song, true);
+    }
+
+    public static boolean tryStartInvited(Player player, Instrument instrument, Song song) {
+        if (song == null) return false;
+
+        return tryStart(player, instrument, song, false);
+    }
+
+    private static boolean tryStart(Player player, Instrument instrument, Song song, boolean requiresSheetMusic) {
         UUID playerId = player.getUniqueId();
         Participant activeParticipant = ACTIVE_PLAYERS.get(playerId);
         if (activeParticipant != null) {
-            if (activeParticipant.isValid()) {
+            if (activeParticipant.isValid() && activeParticipant.song() == song) {
                 activeParticipant.setInstrument(instrument);
                 return true;
             }
 
             activeParticipant.performance().remove(activeParticipant);
         }
-
-        Song song = AllSongs.getSongFromItem(player.getInventory().getItemInMainHand());
-        if (song == null) return false;
 
         Performance performance = findNearbyPerformance(player, song);
         if (performance == null) {
@@ -40,8 +50,8 @@ public class SongPlayer {
             performance.setTask(Bukkit.getScheduler().runTaskTimer(BSInstruments.getInstance(), performance, 0L, 1L));
         }
 
-        int layer = performance.nextAvailableLayer(instrument);
-        Participant participant = new Participant(player, instrument, song, layer, performance.currentSongTick());
+        int layer = performance.nextAvailableLayer(player, instrument);
+        Participant participant = new Participant(player, instrument, song, layer, performance.currentSongTick(), requiresSheetMusic);
         performance.add(participant);
         ACTIVE_PLAYERS.put(playerId, participant);
         performance.playCurrentTickFor(participant);
@@ -50,9 +60,27 @@ public class SongPlayer {
         return true;
     }
 
-    public static void stop(Player player) {
+    public static boolean stop(Player player) {
         Participant participant = ACTIVE_PLAYERS.remove(player.getUniqueId());
-        if (participant != null) participant.performance().remove(participant);
+        if (participant == null) return false;
+
+        participant.performance().remove(participant);
+        return true;
+    }
+
+    public static int stopNearbyPerformance(Player player, Song song) {
+        Performance performance = null;
+        Participant activeParticipant = ACTIVE_PLAYERS.get(player.getUniqueId());
+        if (activeParticipant != null && activeParticipant.song() == song) {
+            performance = activeParticipant.performance();
+        }
+
+        if (performance == null) {
+            performance = findNearbyPerformance(player, song);
+        }
+        if (performance == null) return 0;
+
+        return performance.stopParticipants();
     }
 
     public static boolean isActive(Player player) {
@@ -86,6 +114,7 @@ public class SongPlayer {
         private final Song song;
         private final int startTick;
         private final Map<UUID, Participant> participants = new HashMap<>();
+        private final Map<UUID, Integer> rememberedLayers = new HashMap<>();
         private BukkitTask task;
         private int lastRunTick = Integer.MIN_VALUE;
 
@@ -142,12 +171,27 @@ public class SongPlayer {
 
         private void remove(Participant participant) {
             participants.remove(participant.playerId());
+            rememberedLayers.put(participant.playerId(), participant.layer());
             ACTIVE_PLAYERS.remove(participant.playerId());
             if (participants.isEmpty()) finish();
         }
 
-        private int nextAvailableLayer(Instrument instrument) {
+        private int nextAvailableLayer(Player player, Instrument instrument) {
+            Integer rememberedLayer = rememberedLayers.get(player.getUniqueId());
+            if (rememberedLayer != null
+                    && isLayerAvailable(rememberedLayer)
+                    && instrument.matchesSongLayer(song.layer(rememberedLayer))) {
+                return rememberedLayer;
+            }
+
             return bestLayerFor(instrument, -1, null);
+        }
+
+        private boolean isLayerAvailable(int layer) {
+            for (Participant participant : participants.values()) {
+                if (participant.layer() == layer) return false;
+            }
+            return true;
         }
 
         private int bestLayerFor(Instrument instrument, int currentLayer, UUID currentPlayerId) {
@@ -246,6 +290,16 @@ public class SongPlayer {
         private void cancel() {
             if (task != null) task.cancel();
         }
+
+        private int stopParticipants() {
+            int stopped = participants.size();
+            for (Participant participant : List.copyOf(participants.values())) {
+                ACTIVE_PLAYERS.remove(participant.playerId());
+            }
+            participants.clear();
+            finish();
+            return stopped;
+        }
     }
 
     private static class Participant {
@@ -256,14 +310,16 @@ public class SongPlayer {
         private Instrument.SongPlaybackTuning tuning;
         private Performance performance;
         private int lastSongTick = -1;
+        private final boolean requiresSheetMusic;
 
-        private Participant(Player player, Instrument instrument, Song song, int layer, int songTick) {
+        private Participant(Player player, Instrument instrument, Song song, int layer, int songTick, boolean requiresSheetMusic) {
             this.player = player;
             this.instrument = instrument;
             this.song = song;
             this.layer = layer;
             this.tuning = instrument.createSongPlaybackTuning();
             this.lastSongTick = songTick <= 0 ? song.durationTicks() - 1 : songTick - 1;
+            this.requiresSheetMusic = requiresSheetMusic;
         }
 
         private UUID playerId() {
@@ -276,6 +332,10 @@ public class SongPlayer {
 
         private int layer() {
             return layer;
+        }
+
+        private Song song() {
+            return song;
         }
 
         private void setInstrument(Instrument instrument) {
@@ -310,7 +370,7 @@ public class SongPlayer {
             if (currentInstrument != null && currentInstrument != instrument) setInstrument(currentInstrument);
 
             return currentInstrument != null
-                    && AllSongs.isSameSong(player.getInventory().getItemInMainHand(), song);
+                    && (!requiresSheetMusic || AllSongs.isSameSong(player.getInventory().getItemInMainHand(), song));
         }
 
         private void playDueNote(int songTick) {
