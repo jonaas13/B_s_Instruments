@@ -21,6 +21,7 @@ public final class BSInstruments extends JavaPlugin {
     private static double songHearingRadiusSquared;
     private static boolean registerSongRecipes;
     private static ItemUseAnimation instrumentUseAnimation;
+    private static int directorStartCountdownSeconds;
 
     public static int getIntForRecipe(){
         lastID+=1;
@@ -41,6 +42,10 @@ public final class BSInstruments extends JavaPlugin {
 
     public static ItemUseAnimation getInstrumentUseAnimation() {
         return instrumentUseAnimation;
+    }
+
+    public static int getDirectorStartCountdownSeconds() {
+        return directorStartCountdownSeconds;
     }
 
     @Override
@@ -81,6 +86,7 @@ public final class BSInstruments extends JavaPlugin {
         songHearingRadiusSquared = songHearingRadiusBlocks * songHearingRadiusBlocks;
         registerSongRecipes = getConfig().getBoolean("register-song-recipes", true);
         instrumentUseAnimation = parseInstrumentUseAnimation(getConfig().getString("instrument-use-animation", "TOOT_HORN"));
+        directorStartCountdownSeconds = Math.max(0, getConfig().getInt("director-start-countdown-seconds", 3));
     }
 
     private ItemUseAnimation parseInstrumentUseAnimation(String configuredAnimation) {

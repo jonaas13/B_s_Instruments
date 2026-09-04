@@ -5,6 +5,9 @@ song-pitch-offset-semitones: 0
 # Song sounds are only sent to listeners in the same world within this radius.
 song-hearing-radius-blocks: 48.0
 
+# Director mode waits this many seconds after the director starts playing so accepted players begin together.
+director-start-countdown-seconds: 3
+
 # Keep enabled by default. Disable only if hundreds of song recipes make startup too heavy.
 register-song-recipes: true
 

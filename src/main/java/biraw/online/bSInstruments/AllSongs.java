@@ -2,6 +2,7 @@ package biraw.online.bSInstruments;
 
 import biraw.online.bSInstruments.Obtaining.ItemDelivery;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -15,9 +16,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class AllSongs {
@@ -26,6 +29,7 @@ public final class AllSongs {
     private static final float SONG_CUSTOM_MODEL_DATA = (float) Song.CUSTOM_MODEL_DATA;
     private static final String SONG_DIRECTORY = "songs";
     private static final String BUNDLED_SONG_INDEX = "songs/index.txt";
+    private static final String UNLOCKED_SONG_SEPARATOR = "\n";
     private static final int MAX_LOADED_SONGS = 750;
     private static final long MAX_MIDI_FILE_BYTES = 4L * 1024L * 1024L;
 
@@ -67,18 +71,59 @@ public final class AllSongs {
 
     public static void giveAllSongs(Player player) {
         ensureLoaded();
-        if (allSongs.isEmpty()) {
-            player.sendMessage("§cNo MIDI songs are loaded. Add .mid or .midi files to the plugin songs folder.");
+        List<Song> unlockedSongs = getUnlockedSongs(player);
+        if (unlockedSongs.isEmpty()) {
+            player.sendMessage("§cYou have not unlocked any songs yet.");
             return;
         }
 
         int given = 0;
-        for (Song song : allSongs) {
+        for (Song song : unlockedSongs) {
             if (!ItemDelivery.giveToInventory(player, song.getItem())) break;
             given++;
         }
-        player.sendMessage("§aAdded §e" + given + "§a sheet music items to your inventory.");
-        if (given < allSongs.size()) player.sendMessage("§cInventory full. Some sheet music was not added.");
+        player.sendMessage("§aAdded §e" + given + "§a unlocked sheet music item(s) to your inventory.");
+        if (given < unlockedSongs.size()) player.sendMessage("§cInventory full. Some sheet music was not added.");
+    }
+
+    public static boolean unlockSong(Player player, Song song) {
+        ensureLoaded();
+        if (player == null || song == null) return false;
+
+        Set<String> unlockedSongIds = getUnlockedSongIds(player);
+        if (!unlockedSongIds.add(song.id())) return false;
+
+        saveUnlockedSongIds(player, unlockedSongIds);
+        return true;
+    }
+
+    public static int unlockAllSongs(Player player) {
+        ensureLoaded();
+        Set<String> unlockedSongIds = getUnlockedSongIds(player);
+        int previousSize = unlockedSongIds.size();
+        for (Song song : allSongs) {
+            unlockedSongIds.add(song.id());
+        }
+        saveUnlockedSongIds(player, unlockedSongIds);
+        return unlockedSongIds.size() - previousSize;
+    }
+
+    public static boolean hasUnlockedSong(Player player, Song song) {
+        ensureLoaded();
+        if (player == null || song == null) return false;
+        return getUnlockedSongIds(player).contains(song.id());
+    }
+
+    public static List<Song> getUnlockedSongs(Player player) {
+        ensureLoaded();
+        Set<String> unlockedSongIds = getUnlockedSongIds(player);
+        if (unlockedSongIds.isEmpty()) return List.of();
+
+        List<Song> unlockedSongs = new ArrayList<>();
+        for (Song song : allSongs) {
+            if (unlockedSongIds.contains(song.id())) unlockedSongs.add(song);
+        }
+        return List.copyOf(unlockedSongs);
     }
 
     public static Song getRandomSong() {
@@ -230,6 +275,35 @@ public final class AllSongs {
     private static boolean hasSongCustomModelData(ItemMeta meta) {
         return meta.hasCustomModelDataComponent()
                 && meta.getCustomModelDataComponent().getFloats().contains(SONG_CUSTOM_MODEL_DATA);
+    }
+
+    private static Set<String> getUnlockedSongIds(Player player) {
+        String storedValue = player.getPersistentDataContainer().get(unlockedSongsKey(), PersistentDataType.STRING);
+        Set<String> unlockedSongIds = new LinkedHashSet<>();
+        if (storedValue == null || storedValue.isBlank()) return unlockedSongIds;
+
+        for (String songId : storedValue.split(UNLOCKED_SONG_SEPARATOR)) {
+            String trimmedSongId = songId.trim();
+            if (!trimmedSongId.isBlank()) unlockedSongIds.add(trimmedSongId);
+        }
+        return unlockedSongIds;
+    }
+
+    private static void saveUnlockedSongIds(Player player, Set<String> unlockedSongIds) {
+        if (unlockedSongIds.isEmpty()) {
+            player.getPersistentDataContainer().remove(unlockedSongsKey());
+            return;
+        }
+
+        player.getPersistentDataContainer().set(
+                unlockedSongsKey(),
+                PersistentDataType.STRING,
+                String.join(UNLOCKED_SONG_SEPARATOR, unlockedSongIds)
+        );
+    }
+
+    private static NamespacedKey unlockedSongsKey() {
+        return new NamespacedKey(BSInstruments.getInstance(), "unlocked_songs");
     }
 
     private static boolean isMidiName(String name) {

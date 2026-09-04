@@ -9,6 +9,7 @@ public class PlayerStateCleanup implements Listener {
     private void onPlayerQuit(PlayerQuitEvent event) {
         Instrument.clearPlayerState(event.getPlayer());
         SongPlayer.stop(event.getPlayer());
+        DirectorMode.clearPlayer(event.getPlayer());
         MuteManager.clear(event.getPlayer());
     }
 }

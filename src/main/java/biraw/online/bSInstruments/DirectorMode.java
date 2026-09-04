@@ -17,11 +17,13 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -36,6 +38,7 @@ public final class DirectorMode implements Listener {
     private static final int INVITE_RADIUS_SQUARED = INVITE_RADIUS_BLOCKS * INVITE_RADIUS_BLOCKS;
     private static final int INVITE_EXPIRY_TICKS = 20 * 60;
     private static final Map<UUID, PendingInvite> PENDING_INVITES = new HashMap<>();
+    private static final Map<UUID, DirectorSession> DIRECTOR_SESSIONS = new HashMap<>();
 
     public static void open(Player director) {
         Song song = AllSongs.getSongFromItem(director.getInventory().getItemInMainHand());
@@ -101,10 +104,80 @@ public final class DirectorMode implements Listener {
         }
 
         PENDING_INVITES.remove(player.getUniqueId());
-        SongPlayer.tryStartInvited(player, instrument, invite.song());
-        player.sendMessage("§aJoined " + invite.song().title() + ".");
-        player.sendMessage("§eUse §f/instrument stop §eor play a manual note to stop.");
+        if (SongPlayer.tryJoinDirectorPerformance(player, instrument, invite.song(), director)) {
+            player.sendMessage("§aJoined " + invite.song().title() + ".");
+            player.sendMessage("§eUse §f/instrument stop §eor play a manual note to stop.");
+            return true;
+        }
+
+        DirectorSession session = readySession(director, invite.song());
+        session.setReady(player, instrument);
+        if (session.isStarting()) {
+            player.sendMessage("§aJoined the countdown for " + invite.song().title() + ".");
+        } else {
+            player.sendMessage("§aReady for " + invite.song().title() + ".");
+            player.sendMessage("§eThe song starts when " + director.getName() + " starts playing.");
+        }
         return true;
+    }
+
+    public static boolean tryStartDirectorSession(Player director, Instrument instrument, Song song) {
+        if (instrument == null) return false;
+
+        DirectorSession session = DIRECTOR_SESSIONS.get(director.getUniqueId());
+        if (session == null || session.song() != song || session.readyCount() <= 0) return false;
+
+        if (session.isStarting()) {
+            director.sendActionBar("§eDirector countdown already started.");
+            return true;
+        }
+
+        int countdownSeconds = BSInstruments.getDirectorStartCountdownSeconds();
+        if (countdownSeconds <= 0) {
+            startSessionNow(director, session);
+            return true;
+        }
+
+        session.startCountdown(Bukkit.getScheduler().runTaskTimer(
+                BSInstruments.getInstance(),
+                new Runnable() {
+                    private int secondsRemaining = countdownSeconds;
+
+                    @Override
+                    public void run() {
+                        if (!director.isOnline()
+                                || !AllSongs.isSameSong(director.getInventory().getItemInMainHand(), session.song())) {
+                            cancelSession(director.getUniqueId(), "§cDirector start cancelled.");
+                            return;
+                        }
+
+                        if (secondsRemaining <= 0) {
+                            startSessionNow(director, session);
+                            return;
+                        }
+
+                        sendCountdown(director, session, secondsRemaining);
+                        secondsRemaining--;
+                    }
+                },
+                0L,
+                20L
+        ));
+        return true;
+    }
+
+    static void clearPlayer(Player player) {
+        PENDING_INVITES.remove(player.getUniqueId());
+
+        DirectorSession directedSession = DIRECTOR_SESSIONS.remove(player.getUniqueId());
+        if (directedSession != null) {
+            directedSession.cancelCountdown();
+            directedSession.notifyReadyPlayers("§cDirector session ended.");
+        }
+
+        for (DirectorSession session : DIRECTOR_SESSIONS.values()) {
+            session.removeReady(player.getUniqueId());
+        }
     }
 
     @EventHandler
@@ -119,6 +192,7 @@ public final class DirectorMode implements Listener {
 
         int slot = event.getRawSlot();
         if (slot == STOP_SLOT) {
+            cancelSession(director.getUniqueId(), "§cDirector session stopped.");
             int stopped = SongPlayer.stopNearbyPerformance(director, holder.song());
             director.sendMessage("§aStopped " + stopped + " player(s) playing " + holder.song().title() + ".");
             return;
@@ -164,6 +238,61 @@ public final class DirectorMode implements Listener {
         }
         target.sendMessage("§eYou do not need the sheet music item to accept this invite.");
         target.sendMessage("§eUse §f/instrument stop §eto stop after joining.");
+    }
+
+    private static DirectorSession readySession(Player director, Song song) {
+        DirectorSession existingSession = DIRECTOR_SESSIONS.get(director.getUniqueId());
+        if (existingSession != null && existingSession.song() == song) return existingSession;
+
+        if (existingSession != null) {
+            existingSession.cancelCountdown();
+            existingSession.notifyReadyPlayers("§cDirector switched songs.");
+        }
+
+        DirectorSession session = new DirectorSession(song);
+        DIRECTOR_SESSIONS.put(director.getUniqueId(), session);
+        return session;
+    }
+
+    private static void startSessionNow(Player director, DirectorSession session) {
+        if (!DIRECTOR_SESSIONS.remove(director.getUniqueId(), session)) return;
+        session.cancelCountdown();
+
+        Instrument directorInstrument = AllInstruments.GetInstrumentFromItem(director.getInventory().getItemInOffHand());
+        if (directorInstrument == null || !AllSongs.isSameSong(director.getInventory().getItemInMainHand(), session.song())) {
+            director.sendMessage("§cDirector start cancelled. Hold the sheet music in main hand and an instrument in offhand.");
+            session.notifyReadyPlayers("§cDirector start cancelled.");
+            return;
+        }
+
+        Map<Player, Instrument> readyPlayers = session.readyPlayersInRange(director);
+        if (!SongPlayer.startDirectorPerformance(director, directorInstrument, session.song(), readyPlayers)) {
+            director.sendMessage("§cCould not start director performance.");
+            session.notifyReadyPlayers("§cDirector start cancelled.");
+            return;
+        }
+
+        director.sendMessage("§aStarted " + session.song().title() + " with " + readyPlayers.size() + " ready player(s).");
+        for (Player readyPlayer : readyPlayers.keySet()) {
+            readyPlayer.sendMessage("§aStarted " + session.song().title() + ".");
+            readyPlayer.sendMessage("§eUse §f/instrument stop §eor play a manual note to stop.");
+        }
+    }
+
+    private static void sendCountdown(Player director, DirectorSession session, int secondsRemaining) {
+        String message = "§d♪ " + session.song().title() + " starts in " + secondsRemaining + " ♪";
+        director.sendActionBar(message);
+        for (Player readyPlayer : session.readyPlayersInRange(director).keySet()) {
+            readyPlayer.sendActionBar(message);
+        }
+    }
+
+    private static void cancelSession(UUID directorId, String message) {
+        DirectorSession session = DIRECTOR_SESSIONS.remove(directorId);
+        if (session == null) return;
+
+        session.cancelCountdown();
+        session.notifyReadyPlayers(message);
     }
 
     private static List<Player> nearbyPlayers(Player director) {
@@ -220,6 +349,68 @@ public final class DirectorMode implements Listener {
     private record PendingInvite(UUID directorId, Song song, int expiresAtTick) {
         private boolean isExpired() {
             return Bukkit.getCurrentTick() > expiresAtTick;
+        }
+    }
+
+    private static final class DirectorSession {
+        private final Song song;
+        private final Map<UUID, Instrument> readyPlayers = new LinkedHashMap<>();
+        private BukkitTask countdownTask;
+
+        private DirectorSession(Song song) {
+            this.song = song;
+        }
+
+        private Song song() {
+            return song;
+        }
+
+        private int readyCount() {
+            return readyPlayers.size();
+        }
+
+        private boolean isStarting() {
+            return countdownTask != null;
+        }
+
+        private void setReady(Player player, Instrument instrument) {
+            readyPlayers.put(player.getUniqueId(), instrument);
+        }
+
+        private void removeReady(UUID playerId) {
+            readyPlayers.remove(playerId);
+        }
+
+        private void startCountdown(BukkitTask task) {
+            countdownTask = task;
+        }
+
+        private void cancelCountdown() {
+            if (countdownTask != null) {
+                countdownTask.cancel();
+                countdownTask = null;
+            }
+        }
+
+        private void notifyReadyPlayers(String message) {
+            for (UUID playerId : readyPlayers.keySet()) {
+                Player player = Bukkit.getPlayer(playerId);
+                if (player != null && player.isOnline()) player.sendMessage(message);
+            }
+        }
+
+        private Map<Player, Instrument> readyPlayersInRange(Player director) {
+            Map<Player, Instrument> players = new LinkedHashMap<>();
+            for (Map.Entry<UUID, Instrument> entry : readyPlayers.entrySet()) {
+                Player player = Bukkit.getPlayer(entry.getKey());
+                if (player == null || !player.isOnline()) continue;
+                if (!isInInviteRange(director, player)) continue;
+                Instrument currentInstrument = AllInstruments.GetInstrumentFromItem(player.getInventory().getItemInOffHand());
+                if (currentInstrument == null) continue;
+
+                players.put(player, currentInstrument);
+            }
+            return players;
         }
     }
 

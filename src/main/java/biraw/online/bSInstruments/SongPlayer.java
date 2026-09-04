@@ -21,17 +21,47 @@ public class SongPlayer {
     public static boolean tryStart(Player player, Instrument instrument) {
         Song song = AllSongs.getSongFromItem(player.getInventory().getItemInMainHand());
         if (song == null) return false;
+        if (DirectorMode.tryStartDirectorSession(player, instrument, song)) return true;
 
-        return tryStart(player, instrument, song, true);
+        return tryStart(player, instrument, song, true, true);
     }
 
     public static boolean tryStartInvited(Player player, Instrument instrument, Song song) {
         if (song == null) return false;
 
-        return tryStart(player, instrument, song, false);
+        return tryStart(player, instrument, song, false, true);
     }
 
-    private static boolean tryStart(Player player, Instrument instrument, Song song, boolean requiresSheetMusic) {
+    static boolean tryJoinDirectorPerformance(Player player, Instrument instrument, Song song, Player director) {
+        if (song == null || director == null) return false;
+
+        Participant directorParticipant = ACTIVE_PLAYERS.get(director.getUniqueId());
+        if (directorParticipant == null || directorParticipant.song() != song) return false;
+
+        return tryStart(player, instrument, song, false, false, directorParticipant.performance());
+    }
+
+    static boolean startDirectorPerformance(Player director, Instrument directorInstrument, Song song, Map<Player, Instrument> invitedPlayers) {
+        if (song == null || directorInstrument == null) return false;
+
+        if (!tryStart(director, directorInstrument, song, true, true)) return false;
+
+        for (Map.Entry<Player, Instrument> entry : invitedPlayers.entrySet()) {
+            Player invitedPlayer = entry.getKey();
+            Instrument invitedInstrument = entry.getValue();
+            if (invitedPlayer == null || invitedInstrument == null) continue;
+            if (!invitedPlayer.isOnline()) continue;
+
+            tryJoinDirectorPerformance(invitedPlayer, invitedInstrument, song, director);
+        }
+        return true;
+    }
+
+    private static boolean tryStart(Player player, Instrument instrument, Song song, boolean requiresSheetMusic, boolean createIfMissing) {
+        return tryStart(player, instrument, song, requiresSheetMusic, createIfMissing, null);
+    }
+
+    private static boolean tryStart(Player player, Instrument instrument, Song song, boolean requiresSheetMusic, boolean createIfMissing, Performance forcedPerformance) {
         UUID playerId = player.getUniqueId();
         Participant activeParticipant = ACTIVE_PLAYERS.get(playerId);
         if (activeParticipant != null) {
@@ -43,7 +73,8 @@ public class SongPlayer {
             activeParticipant.performance().remove(activeParticipant);
         }
 
-        Performance performance = findNearbyPerformance(player, song);
+        Performance performance = forcedPerformance != null ? forcedPerformance : findNearbyPerformance(player, song);
+        if (performance == null && !createIfMissing) return false;
         if (performance == null) {
             performance = new Performance(song, Bukkit.getCurrentTick() + 1);
             ACTIVE_PERFORMANCES.add(performance);

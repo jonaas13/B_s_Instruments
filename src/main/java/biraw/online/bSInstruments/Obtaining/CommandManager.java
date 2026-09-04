@@ -25,6 +25,7 @@ public class CommandManager implements CommandExecutor, TabExecutor {
     private static final String PERMISSION_GET = "minearchyinstruments.instrument.get";
     private static final String PERMISSION_ALL = "minearchyinstruments.instrument.all";
     private static final String PERMISSION_SONG = "minearchyinstruments.instrument.song";
+    private static final String PERMISSION_SONGBOOK = "minearchyinstruments.instrument.songbook";
     private static final String PERMISSION_DIRECTOR = "minearchyinstruments.instrument.director";
     private static final String PERMISSION_MUTE = "minearchyinstruments.instrument.mute";
     private static final List<String> MUTE_OPTIONS = List.of("true", "false");
@@ -48,10 +49,12 @@ public class CommandManager implements CommandExecutor, TabExecutor {
         }
 
         if (subcommand.equals("songs")) {
-            if (!hasPermission(player, PERMISSION_SONG)) return true;
             if (strings.length >= 2 && strings[1].equalsIgnoreCase("all")) {
-                AllSongs.giveAllSongs(player);
+                if (!hasPermission(player, PERMISSION_SONG)) return true;
+                int unlocked = AllSongs.unlockAllSongs(player);
+                player.sendMessage("§aUnlocked §e" + unlocked + "§a new song(s) in your song book.");
             } else {
+                if (!hasPermission(player, PERMISSION_SONGBOOK)) return true;
                 SongBookMenu.open(player);
             }
             return true;
@@ -151,10 +154,8 @@ public class CommandManager implements CommandExecutor, TabExecutor {
             completions.add("accept");
             if (player.hasPermission(PERMISSION_GET)) completions.add("get");
             if (player.hasPermission(PERMISSION_DIRECTOR)) completions.add("director");
-            if (player.hasPermission(PERMISSION_SONG)) {
-                completions.add("song");
-                completions.add("songs");
-            }
+            if (player.hasPermission(PERMISSION_SONG)) completions.add("song");
+            if (player.hasPermission(PERMISSION_SONGBOOK) || player.hasPermission(PERMISSION_SONG)) completions.add("songs");
             completions.add("stop");
             if (player.hasPermission(PERMISSION_ALL)) completions.add("all");
             if (player.hasPermission(PERMISSION_MUTE)) completions.add("mute");

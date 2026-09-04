@@ -17,8 +17,11 @@ permissions:
     description: Allows the player to use /instrument all
     default: op
   minearchyinstruments.instrument.song:
-    description: Allows the player to receive sheet music using /instrument song and /instrument songs
+    description: Allows the player to receive sheet music using /instrument song and unlock every song using /instrument songs all
     default: op
+  minearchyinstruments.instrument.songbook:
+    description: Allows the player to open their unlocked song book using /instrument songs
+    default: true
   minearchyinstruments.instrument.director:
     description: Allows the player to invite nearby players to a song they are holding
     default: true
