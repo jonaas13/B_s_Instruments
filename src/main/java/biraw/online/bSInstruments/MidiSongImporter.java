@@ -29,7 +29,7 @@ final class MidiSongImporter {
     private static final int MAX_SOURCE_LAYERS_PER_SONG = 32;
     private static final int MAX_PERFORMANCE_LAYERS_PER_SONG = 8;
     private static final int PERCUSSION_CHANNEL = 9;
-    private static final int MIN_PLAYABLE_MIDI_NOTE = 54;
+    private static final int MIN_PLAYABLE_MIDI_NOTE = 53;
     private static final int MAX_PLAYABLE_MIDI_NOTE = 78;
     private static final int CENTER_PLAYABLE_MIDI_NOTE = 66;
 
@@ -85,7 +85,6 @@ final class MidiSongImporter {
             int[] rawNoteEventCount
     ) {
         int[] programsByChannel = new int[16];
-        double[] pitchBendsByChannel = new double[16];
         String trackName = "Track " + (trackIndex + 1);
 
         for (int eventIndex = 0; eventIndex < track.size(); eventIndex++) {
@@ -104,10 +103,7 @@ final class MidiSongImporter {
                 programsByChannel[channel] = shortMessage.getData1();
                 continue;
             }
-            if (command == ShortMessage.PITCH_BEND) {
-                pitchBendsByChannel[channel] = pitchBendSemitones(shortMessage);
-                continue;
-            }
+            if (command == ShortMessage.PITCH_BEND) continue;
 
             if (command != ShortMessage.NOTE_ON || shortMessage.getData2() <= 0) continue;
             if (rawNoteEventCount[0] >= MAX_RAW_NOTE_EVENTS_PER_SONG) continue;
@@ -121,14 +117,9 @@ final class MidiSongImporter {
                             minecraftTick,
                             shortMessage.getData1(),
                             shortMessage.getData2(),
-                            channel == PERCUSSION_CHANNEL ? 0.0 : pitchBendsByChannel[channel]
+                            0.0
                     ));
         }
-    }
-
-    private static double pitchBendSemitones(ShortMessage shortMessage) {
-        int value = (shortMessage.getData2() << 7) | shortMessage.getData1();
-        return ((value - 8192) / 8192.0) * 2.0;
     }
 
     private static List<SourceLayer> buildSourceLayers(Map<LayerKey, List<Song.SongNoteEvent>> eventsByLayer) {
@@ -260,15 +251,7 @@ final class MidiSongImporter {
     }
 
     private static List<Song.SongNoteEvent> buildLeadLayer(SourceLayer leadSourceLayer) {
-        Map<Integer, List<Song.SongNoteEvent>> byTick = eventsByTick(leadSourceLayer.events());
-        List<Song.SongNoteEvent> lead = new ArrayList<>();
-        for (int tick : sortedTicks(byTick)) {
-            byTick.get(tick).stream()
-                    .max(Comparator.comparingInt(Song.SongNoteEvent::midiNote)
-                            .thenComparingInt(Song.SongNoteEvent::velocity))
-                    .ifPresent(lead::add);
-        }
-        return normalizeDenseTicks(lead);
+        return normalizeDenseTicks(leadSourceLayer.events());
     }
 
     private static List<Song.SongNoteEvent> buildHarmonyLayer(
@@ -417,18 +400,23 @@ final class MidiSongImporter {
             }
         }
 
-        if (bestShift == 0) return events;
-
         List<Song.SongNoteEvent> shiftedEvents = new ArrayList<>();
         for (Song.SongNoteEvent event : events) {
+            int shiftedMidiNote = event.midiNote() + bestShift;
+            if (!isPlayableMidiNote(shiftedMidiNote)) continue;
+
             shiftedEvents.add(new Song.SongNoteEvent(
                     event.tick(),
-                    event.midiNote() + bestShift,
+                    shiftedMidiNote,
                     event.velocity(),
                     event.pitchOffsetSemitones()
             ));
         }
         return List.copyOf(shiftedEvents);
+    }
+
+    private static boolean isPlayableMidiNote(int midiNote) {
+        return midiNote >= MIN_PLAYABLE_MIDI_NOTE && midiNote <= MAX_PLAYABLE_MIDI_NOTE;
     }
 
     private static LayerRange centralSourceRange(List<Song.SongNoteEvent> events) {

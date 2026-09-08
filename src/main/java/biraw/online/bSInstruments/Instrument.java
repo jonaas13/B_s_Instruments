@@ -75,6 +75,7 @@ public class Instrument implements Listener {
     );
     private static final Map<UUID, Integer> LAST_PLAY_TICK = new HashMap<>();
     private static final Map<UUID, Integer> LAST_LEFT_CLICK_TICK = new HashMap<>();
+    private static final Map<UUID, Integer> LAST_RIGHT_CLICK_TICK = new HashMap<>();
     private static final Map<UUID, Integer> LEFT_AIR_CLICK_CANDIDATE_TICK = new HashMap<>();
     private static final Map<UUID, Integer> LEFT_AIR_REPEAT_UNTIL_TICK = new HashMap<>();
     private static final Map<UUID, Integer> LAST_LEFT_AIR_SIGNAL_TICK = new HashMap<>();
@@ -158,7 +159,7 @@ public class Instrument implements Listener {
             cancelWorldInteractionButAllowUse(event);
             boolean canHoldOffHandRightClick = isHoldableOffHandRightClick(event, plr);
             prioritizeOffHandUse(plr);
-            playNote(plr, false);
+            if (!shouldSuppressRightClick(plr)) playNote(plr, false);
             if (canHoldOffHandRightClick && !SongPlayer.isActive(plr)) startRightClickRepeat(plr);
             return;
         }
@@ -392,6 +393,7 @@ public class Instrument implements Listener {
         UUID playerId = player.getUniqueId();
         LAST_PLAY_TICK.remove(playerId);
         LAST_LEFT_CLICK_TICK.remove(playerId);
+        LAST_RIGHT_CLICK_TICK.remove(playerId);
         LEFT_AIR_CLICK_CANDIDATE_TICK.remove(playerId);
         LEFT_AIR_REPEAT_UNTIL_TICK.remove(playerId);
         LAST_LEFT_AIR_SIGNAL_TICK.remove(playerId);
@@ -421,6 +423,15 @@ public class Instrument implements Listener {
         if (lastTick != null && currentTick - lastTick < LEFT_CLICK_REPEAT_TICKS) return true;
 
         LAST_LEFT_CLICK_TICK.put(player.getUniqueId(), currentTick);
+        return false;
+    }
+
+    private boolean shouldSuppressRightClick(Player player) {
+        int currentTick = Bukkit.getCurrentTick();
+        Integer lastTick = LAST_RIGHT_CLICK_TICK.get(player.getUniqueId());
+        if (lastTick != null && currentTick - lastTick < RIGHT_CLICK_REPEAT_TICKS) return true;
+
+        LAST_RIGHT_CLICK_TICK.put(player.getUniqueId(), currentTick);
         return false;
     }
 
@@ -647,7 +658,7 @@ public class Instrument implements Listener {
         if (customSoundBase != null) {
             return new SoundNote(
                     customSongSound(tuning.soundOffset()),
-                    transposeIntoRangePreservingTone(tunedNoteId - tuning.soundOffset(), MIN_SONG_NOTE_ID, MAX_SONG_NOTE_ID),
+                    tunedNoteId - tuning.soundOffset(),
                     velocity,
                     pitchOffsetSemitones
             );
