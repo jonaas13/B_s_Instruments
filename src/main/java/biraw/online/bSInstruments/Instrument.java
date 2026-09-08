@@ -53,6 +53,8 @@ public class Instrument implements Listener {
     private static final int MIN_SONG_NOTE_ID = 0;
     private static final int MAX_SONG_NOTE_ID = 24;
     private static final int MIDI_NOTE_BLOCK_F_SHARP_3 = 54;
+    private static final int MIN_CUSTOM_SOUND_OFFSET = -24;
+    private static final int MAX_CUSTOM_SOUND_OFFSET = 24;
     private static final List<Note.Tone> NATURAL_NOTES = List.of(Note.Tone.G, Note.Tone.A, Note.Tone.B, Note.Tone.C, Note.Tone.D, Note.Tone.E, Note.Tone.F);
     private static final List<Note.Tone> SHARP_NOTES = List.of(Note.Tone.F, Note.Tone.G, Note.Tone.A, Note.Tone.B, Note.Tone.C, Note.Tone.D, Note.Tone.E);
     private static final List<String> NATURAL_NOTE_COLORS = List.of(
@@ -656,9 +658,27 @@ public class Instrument implements Listener {
     private SoundNote getSongSoundNote(int midiNote, int velocity, double pitchOffsetSemitones, SongPlaybackTuning tuning) {
         int tunedNoteId = tunedSongNoteId(midiNote);
         if (customSoundBase != null) {
+            int soundOffset = tuning.soundOffset();
+            int noteId = tunedNoteId - soundOffset;
+
+            // Minecraft clamps pitch to 0.5..2.0. Use an adjacent octave sample only
+            // when needed, preserving the exact sound and pitch of notes already in range.
+            while (noteId + pitchOffsetSemitones < MIN_SONG_NOTE_ID && soundOffset > MIN_CUSTOM_SOUND_OFFSET) {
+                soundOffset -= 12;
+                noteId += 12;
+            }
+            while (noteId + pitchOffsetSemitones > MAX_SONG_NOTE_ID && soundOffset < MAX_CUSTOM_SOUND_OFFSET) {
+                soundOffset += 12;
+                noteId -= 12;
+            }
+
+            // Beyond the pack's outermost samples, keep the note name in a playable octave.
+            while (noteId + pitchOffsetSemitones < MIN_SONG_NOTE_ID) noteId += 12;
+            while (noteId + pitchOffsetSemitones > MAX_SONG_NOTE_ID) noteId -= 12;
+
             return new SoundNote(
-                    customSongSound(tuning.soundOffset()),
-                    tunedNoteId - tuning.soundOffset(),
+                    customSongSound(soundOffset),
+                    noteId,
                     velocity,
                     pitchOffsetSemitones
             );
