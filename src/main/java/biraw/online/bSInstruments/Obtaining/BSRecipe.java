@@ -5,64 +5,63 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapedRecipe;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BSRecipe {
-    public static List<NamespacedKey> AllRecipeKeys = new ArrayList<>();
+public final class BSRecipe {
+    private static final int RECIPE_SIZE = 9;
+    private static final int ROW_SIZE = 3;
+    private static final String INGREDIENT_SYMBOLS = "ABCDEFGHI";
+    private static final List<NamespacedKey> RECIPE_KEYS = new ArrayList<>();
 
-    public BSRecipe(ItemStack resultItem,
-                        Material i1_1,
-                        Material i1_2,
-                        Material i1_3,
+    private BSRecipe() {
+    }
 
-                        Material i2_1,
-                        Material i2_2,
-                        Material i2_3,
+    public static void register(ItemStack resultItem, Material... ingredients) {
+        if (ingredients.length != RECIPE_SIZE) {
+            throw new IllegalArgumentException("A shaped instrument recipe must contain exactly nine slots");
+        }
 
-                        Material i3_1,
-                        Material i3_2,
-                        Material i3_3
-    )
-    {
-
-        // Define the recipe key
         NamespacedKey key = new NamespacedKey(BSInstruments.getInstance(),
-                "recipe_" + BSInstruments.getIntForRecipe());
-
-
-        // Create the recipe
-        org.bukkit.inventory.ShapedRecipe recipe = new org.bukkit.inventory.ShapedRecipe(key,resultItem);
+                "recipe_" + BSInstruments.nextRecipeId());
+        ShapedRecipe recipe = new ShapedRecipe(key, resultItem);
         recipe.shape(
-                (i1_1 != null ? "A" : " ")+
-                        (i1_2 != null ? "B" : " ")+
-                        (i1_3 != null ? "C" : " "),
-
-                (i2_1 != null ? "D" : " ")+
-                        (i2_2 != null ? "E" : " ")+
-                        (i2_3 != null ? "F" : " "),
-
-                (i3_1 != null ? "G" : " ")+
-                        (i3_2 != null ? "H" : " ")+
-                        (i3_3 != null ? "I" : " ")
+                recipeRow(ingredients, 0),
+                recipeRow(ingredients, ROW_SIZE),
+                recipeRow(ingredients, ROW_SIZE * 2)
         );
 
-        if(i1_1!=null) recipe.setIngredient('A', i1_1);
-        if(i1_2!=null) recipe.setIngredient('B', i1_2);
-        if(i1_3!=null) recipe.setIngredient('C', i1_3);
+        for (int slot = 0; slot < ingredients.length; slot++) {
+            Material ingredient = ingredients[slot];
+            if (ingredient != null) recipe.setIngredient(INGREDIENT_SYMBOLS.charAt(slot), ingredient);
+        }
 
-        if(i2_1!=null) recipe.setIngredient('D', i2_1);
-        if(i2_2!=null) recipe.setIngredient('E', i2_2);
-        if(i2_3!=null) recipe.setIngredient('F', i2_3);
-
-        if(i3_1!=null) recipe.setIngredient('G', i3_1);
-        if(i3_2!=null) recipe.setIngredient('H', i3_2);
-        if(i3_3!=null) recipe.setIngredient('I', i3_3);
-
-
-        // Register the recipe
         Bukkit.addRecipe(recipe);
-        AllRecipeKeys.add(key);
+        RECIPE_KEYS.add(key);
+    }
+
+    public static List<NamespacedKey> keys() {
+        return List.copyOf(RECIPE_KEYS);
+    }
+
+    public static void track(NamespacedKey key) {
+        RECIPE_KEYS.add(key);
+    }
+
+    public static void unregisterAll() {
+        for (NamespacedKey key : RECIPE_KEYS) {
+            Bukkit.removeRecipe(key);
+        }
+        RECIPE_KEYS.clear();
+    }
+
+    private static String recipeRow(Material[] ingredients, int startIndex) {
+        StringBuilder row = new StringBuilder(ROW_SIZE);
+        for (int slot = startIndex; slot < startIndex + ROW_SIZE; slot++) {
+            row.append(ingredients[slot] == null ? ' ' : INGREDIENT_SYMBOLS.charAt(slot));
+        }
+        return row.toString();
     }
 }

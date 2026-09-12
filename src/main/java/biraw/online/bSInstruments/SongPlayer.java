@@ -1,5 +1,7 @@
 package biraw.online.bSInstruments;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -23,13 +25,7 @@ public class SongPlayer {
         if (song == null) return false;
         if (DirectorMode.tryStartDirectorSession(player, instrument, song)) return true;
 
-        return tryStart(player, instrument, song, true, true);
-    }
-
-    public static boolean tryStartInvited(Player player, Instrument instrument, Song song) {
-        if (song == null) return false;
-
-        return tryStart(player, instrument, song, false, true);
+        return tryStart(player, instrument, song);
     }
 
     static boolean tryJoinDirectorPerformance(Player player, Instrument instrument, Song song, Player director) {
@@ -44,7 +40,7 @@ public class SongPlayer {
     static boolean startDirectorPerformance(Player director, Instrument directorInstrument, Song song, Map<Player, Instrument> invitedPlayers) {
         if (song == null || directorInstrument == null) return false;
 
-        if (!tryStart(director, directorInstrument, song, true, true)) return false;
+        if (!tryStart(director, directorInstrument, song)) return false;
 
         for (Map.Entry<Player, Instrument> entry : invitedPlayers.entrySet()) {
             Player invitedPlayer = entry.getKey();
@@ -57,8 +53,8 @@ public class SongPlayer {
         return true;
     }
 
-    private static boolean tryStart(Player player, Instrument instrument, Song song, boolean requiresSheetMusic, boolean createIfMissing) {
-        return tryStart(player, instrument, song, requiresSheetMusic, createIfMissing, null);
+    private static boolean tryStart(Player player, Instrument instrument, Song song) {
+        return tryStart(player, instrument, song, true, true, null);
     }
 
     private static boolean tryStart(Player player, Instrument instrument, Song song, boolean requiresSheetMusic, boolean createIfMissing, Performance forcedPerformance) {
@@ -87,7 +83,7 @@ public class SongPlayer {
         ACTIVE_PLAYERS.put(playerId, participant);
         performance.playCurrentTickFor(participant);
 
-        player.sendActionBar("§d♪ " + song.title() + " · Layer " + (layer + 1) + " ♪");
+        player.sendActionBar(songLayerActionBar(song, layer));
         return true;
     }
 
@@ -391,13 +387,13 @@ public class SongPlayer {
 
             layer = nextLayer;
             tuning = instrument.createSongPlaybackTuning();
-            player.sendActionBar("§d♪ " + song.title() + " · Layer " + (layer + 1) + " ♪");
+            player.sendActionBar(songLayerActionBar(song, layer));
         }
 
         private boolean isValid() {
             if (!player.isOnline()) return false;
 
-            Instrument currentInstrument = AllInstruments.GetInstrumentFromItem(player.getInventory().getItemInOffHand());
+            Instrument currentInstrument = AllInstruments.getInstrumentFromItem(player.getInventory().getItemInOffHand());
             if (currentInstrument != null && currentInstrument != instrument) setInstrument(currentInstrument);
 
             return currentInstrument != null
@@ -410,5 +406,9 @@ public class SongPlayer {
 
             instrument.playSongNotes(player, song.eventsBetweenTicks(layer, previousSongTick, songTick), tuning);
         }
+    }
+
+    private static Component songLayerActionBar(Song song, int layer) {
+        return Component.text("♪ " + song.title() + " · Layer " + (layer + 1) + " ♪", NamedTextColor.LIGHT_PURPLE);
     }
 }

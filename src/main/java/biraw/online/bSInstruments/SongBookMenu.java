@@ -37,7 +37,7 @@ public final class SongBookMenu implements Listener {
     private static void open(Player player, int page) {
         List<Song> songs = AllSongs.getUnlockedSongs(player);
         int maxPage = maxPage(songs.size());
-        int clampedPage = Math.max(0, Math.min(page, maxPage));
+        int clampedPage = Math.clamp(page, 0, maxPage);
         SongBookHolder holder = new SongBookHolder(clampedPage);
         Inventory inventory = Bukkit.createInventory(
                 holder,
@@ -116,7 +116,7 @@ public final class SongBookMenu implements Listener {
         if (!isRightClick(event.getAction())) return;
 
         Player player = event.getPlayer();
-        if (AllInstruments.GetInstrumentFromItem(player.getInventory().getItemInOffHand()) != null) return;
+        if (AllInstruments.getInstrumentFromItem(player.getInventory().getItemInOffHand()) != null) return;
 
         Song song = AllSongs.getSongFromItem(player.getInventory().getItemInMainHand());
         if (song == null) return;
@@ -156,7 +156,8 @@ public final class SongBookMenu implements Listener {
         ItemStack item = song.getItem();
         ItemMeta meta = item.getItemMeta();
         List<Component> lore = new ArrayList<>();
-        if (meta.lore() != null) lore.addAll(meta.lore());
+        List<Component> existingLore = meta.lore();
+        if (existingLore != null) lore.addAll(existingLore);
         lore.add(Component.text("Click to take sheet music", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
         meta.lore(lore);
         item.setItemMeta(meta);

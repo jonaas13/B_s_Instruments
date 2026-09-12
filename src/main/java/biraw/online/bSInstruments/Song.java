@@ -96,7 +96,7 @@ public class Song {
         CustomModelDataComponent customModelData = meta.getCustomModelDataComponent();
         customModelData.setFloats(List.of((float) CUSTOM_MODEL_DATA));
         meta.setCustomModelDataComponent(customModelData);
-        meta.getPersistentDataContainer().set(BSInstruments.NSKEY, PersistentDataType.STRING, "song_" + id);
+        meta.getPersistentDataContainer().set(BSInstruments.getItemKey(), PersistentDataType.STRING, "song_" + id);
         item.setItemMeta(meta);
         return item;
     }
@@ -180,9 +180,9 @@ public class Song {
 
         public SongNoteEvent {
             tick = Math.max(0, tick);
-            midiNote = Math.max(0, Math.min(127, midiNote));
-            velocity = Math.max(1, Math.min(127, velocity));
-            pitchOffsetSemitones = Math.max(-2.0, Math.min(2.0, pitchOffsetSemitones));
+            midiNote = Math.clamp(midiNote, 0, 127);
+            velocity = Math.clamp(velocity, 1, 127);
+            pitchOffsetSemitones = Math.clamp(pitchOffsetSemitones, -2.0, 2.0);
         }
     }
 }

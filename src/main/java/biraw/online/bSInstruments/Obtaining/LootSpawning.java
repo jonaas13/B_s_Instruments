@@ -18,16 +18,16 @@ public class LootSpawning implements Listener {
     private static final LootProfile COMMON_PROFILE = new LootProfile(0.14, 0.02, 0.22, 0.04);
 
     @EventHandler
-    private void OnLootSpawning(LootGenerateEvent event){
+    private void OnLootSpawning(LootGenerateEvent event) {
         LootProfile profile = getLootProfile(event.getLootTable());
         if (profile == null) return;
 
         ThreadLocalRandom random = ThreadLocalRandom.current();
 
         if (random.nextDouble() <= profile.instrumentChance()) {
-            event.getLoot().add(AllInstruments.GetRandomInstrument().getItem());
+            event.getLoot().add(AllInstruments.getRandomInstrument().getItem());
             if (random.nextDouble() <= profile.bonusInstrumentChance()) {
-                event.getLoot().add(AllInstruments.GetRandomInstrument().getItem());
+                event.getLoot().add(AllInstruments.getRandomInstrument().getItem());
             }
         }
 
@@ -46,7 +46,7 @@ public class LootSpawning implements Listener {
         if (lootTable == null) return null;
 
         NamespacedKey key = lootTable.getKey();
-        if (key == null || !"minecraft".equals(key.getNamespace())) return null;
+        if (!"minecraft".equals(key.getNamespace())) return null;
 
         String path = key.getKey();
         if (!path.startsWith("chests/")) return null;

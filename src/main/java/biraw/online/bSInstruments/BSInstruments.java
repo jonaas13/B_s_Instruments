@@ -1,31 +1,40 @@
 package biraw.online.bSInstruments;
 
 import biraw.online.bSInstruments.Obtaining.CommandManager;
+import biraw.online.bSInstruments.Obtaining.BSRecipe;
 import biraw.online.bSInstruments.Obtaining.LootSpawning;
 import biraw.online.bSInstruments.Obtaining.RegisterRecipes;
 import io.papermc.paper.datacomponent.item.consumable.ItemUseAnimation;
-import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Locale;
+import java.util.Objects;
 
 public final class BSInstruments extends JavaPlugin {
 
     private static BSInstruments instance;
-    public static BSInstruments getInstance(){return instance;}
-    public static NamespacedKey NSKEY;
+    private static NamespacedKey itemKey;
 
-    private static int lastID = 1;
+    private static int lastRecipeId = 1;
     private static int songPitchOffsetSemitones;
     private static double songHearingRadiusSquared;
     private static boolean registerSongRecipes;
     private static ItemUseAnimation instrumentUseAnimation;
     private static int directorStartCountdownSeconds;
 
-    public static int getIntForRecipe(){
-        lastID+=1;
-        return lastID;
+    public static BSInstruments getInstance() {
+        return instance;
+    }
+
+    public static NamespacedKey getItemKey() {
+        return itemKey;
+    }
+
+    public static int nextRecipeId() {
+        return ++lastRecipeId;
     }
 
     public static int getSongPitchOffsetSemitones() {
@@ -51,33 +60,41 @@ public final class BSInstruments extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-        NSKEY = new NamespacedKey(instance, "bsi");
+        itemKey = new NamespacedKey(this, "bsi");
         saveDefaultConfig();
         loadSettings();
 
-        CommandManager cm = new CommandManager();
-        instance.getCommand("instrument").setExecutor(cm);
-        instance.getCommand("instrument").setTabCompleter(cm);
+        CommandManager commandManager = new CommandManager();
+        PluginCommand instrumentCommand = Objects.requireNonNull(
+                getCommand("instrument"),
+                "instrument command is missing from plugin.yml"
+        );
+        instrumentCommand.setExecutor(commandManager);
+        instrumentCommand.setTabCompleter(commandManager);
 
-        Bukkit.getPluginManager().registerEvents(new LootSpawning(),instance);
-        Bukkit.getPluginManager().registerEvents(new RegisterRecipes(),instance);
-        Bukkit.getPluginManager().registerEvents(new PlayerStateCleanup(), instance);
-        Bukkit.getPluginManager().registerEvents(new SongBookMenu(), instance);
-        Bukkit.getPluginManager().registerEvents(new DirectorMode(), instance);
+        AllInstruments.registerListeners(getServer().getPluginManager(), this);
+        registerListeners(
+                new LootSpawning(),
+                new RegisterRecipes(),
+                new PlayerStateCleanup(),
+                new SongBookMenu(),
+                new DirectorMode()
+        );
 
-        Bukkit.getLogger().info(" ");
-        Bukkit.getLogger().info("O=========================================================O");
-        Bukkit.getLogger().info("    MinearchyInstruments has loaded successfully!");
-        Bukkit.getLogger().info("       This is MinearchyInstruments for Minecraft JDK 25."    );
-        Bukkit.getLogger().info("                       Author: BiRaw");
-        Bukkit.getLogger().info("         Discord: https://discord.gg/XwFqu7uahX :>");
-        Bukkit.getLogger().info("O=========================================================O");
-        Bukkit.getLogger().info(" ");
+        getLogger().info("MinearchyInstruments loaded successfully.");
     }
 
     @Override
     public void onDisable() {
         SongPlayer.stopAll();
+        DirectorMode.clearAll();
+        Instrument.clearAllPlayerState();
+        MuteManager.clearAll();
+        BSRecipe.unregisterAll();
+        AllSongs.clearCache();
+        lastRecipeId = 1;
+        instance = null;
+        itemKey = null;
     }
 
     private void loadSettings() {
@@ -97,6 +114,12 @@ public final class BSInstruments extends JavaPlugin {
         } catch (IllegalArgumentException exception) {
             getLogger().warning("Unknown instrument-use-animation '" + configuredAnimation + "'. Falling back to TOOT_HORN.");
             return ItemUseAnimation.TOOT_HORN;
+        }
+    }
+
+    private void registerListeners(Listener... listeners) {
+        for (Listener listener : listeners) {
+            getServer().getPluginManager().registerEvents(listener, this);
         }
     }
 }

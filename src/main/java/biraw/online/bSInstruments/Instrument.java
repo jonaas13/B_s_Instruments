@@ -29,6 +29,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.components.CustomModelDataComponent;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.RayTraceResult;
@@ -57,23 +58,23 @@ public class Instrument implements Listener {
     private static final int MAX_CUSTOM_SOUND_OFFSET = 24;
     private static final List<Note.Tone> NATURAL_NOTES = List.of(Note.Tone.G, Note.Tone.A, Note.Tone.B, Note.Tone.C, Note.Tone.D, Note.Tone.E, Note.Tone.F);
     private static final List<Note.Tone> SHARP_NOTES = List.of(Note.Tone.F, Note.Tone.G, Note.Tone.A, Note.Tone.B, Note.Tone.C, Note.Tone.D, Note.Tone.E);
-    private static final List<String> NATURAL_NOTE_COLORS = List.of(
-            "§dG", // G - Light Purple
-            "§cA", // A - Red
-            "§6B", // B - Gold/Orange
-            "§eC", // C - Yellow
-            "§aD", // D - Green
-            "§bE", // E - Aqua
-            "§9F"  // F - Blue
+    private static final List<NamedTextColor> NATURAL_NOTE_COLORS = List.of(
+            NamedTextColor.LIGHT_PURPLE, // G
+            NamedTextColor.RED,          // A
+            NamedTextColor.GOLD,         // B
+            NamedTextColor.YELLOW,       // C
+            NamedTextColor.GREEN,        // D
+            NamedTextColor.AQUA,         // E
+            NamedTextColor.BLUE          // F
     );
-    private static final List<String> SHARP_NOTE_COLORS = List.of(
-            "§9F", // F - Blue
-            "§dG", // G - Light Purple
-            "§cA", // A - Red
-            "§6B", // B - Gold/Orange
-            "§eC", // C - Yellow
-            "§aD", // D - Green
-            "§bE"  // E - Aqua
+    private static final List<NamedTextColor> SHARP_NOTE_COLORS = List.of(
+            NamedTextColor.BLUE,         // F
+            NamedTextColor.LIGHT_PURPLE, // G
+            NamedTextColor.RED,          // A
+            NamedTextColor.GOLD,         // B
+            NamedTextColor.YELLOW,       // C
+            NamedTextColor.GREEN,        // D
+            NamedTextColor.AQUA          // E
     );
     private static final Map<UUID, Integer> LAST_PLAY_TICK = new HashMap<>();
     private static final Map<UUID, Integer> LAST_LEFT_CLICK_TICK = new HashMap<>();
@@ -94,35 +95,36 @@ public class Instrument implements Listener {
     private final String itemKey;
     private final int customModelData;
 
-    public Instrument(String name, org.bukkit.Instrument instrument, int octave, Material item){
+    public Instrument(String name, org.bukkit.Instrument instrument, int octave, Material item) {
         this(name, instrument, octave, item, null);
     }
 
-    public Instrument(String name, org.bukkit.Instrument instrument, int octave, Material item, String customSoundBase){
+    public Instrument(String name, org.bukkit.Instrument instrument, int octave, Material item, String customSoundBase) {
         this.octave = octave;
         this.instrument = instrument;
         this.name = name;
         this.item = item;
         this.customSoundBase = customSoundBase;
         this.sname = name.replace(' ', '-').toLowerCase(Locale.ROOT);
-        this.itemKey = "instrument_"+sname+"_"+octave;
+        this.itemKey = "instrument_" + sname + "_" + octave;
         this.customModelData = getCustomModelData(sname);
 
-        Bukkit.getServer().getPluginManager().registerEvents(this,BSInstruments.getInstance());
     }
 
     // get the item of the instrument
-    public ItemStack getItem(){
+    public ItemStack getItem() {
         ItemStack give = new ItemStack(item);
         ItemMeta meta = give.getItemMeta();
         meta.displayName(Component.text(name, NamedTextColor.LIGHT_PURPLE).decoration(TextDecoration.ITALIC, false));
         meta.lore(instrumentLore(octaveDescription()));
         meta.getPersistentDataContainer().set(
-                BSInstruments.NSKEY,
+                BSInstruments.getItemKey(),
                 PersistentDataType.STRING,
                 itemKey
         );
-        meta.setCustomModelData(customModelData);
+        CustomModelDataComponent modelData = meta.getCustomModelDataComponent();
+        modelData.setFloats(List.of((float) customModelData));
+        meta.setCustomModelDataComponent(modelData);
         give.setItemMeta(meta);
         addRightClickUseComponents(give);
         return give;
@@ -146,7 +148,7 @@ public class Instrument implements Listener {
     }
 
     @EventHandler
-    private void playerPlayEvent(PlayerInteractEvent event){
+    private void playerPlayEvent(PlayerInteractEvent event) {
         if (event.getHand() != EquipmentSlot.HAND && event.getHand() != EquipmentSlot.OFF_HAND) return;
         if (!isThisInstrument(event.getPlayer().getInventory().getItemInOffHand())) return;
 
@@ -218,21 +220,21 @@ public class Instrument implements Listener {
         float pitch = plr.getPitch();
 
         pitch = (90 - pitch) / 180 * (NATURAL_NOTES.size() - 1); // convert player pitch to a note
-        int noteIndex = Math.max(0, Math.min(NATURAL_NOTES.size() - 1, Math.round(pitch)));
+        int noteIndex = Math.clamp(Math.round(pitch), 0, NATURAL_NOTES.size() - 1);
 
         Note note;
         if (plr.isSneaking()) {
             Note.Tone tone = NATURAL_NOTES.get(noteIndex);
             note = Note.flat(getPlayableBukkitOctave(), tone);
-            plr.sendActionBar(NATURAL_NOTE_COLORS.get(noteIndex) + "♭");
+            plr.sendActionBar(Component.text(tone.name() + "♭", NATURAL_NOTE_COLORS.get(noteIndex)));
         } else if (sharp) {
             Note.Tone tone = SHARP_NOTES.get(noteIndex);
             note = Note.sharp(getPlayableBukkitOctave(), tone);
-            plr.sendActionBar(SHARP_NOTE_COLORS.get(noteIndex) + "#");
+            plr.sendActionBar(Component.text(tone.name() + "#", SHARP_NOTE_COLORS.get(noteIndex)));
         } else {
             Note.Tone tone = NATURAL_NOTES.get(noteIndex);
             note = Note.natural(getPlayableBukkitOctave(), tone);
-            plr.sendActionBar(NATURAL_NOTE_COLORS.get(noteIndex));
+            plr.sendActionBar(Component.text(tone.name(), NATURAL_NOTE_COLORS.get(noteIndex)));
         }
 
         playForListeners(plr, note);
@@ -343,15 +345,14 @@ public class Instrument implements Listener {
 
     private boolean isInstrumentControlMode(Player player) {
         ItemStack mainHand = player.getInventory().getItemInMainHand();
-        return mainHand == null
-                || mainHand.getType().isAir()
+        return mainHand.getType().isAir()
                 || AllSongs.getSongFromItem(mainHand) != null
-                || AllInstruments.GetInstrumentFromItem(mainHand) != null;
+                || AllInstruments.getInstrumentFromItem(mainHand) != null;
     }
 
     private boolean isHoldableOffHandRightClick(PlayerInteractEvent event, Player player) {
         return event.getHand() == EquipmentSlot.OFF_HAND
-                && AllInstruments.GetInstrumentFromItem(player.getInventory().getItemInMainHand()) == null;
+                && AllInstruments.getInstrumentFromItem(player.getInventory().getItemInMainHand()) == null;
     }
 
     private ItemUseAnimation getRightClickUseAnimation() {
@@ -383,10 +384,11 @@ public class Instrument implements Listener {
         if (itemStack == null || itemStack.getType() != item) return false;
         ItemMeta meta = itemStack.getItemMeta();
         if (meta == null) return false;
-        if (!meta.hasCustomModelData() || meta.getCustomModelData() != customModelData) return false;
+        if (!meta.hasCustomModelDataComponent()
+                || !meta.getCustomModelDataComponent().getFloats().contains((float) customModelData)) return false;
         return Objects.equals(meta.getPersistentDataContainer().get(
-                BSInstruments.NSKEY,
-                PersistentDataType.STRING),
+                        BSInstruments.getItemKey(),
+                        PersistentDataType.STRING),
                 itemKey
         );
     }
@@ -406,6 +408,20 @@ public class Instrument implements Listener {
 
         BukkitTask rightClickTask = RIGHT_CLICK_TASKS.remove(playerId);
         if (rightClickTask != null) rightClickTask.cancel();
+    }
+
+    static void clearAllPlayerState() {
+        LEFT_AIR_TASKS.values().forEach(BukkitTask::cancel);
+        RIGHT_CLICK_TASKS.values().forEach(BukkitTask::cancel);
+        LAST_PLAY_TICK.clear();
+        LAST_LEFT_CLICK_TICK.clear();
+        LAST_RIGHT_CLICK_TICK.clear();
+        LEFT_AIR_CLICK_CANDIDATE_TICK.clear();
+        LEFT_AIR_REPEAT_UNTIL_TICK.clear();
+        LAST_LEFT_AIR_SIGNAL_TICK.clear();
+        LAST_MUTED_WARNING_TICK.clear();
+        LEFT_AIR_TASKS.clear();
+        RIGHT_CLICK_TASKS.clear();
     }
 
     private void cancelWorldInteraction(PlayerInteractEvent event) {
@@ -611,7 +627,8 @@ public class Instrument implements Listener {
     boolean canUseSongLayerAsFallback(Song.SongLayer layer) {
         String preferredInstrumentName = layer.preferredInstrumentName();
         if (preferredInstrumentName.equals("percussion")) return isPercussionLike();
-        if (preferredInstrumentName.equals("bass-guitar") || preferredInstrumentName.equals("didgeridoo")) return isBassLike();
+        if (preferredInstrumentName.equals("bass-guitar") || preferredInstrumentName.equals("didgeridoo"))
+            return isBassLike();
         return !isPercussionLike() && !isBassLike();
     }
 
@@ -655,7 +672,7 @@ public class Instrument implements Listener {
                 + BSInstruments.getSongPitchOffsetSemitones();
     }
 
-    private SoundNote getSongSoundNote(int midiNote, int velocity, double pitchOffsetSemitones, SongPlaybackTuning tuning) {
+    SoundNote getSongSoundNote(int midiNote, int velocity, double pitchOffsetSemitones, SongPlaybackTuning tuning) {
         int tunedNoteId = tunedSongNoteId(midiNote);
         if (customSoundBase != null) {
             int soundOffset = tuning.soundOffset();
@@ -686,15 +703,15 @@ public class Instrument implements Listener {
 
         return new SoundNote(
                 "block.note_block.harp",
-                transposeIntoRangePreservingTone(tunedNoteId, MIN_SONG_NOTE_ID, MAX_SONG_NOTE_ID),
+                transposeIntoPlayableRange(tunedNoteId),
                 velocity,
                 pitchOffsetSemitones
         );
     }
 
-    private int transposeIntoRangePreservingTone(int noteId, int minNoteId, int maxNoteId) {
-        while (noteId < minNoteId) noteId += 12;
-        while (noteId > maxNoteId) noteId -= 12;
+    private int transposeIntoPlayableRange(int noteId) {
+        while (noteId < MIN_SONG_NOTE_ID) noteId += 12;
+        while (noteId > MAX_SONG_NOTE_ID) noteId -= 12;
         return noteId;
     }
 
@@ -729,18 +746,19 @@ public class Instrument implements Listener {
         for (Player listener : Bukkit.getOnlinePlayers()) {
             if (MuteManager.isMuted(listener)) continue;
             if (!listener.getWorld().equals(player.getWorld())) continue;
-            if (listener.getLocation().distanceSquared(player.getLocation()) > BSInstruments.getSongHearingRadiusSquared()) continue;
+            if (listener.getLocation().distanceSquared(player.getLocation()) > BSInstruments.getSongHearingRadiusSquared())
+                continue;
             listeners.add(listener);
         }
         return listeners;
     }
 
-    private record SoundNote(String sound, int noteId, int velocity, double pitchOffsetSemitones) {
-        private float volume() {
-            return NOTE_VOLUME * Math.max(0.35f, Math.min(1.0f, velocity / 96.0f));
+    record SoundNote(String sound, int noteId, int velocity, double pitchOffsetSemitones) {
+        float volume() {
+            return NOTE_VOLUME * Math.clamp(velocity / 96.0f, 0.35f, 1.0f);
         }
 
-        private float pitch() {
+        float pitch() {
             return (float) Math.pow(2.0, ((noteId + pitchOffsetSemitones) - 12) / 12.0);
         }
     }

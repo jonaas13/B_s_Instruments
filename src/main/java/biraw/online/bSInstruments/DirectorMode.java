@@ -37,6 +37,7 @@ public final class DirectorMode implements Listener {
     private static final int INVITE_RADIUS_BLOCKS = 24;
     private static final int INVITE_RADIUS_SQUARED = INVITE_RADIUS_BLOCKS * INVITE_RADIUS_BLOCKS;
     private static final int INVITE_EXPIRY_TICKS = 20 * 60;
+    private static final int MAX_MENU_SONG_TITLE_LENGTH = 20;
     private static final Map<UUID, PendingInvite> PENDING_INVITES = new HashMap<>();
     private static final Map<UUID, DirectorSession> DIRECTOR_SESSIONS = new HashMap<>();
 
@@ -52,7 +53,7 @@ public final class DirectorMode implements Listener {
         Inventory inventory = Bukkit.createInventory(
                 holder,
                 INVENTORY_SIZE,
-                Component.text("Director: " + trimTitle(song.title(), 20), NamedTextColor.DARK_PURPLE)
+                Component.text("Director: " + trimTitle(song.title()), NamedTextColor.DARK_PURPLE)
         );
         holder.setInventory(inventory);
         inventory.setItem(STOP_SLOT, button(Material.BARRIER, "Stop nearby song", NamedTextColor.RED, List.of(
@@ -97,7 +98,7 @@ public final class DirectorMode implements Listener {
             return true;
         }
 
-        Instrument instrument = AllInstruments.GetInstrumentFromItem(player.getInventory().getItemInOffHand());
+        Instrument instrument = AllInstruments.getInstrumentFromItem(player.getInventory().getItemInOffHand());
         if (instrument == null) {
             player.sendMessage("§eHold an instrument in your offhand, then use §f/instrument accept §eagain.");
             return true;
@@ -128,7 +129,7 @@ public final class DirectorMode implements Listener {
         if (session == null || session.song() != song || session.readyCount() <= 0) return false;
 
         if (session.isStarting()) {
-            director.sendActionBar("§eDirector countdown already started.");
+            director.sendActionBar(Component.text("Director countdown already started.", NamedTextColor.YELLOW));
             return true;
         }
 
@@ -178,6 +179,14 @@ public final class DirectorMode implements Listener {
         for (DirectorSession session : DIRECTOR_SESSIONS.values()) {
             session.removeReady(player.getUniqueId());
         }
+    }
+
+    static void clearAll() {
+        for (DirectorSession session : DIRECTOR_SESSIONS.values()) {
+            session.cancelCountdown();
+        }
+        DIRECTOR_SESSIONS.clear();
+        PENDING_INVITES.clear();
     }
 
     @EventHandler
@@ -230,7 +239,7 @@ public final class DirectorMode implements Listener {
                 .append(Component.text("[Accept]", NamedTextColor.GREEN)
                         .clickEvent(ClickEvent.runCommand("/instrument accept"))
                         .hoverEvent(HoverEvent.showText(Component.text("Accept song invite", NamedTextColor.GREEN)))));
-        Instrument instrument = AllInstruments.GetInstrumentFromItem(target.getInventory().getItemInOffHand());
+        Instrument instrument = AllInstruments.getInstrumentFromItem(target.getInventory().getItemInOffHand());
         if (instrument == null) {
             target.sendMessage("§eHold an instrument in your offhand before accepting.");
         } else {
@@ -258,7 +267,7 @@ public final class DirectorMode implements Listener {
         if (!DIRECTOR_SESSIONS.remove(director.getUniqueId(), session)) return;
         session.cancelCountdown();
 
-        Instrument directorInstrument = AllInstruments.GetInstrumentFromItem(director.getInventory().getItemInOffHand());
+        Instrument directorInstrument = AllInstruments.getInstrumentFromItem(director.getInventory().getItemInOffHand());
         if (directorInstrument == null || !AllSongs.isSameSong(director.getInventory().getItemInMainHand(), session.song())) {
             director.sendMessage("§cDirector start cancelled. Hold the sheet music in main hand and an instrument in offhand.");
             session.notifyReadyPlayers("§cDirector start cancelled.");
@@ -280,7 +289,10 @@ public final class DirectorMode implements Listener {
     }
 
     private static void sendCountdown(Player director, DirectorSession session, int secondsRemaining) {
-        String message = "§d♪ " + session.song().title() + " starts in " + secondsRemaining + " ♪";
+        Component message = Component.text(
+                "♪ " + session.song().title() + " starts in " + secondsRemaining + " ♪",
+                NamedTextColor.LIGHT_PURPLE
+        );
         director.sendActionBar(message);
         for (Player readyPlayer : session.readyPlayersInRange(director).keySet()) {
             readyPlayer.sendActionBar(message);
@@ -317,9 +329,8 @@ public final class DirectorMode implements Listener {
         if (itemMeta instanceof SkullMeta skullMeta) {
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(player.getUniqueId());
             skullMeta.setOwningPlayer(offlinePlayer);
-            itemMeta = skullMeta;
         }
-        Instrument instrument = AllInstruments.GetInstrumentFromItem(player.getInventory().getItemInOffHand());
+        Instrument instrument = AllInstruments.getInstrumentFromItem(player.getInventory().getItemInOffHand());
         Component instrumentLine = instrument == null
                 ? Component.text("No offhand instrument", NamedTextColor.RED).decoration(TextDecoration.ITALIC, false)
                 : Component.text("Offhand: " + instrument.name, NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false);
@@ -341,9 +352,9 @@ public final class DirectorMode implements Listener {
         return item;
     }
 
-    private static String trimTitle(String title, int maxLength) {
-        if (title.length() <= maxLength) return title;
-        return title.substring(0, Math.max(0, maxLength - 3)) + "...";
+    private static String trimTitle(String title) {
+        if (title.length() <= MAX_MENU_SONG_TITLE_LENGTH) return title;
+        return title.substring(0, MAX_MENU_SONG_TITLE_LENGTH - 3) + "...";
     }
 
     private record PendingInvite(UUID directorId, Song song, int expiresAtTick) {
@@ -405,7 +416,7 @@ public final class DirectorMode implements Listener {
                 Player player = Bukkit.getPlayer(entry.getKey());
                 if (player == null || !player.isOnline()) continue;
                 if (!isInInviteRange(director, player)) continue;
-                Instrument currentInstrument = AllInstruments.GetInstrumentFromItem(player.getInventory().getItemInOffHand());
+                Instrument currentInstrument = AllInstruments.getInstrumentFromItem(player.getInventory().getItemInOffHand());
                 if (currentInstrument == null) continue;
 
                 players.put(player, currentInstrument);

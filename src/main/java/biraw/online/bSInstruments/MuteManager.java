@@ -7,20 +7,30 @@ import java.util.Set;
 import java.util.UUID;
 
 
-public class MuteManager {
-    private static final Set<UUID> Muted = new HashSet<>();
-    public static boolean isMuted(Player player){return Muted.contains(player.getUniqueId());}
+public final class MuteManager {
+    private static final Set<UUID> MUTED_PLAYERS = new HashSet<>();
+
+    private MuteManager() {
+    }
+
+    public static boolean isMuted(Player player) {
+        return MUTED_PLAYERS.contains(player.getUniqueId());
+    }
 
     public static void setMuted(Player player, boolean muted) {
         if (muted) {
-            Muted.add(player.getUniqueId());
+            MUTED_PLAYERS.add(player.getUniqueId());
         } else {
-            Muted.remove(player.getUniqueId());
+            MUTED_PLAYERS.remove(player.getUniqueId());
         }
     }
 
     public static void clear(Player player) {
-        Muted.remove(player.getUniqueId());
+        MUTED_PLAYERS.remove(player.getUniqueId());
+    }
+
+    static void clearAll() {
+        MUTED_PLAYERS.clear();
     }
 
     public static void sendMuteStatus(Player player) {

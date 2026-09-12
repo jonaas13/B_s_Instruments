@@ -1,8 +1,9 @@
 package biraw.online.bSInstruments;
 
+import biraw.online.bSInstruments.Obtaining.ItemDelivery;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import biraw.online.bSInstruments.Obtaining.ItemDelivery;
+import org.bukkit.plugin.PluginManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +12,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class AllInstruments {
+public final class AllInstruments {
     private static final List<InstrumentDefinition> INSTRUMENT_DEFINITIONS = List.of(
             new InstrumentDefinition("Piano", org.bukkit.Instrument.PIANO, "block.note_block.harp"),
             new InstrumentDefinition("Harp", org.bukkit.Instrument.PIANO, "block.note_block.harp"),
@@ -37,7 +38,7 @@ public class AllInstruments {
     );
     private static final int[] OCTAVES = {2, 1, 0, -1, -2};
 
-    public static final List<Instrument> AllInstruments;
+    private static final List<Instrument> ALL_INSTRUMENTS;
     private static final Map<String, Instrument> INSTRUMENTS_BY_NAME;
     private static final List<String> INSTRUMENT_NAMES;
 
@@ -62,45 +63,54 @@ public class AllInstruments {
             }
         }
 
-        AllInstruments = List.copyOf(instruments);
+        ALL_INSTRUMENTS = List.copyOf(instruments);
         INSTRUMENTS_BY_NAME = Map.copyOf(instrumentsByName);
         INSTRUMENT_NAMES = List.copyOf(instrumentNames);
     }
 
-    public static Instrument GetInstrumentByName(String name){
+    private AllInstruments() {
+    }
+
+    public static Instrument getInstrumentByName(String name) {
         if (name == null) return null;
         return INSTRUMENTS_BY_NAME.get(name.toLowerCase(Locale.ROOT));
     }
 
-    public static List<String> GetAllInstrumentNames(){
+    public static List<String> getAllInstrumentNames() {
         return INSTRUMENT_NAMES;
     }
 
-    public static void GiveAllInstruments(Player player){
+    public static void giveAllInstruments(Player player) {
         int given = 0;
-        for (Instrument i : AllInstruments){
-            if (!ItemDelivery.giveToInventory(player, i.getItem())) break;
+        for (Instrument instrument : ALL_INSTRUMENTS) {
+            if (!ItemDelivery.giveToInventory(player, instrument.getItem())) break;
             given++;
         }
         player.sendMessage("§aAdded §e" + given + "§a instruments to your inventory.");
-        if (given < AllInstruments.size()) player.sendMessage("§cInventory full. Some instruments were not added.");
+        if (given < ALL_INSTRUMENTS.size()) player.sendMessage("§cInventory full. Some instruments were not added.");
     }
 
-    public static Instrument GetRandomInstrument(){
-        return AllInstruments.get(ThreadLocalRandom.current().nextInt(AllInstruments.size()));
+    public static Instrument getRandomInstrument() {
+        return ALL_INSTRUMENTS.get(ThreadLocalRandom.current().nextInt(ALL_INSTRUMENTS.size()));
     }
 
-    public static Instrument GetInstrumentFromItem(org.bukkit.inventory.ItemStack itemStack) {
-        for (Instrument instrument : AllInstruments) {
+    public static Instrument getInstrumentFromItem(org.bukkit.inventory.ItemStack itemStack) {
+        for (Instrument instrument : ALL_INSTRUMENTS) {
             if (instrument.isThisInstrument(itemStack)) return instrument;
         }
         return null;
     }
 
+    static void registerListeners(PluginManager pluginManager, BSInstruments plugin) {
+        for (Instrument instrument : ALL_INSTRUMENTS) {
+            pluginManager.registerEvents(instrument, plugin);
+        }
+    }
+
     private static String getLookupName(Instrument instrument) {
         if (instrument.octave == 0) return instrument.sname;
-        if (instrument.octave > 0) return instrument.sname+"+"+instrument.octave;
-        return instrument.sname+instrument.octave;
+        if (instrument.octave > 0) return instrument.sname + "+" + instrument.octave;
+        return instrument.sname + instrument.octave;
     }
 
     private record InstrumentDefinition(String name, org.bukkit.Instrument bukkitInstrument, String customSoundBase) {

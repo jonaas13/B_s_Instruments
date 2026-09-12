@@ -170,13 +170,13 @@ final class MidiSongImporter {
         if (!texture.isEmpty()) layers.add(new Song.SongLayer("Texture", "pling", texture));
 
         while (layers.size() > MAX_PERFORMANCE_LAYERS_PER_SONG) {
-            layers.remove(layers.size() - 1);
+            layers.removeLast();
         }
         return List.copyOf(layers);
     }
 
     private static List<Song.SongLayer> buildPercussionLayers(List<SourceLayer> sourceLayers) {
-        List<Song.SongNoteEvent> percussion = mergeEventsForRole(sourceLayers, "percussion", event -> true);
+        List<Song.SongNoteEvent> percussion = mergeEventsForRole(sourceLayers, "percussion", ignored -> true);
         if (percussion.isEmpty()) return List.of();
 
         List<Song.SongNoteEvent> coreBeat = new ArrayList<>();
@@ -185,7 +185,6 @@ final class MidiSongImporter {
 
         for (Song.SongNoteEvent event : percussion) {
             switch (event.midiNote()) {
-                case 54, 62 -> coreBeat.add(event);
                 case 66, 70 -> highBeat.add(event);
                 case 58 -> fills.add(event);
                 default -> coreBeat.add(event);
@@ -242,7 +241,8 @@ final class MidiSongImporter {
         score -= Math.max(0, 58 - range.center()) * 20;
 
         String name = sourceLayer.name().toLowerCase(Locale.ROOT);
-        if (name.contains("melody") || name.contains("lead") || name.contains("vocal") || name.contains("main")) score += 500;
+        if (name.contains("melody") || name.contains("lead") || name.contains("vocal") || name.contains("main"))
+            score += 500;
         if (name.contains("right") || name.contains("treble")) score += 150;
         if (name.contains("chord") || name.contains("harmony") || name.contains("pad")) score -= 250;
         if (name.contains("arp") || name.contains("arpeggio")) score -= 350;
@@ -313,17 +313,6 @@ final class MidiSongImporter {
         List<Song.SongNoteEvent> events = new ArrayList<>();
         for (SourceLayer sourceLayer : sourceLayers) {
             if (sourceLayer == excludedLayer) continue;
-            if (sourceLayer.preferredInstrumentName().equals("percussion")) continue;
-            if (sourceLayer.preferredInstrumentName().equals("bass-guitar")) continue;
-            if (sourceLayer.preferredInstrumentName().equals("didgeridoo")) continue;
-            events.addAll(sourceLayer.events());
-        }
-        return normalizeDenseTicks(events);
-    }
-
-    private static List<Song.SongNoteEvent> mergeMelodicEvents(List<SourceLayer> sourceLayers) {
-        List<Song.SongNoteEvent> events = new ArrayList<>();
-        for (SourceLayer sourceLayer : sourceLayers) {
             if (sourceLayer.preferredInstrumentName().equals("percussion")) continue;
             if (sourceLayer.preferredInstrumentName().equals("bass-guitar")) continue;
             if (sourceLayer.preferredInstrumentName().equals("didgeridoo")) continue;
@@ -439,8 +428,8 @@ final class MidiSongImporter {
                 .sorted()
                 .toList();
         return new LayerRange(
-                notes.get(0),
-                notes.get(notes.size() - 1),
+                notes.getFirst(),
+                notes.getLast(),
                 notes.get(notes.size() / 2)
         );
     }
@@ -563,7 +552,7 @@ final class MidiSongImporter {
     private static int toMinecraftTick(long midiTick, Sequence sequence, List<TempoChange> tempoChanges) {
         long micros;
         if (sequence.getDivisionType() == Sequence.PPQ) {
-            TempoChange activeTempo = tempoChanges.get(0);
+            TempoChange activeTempo = tempoChanges.getFirst();
             for (TempoChange tempoChange : tempoChanges) {
                 if (tempoChange.midiTick() > midiTick) break;
                 activeTempo = tempoChange;

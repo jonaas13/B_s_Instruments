@@ -32,8 +32,7 @@ public class CommandManager implements CommandExecutor, TabExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String @NotNull [] strings) {
-        if (!(commandSender instanceof Player player))
-        {
+        if (!(commandSender instanceof Player player)) {
             BSInstruments.getInstance().getLogger().warning("This command can only be used by players!");
             return true;
         }
@@ -44,7 +43,7 @@ public class CommandManager implements CommandExecutor, TabExecutor {
 
         if (subcommand.equals("all")) {
             if (!hasPermission(player, PERMISSION_ALL)) return true;
-            AllInstruments.GiveAllInstruments(player);
+            AllInstruments.giveAllInstruments(player);
             return true;
         }
 
@@ -106,7 +105,7 @@ public class CommandManager implements CommandExecutor, TabExecutor {
     }
 
     private boolean giveInstrument(Player player, String name) {
-        Instrument item = AllInstruments.GetInstrumentByName(name);
+        Instrument item = AllInstruments.getInstrumentByName(name);
         if (item == null) return false;
         if (!ItemDelivery.giveToInventory(player, item.getItem())) {
             player.sendMessage("§cInventory full. Instrument was not added.");
@@ -155,7 +154,8 @@ public class CommandManager implements CommandExecutor, TabExecutor {
             if (player.hasPermission(PERMISSION_GET)) completions.add("get");
             if (player.hasPermission(PERMISSION_DIRECTOR)) completions.add("director");
             if (player.hasPermission(PERMISSION_SONG)) completions.add("song");
-            if (player.hasPermission(PERMISSION_SONGBOOK) || player.hasPermission(PERMISSION_SONG)) completions.add("songs");
+            if (player.hasPermission(PERMISSION_SONGBOOK) || player.hasPermission(PERMISSION_SONG))
+                completions.add("songs");
             completions.add("stop");
             if (player.hasPermission(PERMISSION_ALL)) completions.add("all");
             if (player.hasPermission(PERMISSION_MUTE)) completions.add("mute");
@@ -165,7 +165,7 @@ public class CommandManager implements CommandExecutor, TabExecutor {
         if (strings.length == 2
                 && strings[0].equalsIgnoreCase("get")
                 && player.hasPermission(PERMISSION_GET)) {
-            return filterCompletions(AllInstruments.GetAllInstrumentNames(), strings[1]);
+            return filterCompletions(AllInstruments.getAllInstrumentNames(), strings[1]);
         }
 
         if (strings.length == 2

@@ -36,7 +36,7 @@ public final class AllSongs {
     private static List<Song> allSongs;
     private static Map<String, Song> songsByName;
     private static List<String> songNames;
-    private static ImportStats importStats;
+    private static int skippedSongCount;
 
     private AllSongs() {
     }
@@ -54,7 +54,7 @@ public final class AllSongs {
         if (meta == null) return null;
         if (!hasSongCustomModelData(meta)) return null;
 
-        String value = meta.getPersistentDataContainer().get(BSInstruments.NSKEY, PersistentDataType.STRING);
+        String value = meta.getPersistentDataContainer().get(BSInstruments.getItemKey(), PersistentDataType.STRING);
         if (value == null || !value.startsWith(SONG_KEY_PREFIX)) return null;
         return getSongByName(value.substring(SONG_KEY_PREFIX.length()));
     }
@@ -137,11 +137,18 @@ public final class AllSongs {
         return itemSong == song;
     }
 
+    static void clearCache() {
+        allSongs = null;
+        songsByName = null;
+        songNames = null;
+        skippedSongCount = 0;
+    }
+
     private static void ensureLoaded() {
         if (allSongs != null) return;
 
         List<Song> loadedSongs = new ArrayList<>();
-        importStats = new ImportStats();
+        skippedSongCount = 0;
         loadBundledSongs(loadedSongs);
         loadExternalSongs(loadedSongs);
         indexSongs(loadedSongs);
@@ -160,27 +167,26 @@ public final class AllSongs {
             for (String resourceName : resourceNames) {
                 if (songs.size() >= MAX_LOADED_SONGS) {
                     warn("MIDI song limit reached. Skipping remaining bundled songs.");
-                    importStats.skipped++;
+                    skippedSongCount++;
                     break;
                 }
                 if (!isMidiName(resourceName)) continue;
                 try (InputStream songStream = BSInstruments.getInstance().getResource(resourceName)) {
                     if (songStream == null) {
                         warn("Bundled MIDI is listed but missing: " + resourceName);
-                        importStats.skipped++;
+                        skippedSongCount++;
                         continue;
                     }
                     String title = MidiSongImporter.titleFromFileName(Path.of(resourceName));
                     songs.add(MidiSongImporter.importSong(title, songStream));
-                    importStats.loaded++;
                 } catch (IOException | InvalidMidiDataException exception) {
                     warn("Skipping bundled MIDI " + resourceName + ": " + exception.getMessage());
-                    importStats.skipped++;
+                    skippedSongCount++;
                 }
             }
         } catch (IOException exception) {
             warn("Could not read bundled MIDI index: " + exception.getMessage());
-            importStats.skipped++;
+            skippedSongCount++;
         }
     }
 
@@ -190,7 +196,7 @@ public final class AllSongs {
             Files.createDirectories(songDirectory);
         } catch (IOException exception) {
             warn("Could not create MIDI song folder " + songDirectory + ": " + exception.getMessage());
-            importStats.skipped++;
+            skippedSongCount++;
             return;
         }
 
@@ -203,25 +209,25 @@ public final class AllSongs {
                     .toList();
         } catch (IOException exception) {
             warn("Could not scan MIDI song folder " + songDirectory + ": " + exception.getMessage());
-            importStats.skipped++;
+            skippedSongCount++;
             return;
         }
 
         for (Path midiFile : midiFiles) {
             if (songs.size() >= MAX_LOADED_SONGS) {
                 warn("MIDI song limit reached. Skipping remaining external songs.");
-                importStats.skipped++;
+                skippedSongCount++;
                 break;
             }
             try {
                 if (Files.size(midiFile) > MAX_MIDI_FILE_BYTES) {
                     warn("Skipping MIDI " + midiFile.getFileName() + ": file is larger than " + MAX_MIDI_FILE_BYTES + " bytes");
-                    importStats.skipped++;
+                    skippedSongCount++;
                     continue;
                 }
             } catch (IOException exception) {
                 warn("Skipping MIDI " + midiFile.getFileName() + ": could not read file size");
-                importStats.skipped++;
+                skippedSongCount++;
                 continue;
             }
             try (InputStream inputStream = Files.newInputStream(midiFile)) {
@@ -229,10 +235,9 @@ public final class AllSongs {
                         MidiSongImporter.titleFromFileName(midiFile),
                         inputStream
                 ));
-                importStats.loaded++;
             } catch (IOException | InvalidMidiDataException exception) {
                 warn("Skipping MIDI " + midiFile.getFileName() + ": " + exception.getMessage());
-                importStats.skipped++;
+                skippedSongCount++;
             }
         }
     }
@@ -246,7 +251,7 @@ public final class AllSongs {
             String lookupName = song.lookupName();
             if (loadedSongsByName.containsKey(lookupName)) {
                 warn("Skipping duplicate MIDI song id: " + lookupName);
-                importStats.skipped++;
+                skippedSongCount++;
                 continue;
             }
             loadedSongsByName.put(lookupName, song);
@@ -267,7 +272,7 @@ public final class AllSongs {
                 "Loaded " + allSongs.size()
                         + " MIDI songs (" + totalLayers
                         + " layers, " + totalEvents
-                        + " note events, " + importStats.skipped
+                        + " note events, " + skippedSongCount
                         + " skipped)."
         );
     }
@@ -315,8 +320,4 @@ public final class AllSongs {
         BSInstruments.getInstance().getLogger().warning(message);
     }
 
-    private static final class ImportStats {
-        private int loaded;
-        private int skipped;
-    }
 }
