@@ -51,8 +51,12 @@ public final class BSRecipe {
     }
 
     public static void unregisterAll() {
-        for (NamespacedKey key : RECIPE_KEYS) {
-            Bukkit.removeRecipe(key);
+        // Paper can reload recipe data on every removal. Leave server recipes alone
+        // during shutdown; only a plugin disable on a running server needs removal.
+        if (!Bukkit.isStopping()) {
+            for (NamespacedKey key : RECIPE_KEYS) {
+                Bukkit.removeRecipe(key);
+            }
         }
         RECIPE_KEYS.clear();
     }
