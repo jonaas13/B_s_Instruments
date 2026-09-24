@@ -110,10 +110,12 @@ public final class SongBookMenu implements Listener {
         }
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler
     private void onSheetMusicInteract(PlayerInteractEvent event) {
         if (event.getHand() != EquipmentSlot.HAND) return;
         if (!isRightClick(event.getAction())) return;
+        // Air interactions may arrive cancelled because vanilla has no action for sheet music.
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.isCancelled()) return;
 
         Player player = event.getPlayer();
         if (AllInstruments.getInstrumentFromItem(player.getInventory().getItemInOffHand()) != null) return;
